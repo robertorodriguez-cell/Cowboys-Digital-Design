@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Digital Design Trainer Hub — Madison County Cowboys</title>
+<style>
+:root{
+  --maroon:#8A0635;--maroon-d:#5f0425;--black:#0A0A0A;--silver:#9E9FA3;
+  --bg:#f4f2f0;--paper:#ffffff;--ink:#141414;--muted:#55565b;--line:#d9d6d3;--chip:#f3e6eb;--accent:var(--maroon);
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0d0d0e;--paper:#18181a;--ink:#f1efee;--muted:#b4b5ba;--line:#2e2e32;--chip:#2c1019;--accent:#d4517f}}
+:root[data-theme="dark"]{--bg:#0d0d0e;--paper:#18181a;--ink:#f1efee;--muted:#b4b5ba;--line:#2e2e32;--chip:#2c1019;--accent:#d4517f}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Calibri,Carlito,"Segoe UI",system-ui,sans-serif;font-size:1.2rem;line-height:1.5}
+h1,h2,h3{font-family:Cambria,Caladea,Georgia,"Times New Roman",serif;line-height:1.15;margin:0}
+a{color:var(--accent)}
+.wrap{max-width:68rem;margin:0 auto;padding:0 1.25rem}
+
+/* header: a scoreboard-style band */
+header{background:var(--black);color:#fff;border-bottom:.55rem solid var(--maroon);position:relative;overflow:hidden}
+header::after{content:"";position:absolute;inset:auto -4rem -3rem auto;width:22rem;height:22rem;border-radius:50%;border:2.2rem solid rgba(158,159,163,.12)}
+.top{display:flex;align-items:center;gap:1rem;padding:1.6rem 0 .4rem}
+.badge{flex:none;width:3.4rem;height:3.4rem;border-radius:.5rem;background:var(--maroon);display:grid;place-items:center;font-family:Cambria,Georgia,serif;font-weight:700;font-size:1.35rem;color:#fff;border:2px solid var(--silver)}
+.kicker{color:var(--silver);font-size:1rem;letter-spacing:.14em;text-transform:uppercase;font-weight:700}
+header h1{font-size:clamp(2.1rem,6vw,3.4rem);padding:.5rem 0 .3rem;position:relative;z-index:1}
+header p{max-width:42rem;color:#e7e5e3;margin:.2rem 0 1.8rem;font-size:1.25rem;position:relative;z-index:1}
+.pill{display:inline-block;background:var(--maroon);color:#fff;border-radius:999px;padding:.2rem .8rem;font-size:1rem;font-weight:700;margin-right:.4rem}
+
+main.wrap{padding-top:2.2rem;padding-bottom:3rem}
+.section-title{display:flex;align-items:baseline;gap:.8rem;margin:0 0 1rem}
+.section-title h2{font-size:1.9rem}
+.section-title span{color:var(--muted);font-size:1.05rem}
+
+/* trainer cards */
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(19rem,1fr));gap:1.2rem}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:.8rem;overflow:hidden;display:flex;flex-direction:column}
+.card-head{display:flex;align-items:center;gap:.9rem;padding:1.2rem 1.2rem .6rem}
+.mono{flex:none;width:3.6rem;height:3.6rem;border-radius:.55rem;display:grid;place-items:center;font-family:Cambria,Georgia,serif;font-weight:700;font-size:1.45rem;color:#fff;background:var(--black);border:3px solid var(--maroon)}
+.card h3{font-size:1.5rem}
+.updated{font-size:.98rem;color:var(--muted);margin-top:.15rem}
+.card-body{padding:0 1.2rem 1rem;flex:1}
+.card-body p{margin:.3rem 0 .8rem}
+.new{background:var(--chip);border-left:.3rem solid var(--maroon);border-radius:.3rem;padding:.55rem .75rem;font-size:1.08rem}
+.new b{color:var(--accent)}
+.open{display:flex;align-items:center;justify-content:center;gap:.5rem;margin:0 1.2rem 1.2rem;padding:.85rem 1rem;border-radius:.55rem;background:var(--maroon);color:#fff;text-decoration:none;font-weight:700;font-size:1.25rem;min-height:3.2rem}
+.open:hover,.open:focus-visible{background:var(--maroon-d);outline:3px solid var(--silver);outline-offset:2px}
+
+/* how-to strip */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:1rem;margin-top:2.6rem}
+.step{background:var(--paper);border:1px solid var(--line);border-radius:.8rem;padding:1.1rem 1.2rem;position:relative}
+.step .n{font-family:Cambria,Georgia,serif;font-size:2.4rem;font-weight:700;color:var(--accent);line-height:1}
+.step h3{font-size:1.3rem;margin:.35rem 0 .3rem}
+.step p{margin:0;color:var(--ink)}
+
+/* changelog */
+.log{margin-top:2.6rem;background:var(--paper);border:1px solid var(--line);border-radius:.8rem;padding:1.2rem 1.3rem}
+.log h2{font-size:1.6rem;margin-bottom:.6rem}
+.entry{display:grid;grid-template-columns:7.5rem 1fr;gap:.2rem 1rem;padding:.7rem 0;border-top:1px solid var(--line)}
+.entry:first-of-type{border-top:0}
+.entry time{font-weight:700;color:var(--accent)}
+.entry p{margin:0}
+@media (max-width:34rem){.entry{grid-template-columns:1fr}}
+
+footer{border-top:1px solid var(--line);padding:1.4rem 0 2rem;color:var(--muted);font-size:1.05rem}
+footer b{color:var(--ink)}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="top"><div class="badge" aria-hidden="true">MC</div><div class="kicker">Madison County High School · Digital Design</div></div>
+    <h1>Cowboys Trainer Hub</h1>
+    <p>Practice Illustrator, Photoshop, and Lightroom on any device — no login, no install. <b>Bookmark this page.</b> It always opens the newest version of every trainer.</p>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="section-title"><h2>Trainers</h2><span>Tap a trainer to open it</span></div>
+  <div class="cards">
+    <article class="card">
+      <div class="card-head"><div class="mono" aria-hidden="true">Ai</div><div><h3>Illustrator Workspace Trainer</h3><div class="updated">Updated October 5, 2026</div></div></div>
+      <div class="card-body">
+        <p>Tools, menus, and panels. Draw with the Pen Tool, edit anchor points, and build vector artwork.</p>
+        <div class="new"><b>New:</b> pick a document size — File › New has Postcard, Letter, Instagram, and more. File › Document Setup resizes the artboard.</div>
+      </div>
+      <a class="open" href="illustrator.html">Open Illustrator Trainer <span aria-hidden="true">→</span></a>
+    </article>
+    <article class="card">
+      <div class="card-head"><div class="mono" aria-hidden="true">Ps</div><div><h3>Photoshop Workspace Trainer</h3><div class="updated">Updated October 5, 2026</div></div></div>
+      <div class="card-body">
+        <p>Layers, masks, selections, adjustment layers, and layer styles. Saves real PSD files.</p>
+        <div class="new"><b>New:</b> inches and resolution (ppi) in File › New, plus Resample in Image Size and the anchor in Canvas Size.</div>
+      </div>
+      <a class="open" href="photoshop.html">Open Photoshop Trainer <span aria-hidden="true">→</span></a>
+    </article>
+    <article class="card">
+      <div class="card-head"><div class="mono" aria-hidden="true">Lr</div><div><h3>Lightroom Classic Trainer</h3><div class="updated">Updated October 1, 2026</div></div></div>
+      <div class="card-body">
+        <p>Library, Develop, and Export modules. Fix practice photos or import your own.</p>
+        <div class="new"><b>Tip:</b> iPhone photos? Set the camera to “Most Compatible” so they save as JPG.</div>
+      </div>
+      <a class="open" href="lightroom.html">Open Lightroom Trainer <span aria-hidden="true">→</span></a>
+    </article>
+  </div>
+
+  <div class="steps">
+    <div class="step"><div class="n">1</div><h3>Open from here</h3><p>Open trainers from this page every time — no download needed, and you always get the latest fixes and features.</p></div>
+    <div class="step"><div class="n">2</div><h3>Save your work</h3><p>File › Save downloads your file to your device. The trainer doesn't keep it for you — save before you close the tab.</p></div>
+    <div class="step"><div class="n">3</div><h3>Pick up later</h3><p>Come back to this page, open the trainer, and use File › Open to load the file you saved. Works on Chromebooks, laptops, tablets, and phones.</p></div>
+  </div>
+
+  <section class="log" aria-labelledby="logh">
+    <h2 id="logh">What's new</h2>
+    <div class="entry"><time datetime="2026-10-05">Oct 5, 2026</time><p><b>Photoshop:</b> New Document presets in inches at 300 ppi, Image Size with Resample on/off, and Canvas Size with an anchor and extension color.</p></div>
+    <div class="entry"><time datetime="2026-10-05">Oct 5, 2026</time><p><b>Illustrator:</b> choose your document size and units. Resize the artboard with File › Document Setup or the Artboard Tool. PNG export now offers 300 ppi for print.</p></div>
+    <div class="entry"><time datetime="2026-10-01">Oct 1, 2026</time><p><b>Lightroom:</b> latest version posted.</p></div>
+  </section>
+</main>
+
+<footer class="wrap">Questions or something not working? Tell <b>Mr. Rodriguez</b> which trainer, what device, and what you clicked. · Go Cowboys!</footer>
+</body>
+</html>

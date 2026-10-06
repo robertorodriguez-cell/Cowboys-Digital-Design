@@ -1,0 +1,1539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Illustrator Workspace Trainer</title>
+<style>
+:root{
+  --bg:#e4e4e4;--panel:#f3f3f3;--panel2:#e9e9e9;--border:#cdcdcd;--text:#1d1d1d;--muted:#666;
+  --hover:#dadada;--active:#c6c6c6;--canvas:#b9b9b9;--input:#fff;--accent:#1473e6;--maroon:#8A0635;--good:#1d8a3a;--bad:#c62828;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+  font-size:13px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){--bg:#1c1c1c;--panel:#323232;--panel2:#282828;--border:#474747;--text:#e8e8e8;--muted:#a0a0a0;--hover:#404040;--active:#505050;--canvas:#535353;--input:#1e1e1e;--good:#4caf50;--bad:#ef5350}
+}
+:root[data-theme="dark"]{--bg:#1c1c1c;--panel:#323232;--panel2:#282828;--border:#474747;--text:#e8e8e8;--muted:#a0a0a0;--hover:#404040;--active:#505050;--canvas:#535353;--input:#1e1e1e;--good:#4caf50;--bad:#ef5350}
+html.proj{font-size:17px}
+*,*::before,*::after{box-sizing:border-box}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+body{height:100%;margin:0;background:var(--bg);color:var(--text);font:1rem/1.35 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;overflow:hidden}
+[hidden]{display:none!important}
+button{font:inherit;color:inherit}
+button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+kbd{font:inherit;font-weight:600;border:1px solid var(--border);border-radius:.25rem;padding:0 .3rem;background:var(--panel2)}
+.ico{fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#app{height:100%;display:grid;grid-template-rows:auto auto auto 1fr auto}
+
+/* App bar */
+#appbar{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem .7rem;padding:.35rem .7rem;background:var(--panel2);border-bottom:1px solid var(--border)}
+.brand{display:flex;align-items:center;gap:.55rem}
+.mark{width:1.9rem;height:1.9rem;border-radius:.35rem;background:var(--maroon);color:#fff;display:grid;place-items:center;font:700 .95rem Cambria,Georgia,serif}
+.brand b{font-family:Cambria,Georgia,serif;font-size:1.1rem}
+.brand small{color:var(--muted);margin-left:.3rem}
+.modes{display:flex;border:1px solid var(--border);border-radius:.4rem;overflow:hidden;margin-left:auto}
+.modes button{border:0;background:var(--panel);padding:.35rem .8rem;cursor:pointer}
+.modes button+button{border-left:1px solid var(--border)}
+.modes button.on{background:var(--maroon);color:#fff}
+.appbtn{border:1px solid var(--border);background:var(--panel);border-radius:.35rem;padding:.3rem .6rem;cursor:pointer}
+.appbtn.on{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+
+/* Menu bar */
+#menubar{display:flex;background:var(--panel);border-bottom:1px solid var(--border);padding:0 .3rem;overflow-x:auto;scrollbar-width:none;position:relative}
+#menubar button{border:0;background:none;padding:.32rem .7rem;white-space:nowrap;border-radius:.2rem;cursor:default}
+#menubar button:hover,#menubar button.open{background:var(--hover)}
+.dropdown{position:fixed;z-index:60;min-width:16rem;background:var(--panel);color:var(--text);border:1px solid var(--border);box-shadow:0 .5rem 1.4rem rgba(0,0,0,.35);padding:.25rem 0;border-radius:.25rem}
+.mi{display:flex;justify-content:space-between;align-items:center;gap:1.6rem;padding:.3rem .9rem;position:relative;white-space:nowrap;cursor:default}
+.mi:hover{background:var(--accent);color:#fff}
+.mi kbd{border:0;background:none;padding:0;font-weight:400;color:var(--muted)}
+.mi:hover>kbd,.mi:hover>.arr{color:#e6f0ff}
+.msep{height:1px;background:var(--border);margin:.25rem 0}
+.mi .sub{display:none;position:absolute;left:100%;top:-.3rem;min-width:15rem;background:var(--panel);color:var(--text);border:1px solid var(--border);box-shadow:0 .5rem 1.4rem rgba(0,0,0,.35);padding:.25rem 0;border-radius:.25rem}
+.dropdown.flip .sub{left:auto;right:100%}
+.mi.has-sub:hover>.sub,.mi.has-sub.open>.sub{display:block}
+
+/* Control bar */
+#control{display:flex;align-items:center;gap:.75rem;padding:.3rem .7rem;background:var(--panel);border-bottom:1px solid var(--border);min-height:2.5rem;overflow-x:auto;white-space:nowrap;position:relative}
+#control .lbl{font-weight:600;min-width:7.5rem}
+.ctl{display:flex;align-items:center;gap:.3rem;color:var(--muted)}
+.spacer{flex:1}
+.mini{width:1.35rem;height:1.35rem;border:1px solid #888;border-radius:.15rem;cursor:pointer;flex:none;padding:0;background:#fff}
+select,input[type=number],input[type=text]{background:var(--input);color:var(--text);border:1px solid var(--border);border-radius:.25rem;padding:.15rem .3rem;font:inherit}
+input[type=number]{width:4.4rem}
+.none{background:linear-gradient(to top right,transparent calc(50% - 1.5px),#e0302e calc(50% - 1.5px),#e0302e calc(50% + 1.5px),transparent calc(50% + 1.5px)),#fff!important}
+
+/* Main */
+#main{display:grid;grid-template-columns:auto 1fr minmax(16rem,20rem);min-height:0}
+#toolbar{background:var(--panel);border-right:1px solid var(--border);padding:.3rem;display:grid;grid-template-columns:repeat(2,2.1rem);gap:.1rem;align-content:start;overflow-y:auto;position:relative}
+#toolbar.single{grid-template-columns:2.1rem}
+.tbtop{grid-column:1/-1;height:1.2rem;border:0;background:none;color:var(--muted);cursor:pointer;font-size:.85rem;border-radius:.2rem}
+.tbtop:hover{background:var(--hover)}
+.tool{position:relative;height:2.1rem;border:0;background:none;border-radius:.25rem;display:grid;place-items:center;cursor:pointer;padding:0;touch-action:none}
+.tool:hover{background:var(--hover)}
+.tool.on{background:var(--active)}
+.tool .ico{width:1.35rem;height:1.35rem;pointer-events:none}
+.tri{position:absolute;right:1px;bottom:1px;width:.55rem;height:.55rem;display:block}
+.tri::after{content:"";position:absolute;right:1px;bottom:1px;border-left:.32rem solid transparent;border-bottom:.32rem solid currentColor;opacity:.75}
+.tool.hint{animation:pulse .5s 5 alternate}
+@keyframes pulse{to{background:var(--maroon);color:#fff}}
+@media (prefers-reduced-motion:reduce){.tool.hint{animation:none;background:var(--maroon);color:#fff}}
+.tsep{grid-column:1/-1;height:1px;background:var(--border);margin:.2rem 0}
+.fs{grid-column:1/-1;position:relative;width:3.7rem;height:3.7rem;margin:.5rem auto .1rem}
+.fsbox{position:absolute;width:2.2rem;height:2.2rem;border:1px solid #888;cursor:pointer;padding:0;background:#fff}
+.fsFill{left:0;top:0;z-index:2}
+.fsStroke{left:1.1rem;top:1.1rem;z-index:1}
+.fs.stroke-on .fsStroke{z-index:3}
+.fsStroke::after{content:"";position:absolute;inset:.5rem;background:var(--panel);border:1px solid #888}
+.fsSm{position:absolute;width:1.05rem;height:1.05rem;border:0;background:none;padding:0;cursor:pointer;font-size:.8rem;line-height:1;color:var(--text)}
+.fsSwap{right:-.35rem;top:-.25rem}
+.fsDef{left:-.3rem;bottom:-.3rem}
+.fsDef::before,.fsDef::after{content:"";position:absolute;width:.55rem;height:.55rem;border:1px solid var(--text)}
+.fsDef::before{left:0;top:0;background:#fff;z-index:1}
+.fsDef::after{left:.3rem;top:.3rem;background:none;border-width:2px}
+.fsmodes{grid-column:1/-1;display:flex;justify-content:center;gap:.2rem;margin-bottom:.3rem}
+.fsmodes button{width:1.1rem;height:1.1rem;border:1px solid #888;padding:0;cursor:pointer;border-radius:.1rem}
+#flyout{position:fixed;z-index:55;background:var(--panel);border:1px solid var(--border);box-shadow:0 .5rem 1.4rem rgba(0,0,0,.35);padding:.25rem;border-radius:.3rem;min-width:15rem}
+.fi{display:flex;align-items:center;gap:.6rem;width:100%;border:0;background:none;padding:.35rem .5rem;cursor:pointer;border-radius:.2rem;text-align:left}
+.fi:hover{background:var(--accent);color:#fff}
+.fi.on{font-weight:700}
+.fi .ico{width:1.3rem;height:1.3rem;flex:none}
+.fi span{flex:1}
+.fi kbd{border:0;background:none;font-weight:400;opacity:.75}
+
+#canvasWrap{position:relative;background:var(--canvas);min-width:0;min-height:0;overflow:hidden}
+#stage{width:100%;height:100%;display:block;touch-action:none;user-select:none}
+.selbox{fill:none;stroke:#1473e6;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
+.selbox.thin{stroke-dasharray:3 2}
+.anc{fill:#fff;stroke:#1473e6;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
+.anc.first,.anc.on{fill:#1473e6}
+.anc.hot{pointer-events:all;cursor:move}
+.hnd{fill:#1473e6;stroke:#fff;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:all;cursor:pointer}
+.hnd.ghost{pointer-events:none}
+.hline{stroke:#1473e6;stroke-width:1;vector-effect:non-scaling-stroke;pointer-events:none}
+.hdl{fill:#fff;stroke:#1473e6;stroke-width:1;vector-effect:non-scaling-stroke}
+.rubber{stroke:#1473e6;stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:4 3}
+.marq{fill:rgba(20,115,230,.08);stroke:#1473e6;stroke-width:1;vector-effect:non-scaling-stroke;stroke-dasharray:4 3}
+#stage.outline .obj{fill:none!important;stroke:#000!important;stroke-width:1px!important;vector-effect:non-scaling-stroke;filter:none!important;opacity:1!important}
+#stage.outline text.obj{fill:#000!important;stroke:none!important}
+.txtin{position:absolute;z-index:15;background:rgba(255,255,255,.92);color:#000;border:1px dashed var(--accent);padding:0 .2rem;min-width:9rem;outline:none;line-height:1.15}
+
+#quizBar{position:absolute;left:50%;top:.8rem;transform:translateX(-50%);width:min(42rem,94%);z-index:20;background:var(--panel);border:2px solid var(--maroon);border-radius:.6rem;padding:.75rem 1rem;box-shadow:0 .5rem 1.5rem rgba(0,0,0,.35)}
+.qtop{display:flex;gap:1rem;color:var(--muted);font-size:.9rem}
+.qtop b{color:var(--maroon)}
+:root[data-theme="dark"] .qtop b{color:#e57399}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .qtop b{color:#e57399}}
+.qtop span:last-child{margin-left:auto}
+.qtext{font-size:1.3rem;margin:.35rem 0;font-family:Cambria,Georgia,serif}
+.qfb{min-height:1.4em;color:var(--muted)}
+.qfb.ok{color:var(--good);font-weight:600}
+.qfb.bad{color:var(--bad);font-weight:600}
+.qbtns{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.3rem}
+.qbtns button,.qa button{border:1px solid var(--border);background:var(--panel2);border-radius:.3rem;padding:.3rem .7rem;cursor:pointer}
+.qa button:hover,.qbtns button:hover{background:var(--hover)}
+.qa button.primary{background:var(--maroon);color:#fff;border-color:var(--maroon)}
+
+/* Panels */
+#panels{background:var(--panel);border-left:1px solid var(--border);display:flex;flex-direction:column;min-height:0;overflow:hidden;position:relative}
+.phead{padding:.35rem .7rem;background:var(--panel2);border-bottom:1px solid var(--border);font-weight:600;display:flex;justify-content:space-between}
+.phead span{color:var(--muted);font-weight:400}
+#toolInfo{padding:.7rem;border-bottom:1px solid var(--border);overflow-y:auto;max-height:48%;flex:none}
+.tihead{display:flex;align-items:center;gap:.6rem}
+.tiicon{width:2.6rem;height:2.6rem;border-radius:.4rem;background:var(--panel2);border:1px solid var(--border);display:grid;place-items:center;flex:none}
+.tiicon .ico{width:1.7rem;height:1.7rem}
+.tiname{font:700 1.15rem Cambria,Georgia,serif}
+.tikey{color:var(--muted);font-size:.92rem}
+.badge{margin-left:auto;font-size:.8rem;padding:.1rem .5rem;border-radius:1rem;flex:none}
+.badge.live{background:#1d8a3a22;color:var(--good);border:1px solid var(--good)}
+.badge.demo{background:var(--panel2);color:var(--muted);border:1px solid var(--border)}
+#toolInfo p{margin:.5rem 0}
+.acp{border-left:3px solid var(--maroon);background:var(--panel2);padding:.45rem .6rem;border-radius:0 .3rem .3rem 0;margin:.5rem 0}
+.acp b{display:block;font-size:.85rem;color:var(--muted)}
+.loc{color:var(--muted);font-size:.92rem}
+.tabs{display:flex;border-bottom:1px solid var(--border);background:var(--panel2);flex:none}
+.tabs button{flex:1;border:0;background:none;padding:.45rem .3rem;cursor:pointer;border-bottom:2px solid transparent;color:var(--muted)}
+.tabs button.on{border-bottom-color:var(--text);color:var(--text);font-weight:600}
+.tabbody{flex:1;overflow-y:auto;padding:.4rem .7rem .8rem;min-height:0}
+.tabbody h4{margin:.8rem 0 .35rem;font-size:.92rem}
+.prow{display:flex;align-items:center;gap:.5rem;margin:.3rem 0}
+.prow>span:first-child{width:4.2rem;color:var(--muted)}
+.prow code{font-size:.9rem}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:.35rem .6rem}
+.grid2 label{display:flex;align-items:center;gap:.3rem;color:var(--muted)}
+.grid2 input{width:100%}
+.chk{display:flex;align-items:center;gap:.4rem;margin:.3rem 0}
+.chk kbd{margin-left:auto}
+.qa{display:flex;flex-wrap:wrap;gap:.35rem;margin:.3rem 0}
+.note{color:var(--muted);font-size:.92rem}
+.lyr-top{display:flex;align-items:center;gap:.4rem;padding:.35rem .2rem;border-bottom:1px solid var(--border);margin-bottom:.2rem}
+.lyr-top .chip{width:.35rem;align-self:stretch;background:#1473e6}
+.lrow{display:flex;align-items:center;gap:.35rem;padding:.25rem .2rem .25rem 1.1rem;border-radius:.2rem;cursor:pointer}
+.lrow:hover{background:var(--hover)}
+.lrow.sel{background:var(--active)}
+.lrow.sel .lname::after{content:"";display:inline-block;width:.5rem;height:.5rem;background:#1473e6;margin-left:.4rem}
+.lb{border:0;background:none;padding:0;width:1.3rem;height:1.3rem;cursor:pointer;display:grid;place-items:center;color:var(--muted)}
+.lb .ico{width:1rem;height:1rem}
+.lsw{width:1.1rem;height:1.1rem;border:1px solid #888;flex:none;background:#fff}
+.lname{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.muted{color:var(--muted)}
+.swtarget{display:flex;align-items:center;gap:.35rem;margin:.4rem 0}
+.swtarget button{border:1px solid var(--border);background:var(--panel2);border-radius:.25rem;padding:.15rem .55rem;cursor:pointer}
+.swtarget button.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.swgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(1.7rem,1fr));gap:.25rem}
+.swc{aspect-ratio:1;border:1px solid #888;padding:0;cursor:pointer;border-radius:.1rem}
+.swc.cur{outline:2px solid var(--accent);outline-offset:1px}
+
+#status{display:flex;align-items:center;gap:1rem;padding:.2rem .7rem;background:var(--panel2);border-top:1px solid var(--border);color:var(--muted);font-size:.9rem;white-space:nowrap;overflow:hidden;position:relative}
+#status button{border:1px solid var(--border);background:var(--panel);border-radius:.2rem;padding:0 .4rem;cursor:pointer}
+#stHint{overflow:hidden;text-overflow:ellipsis;flex:1}
+
+#toast{position:fixed;left:50%;bottom:3.2rem;transform:translate(-50%,.6rem);opacity:0;transition:opacity .2s,transform .2s;max-width:min(36rem,92vw);background:#202020;color:#fff;padding:.65rem 1rem;border-radius:.45rem;z-index:90;pointer-events:none;box-shadow:0 .4rem 1.2rem rgba(0,0,0,.4);border-left:4px solid var(--maroon)}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#toast kbd{background:#333;border-color:#555;color:#fff}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:100;padding:1rem}
+.card{width:min(46rem,100%);max-height:100%;overflow:auto;background:var(--panel);border-radius:.7rem;padding:1.3rem 1.5rem;border-top:.4rem solid var(--maroon);box-shadow:0 1rem 3rem rgba(0,0,0,.5)}
+.card h2{font:700 1.7rem/1.15 Cambria,Georgia,serif;margin:0 0 .3rem}
+.card .sub{color:var(--muted);margin:0 0 1rem}
+.areas{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.5rem .9rem;margin:.6rem 0 1rem}
+.areas div{border-left:3px solid var(--maroon);padding:.1rem .6rem}
+.areas b{display:block}
+.bigscore{font:700 3rem Cambria,Georgia,serif;color:var(--maroon)}
+.reftable{border-collapse:collapse;width:100%;font-size:.95rem}
+.reftable td{border-bottom:1px solid var(--border);padding:.3rem .4rem;vertical-align:middle}
+.reftable .ico{width:1.3rem;height:1.3rem}
+.refcols{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:1rem}
+.tblwrap{overflow-x:auto}
+.foot{color:var(--muted);font-size:.85rem;margin-top:1rem}
+.fld{display:block;font-weight:600;margin:.6rem 0}
+.fnrow{display:flex;align-items:center;gap:.4rem;margin-top:.3rem;font-weight:400}
+.fnrow input{flex:1;font-size:1.1rem;padding:.35rem .5rem}
+.opts{display:flex;flex-wrap:wrap;gap:.4rem 1rem;margin:.3rem 0 .6rem}
+.opts label{display:flex;align-items:center;gap:.3rem}
+.presets{display:grid;grid-template-columns:repeat(auto-fill,minmax(9.5rem,1fr));gap:.45rem;margin:.4rem 0 .8rem}
+.presets button{text-align:left;padding:.45rem .6rem;border:1px solid var(--border);border-radius:.4rem;background:var(--panel2);color:var(--text);cursor:pointer;font:inherit;line-height:1.25}
+.presets button small{display:block;color:var(--muted);font-size:.85em}
+.presets button.on{border-color:var(--maroon);box-shadow:0 0 0 2px var(--maroon) inset}
+.presets h5{grid-column:1/-1;margin:.3rem 0 0;font-size:.9rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.dimrow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.6rem 1rem;margin:.4rem 0 .8rem}
+.dimrow label{display:flex;flex-direction:column;font-weight:600;gap:.2rem}
+.dimrow input,.dimrow select{font-size:1.05rem;padding:.3rem .4rem;width:7.5rem}
+.orient{display:flex;gap:.3rem}
+.orient button{width:2.6rem;height:2.4rem;display:grid;place-items:center;border:1px solid var(--border);border-radius:.35rem;background:var(--panel2);cursor:pointer;color:var(--text)}
+.orient button.on{border-color:var(--maroon);box-shadow:0 0 0 2px var(--maroon) inset}
+.orient i{display:block;border:2px solid currentColor;border-radius:2px}
+.refpt{display:grid;grid-template-columns:repeat(3,1.35rem);gap:.25rem;padding:.3rem;border:1px solid var(--border);border-radius:.35rem;width:max-content}
+.refpt button{width:1.35rem;height:1.35rem;border:1px solid var(--border);background:var(--panel2);border-radius:2px;cursor:pointer;padding:0}
+.refpt button.on{background:var(--maroon);border-color:var(--maroon)}
+.abprev{font-size:.95rem;color:var(--muted);margin:.2rem 0 .6rem}
+
+body.labels [data-label]::after{content:attr(data-label);position:absolute;z-index:45;left:.4rem;top:.3rem;background:var(--maroon);color:#fff;font:700 .85rem system-ui,sans-serif;padding:.15rem .5rem;border-radius:.25rem;pointer-events:none;box-shadow:0 2px 6px rgba(0,0,0,.35);white-space:nowrap}
+body.labels #menubar::after,body.labels #control::after,body.labels #status::after{left:auto;right:.4rem}
+body.labels #toolbar::after{top:auto;bottom:.3rem;left:.2rem}
+body.nopanels #toolbar,body.nopanels #panels,body.nopanels #control{display:none}
+body.nopanels #main{grid-template-columns:1fr}
+
+@media (max-width:820px){
+  #main{grid-template-columns:auto 1fr;grid-template-rows:1fr 42%}
+  #panels{grid-column:1/-1;border-left:0;border-top:1px solid var(--border)}
+  #toolInfo{max-height:none}
+  .brand small{display:none}
+  .modes{margin-left:0}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <header id="appbar">
+    <div class="brand"><div class="mark">MC</div><b>Illustrator Workspace Trainer</b><small>Madison County Cowboys · Digital Design</small></div>
+    <div class="modes" role="group" aria-label="Mode">
+      <button data-act="mode-explore" class="on" id="mExplore">Explore</button>
+      <button data-act="mode-find" id="mFind">Find the Tool</button>
+      <button data-act="mode-keys" id="mKeys">Shortcut Challenge</button>
+    </div>
+    <button class="appbtn" data-act="labels" id="bLabels">Label workspace</button>
+    <button class="appbtn" data-act="mac" id="bMac">Win shortcuts</button>
+    <button class="appbtn" data-act="theme" id="bTheme">Theme</button>
+    <button class="appbtn" data-act="proj" id="bProj">Projector size</button>
+  </header>
+  <nav id="menubar" data-label="Menu Bar"></nav>
+  <div id="control" data-label="Control Bar"></div>
+  <div id="main">
+    <aside id="toolbar" data-label="Toolbar"></aside>
+    <div id="canvasWrap" data-label="Canvas (pasteboard)">
+      <svg id="stage" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+        <defs id="sdefs">
+          <pattern id="gridpat" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#8fb3e0" stroke-width=".6"/></pattern>
+          <pattern id="gridpat2" width="100" height="100" patternUnits="userSpaceOnUse"><rect width="100" height="100" fill="url(#gridpat)"/><path d="M100 0H0V100" fill="none" stroke="#5f8fcf" stroke-width="1"/></pattern>
+          <filter id="ds" x="-40%" y="-40%" width="180%" height="180%"><feDropShadow dx="7" dy="7" stdDeviation="4" flood-opacity=".45"/></filter>
+          <filter id="blur" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="4"/></filter>
+        </defs>
+        <defs id="defs"></defs>
+        <g id="board">
+          <rect id="abShadow" x="4" y="4" width="800" height="600" fill="rgba(0,0,0,.28)"/>
+          <rect id="abPage" x="0" y="0" width="800" height="600" fill="#fff"/>
+          <text id="abLabel" x="0" y="-8" font-size="13" style="fill:var(--text);font-family:system-ui,sans-serif">01 - Artboard 1</text>
+        </g>
+        <g id="art"></g>
+        <rect id="gridR" x="0" y="0" width="800" height="600" fill="url(#gridpat2)" pointer-events="none" style="display:none"/>
+        <g id="temp" pointer-events="none"></g>
+        <g id="overlay"></g>
+      </svg>
+      <div id="quizBar" hidden></div>
+    </div>
+    <aside id="panels" data-label="Panels">
+      <div class="phead">Tool Guide <span>trainer panel</span></div>
+      <div id="toolInfo"></div>
+      <div class="tabs" role="tablist">
+        <button data-act="tab-props" id="tb-props" class="on">Properties</button>
+        <button data-act="tab-layers" id="tb-layers">Layers</button>
+        <button data-act="tab-swatches" id="tb-swatches">Swatches</button>
+      </div>
+      <div class="tabbody" id="tab-props"></div>
+      <div class="tabbody" id="tab-layers" hidden></div>
+      <div class="tabbody" id="tab-swatches" hidden></div>
+    </aside>
+  </div>
+  <footer id="status" data-label="Status Bar">
+    <button data-act="fit" title="Fit Artboard in Window" id="stZoom">100%</button>
+    <span id="stDoc">Untitled-1.svg</span><span id="stAB">Artboard 1 · 800 × 600 px</span>
+    <span id="stTool">Selection Tool</span>
+    <span id="stHint"></span>
+    <span id="stXY"></span>
+  </footer>
+</div>
+<div id="dropdown" class="dropdown" hidden></div>
+<div id="flyout" hidden></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="modal" hidden></div>
+<input type="file" id="fileIn" accept=".svg,.ai,.eps,.ps,image/svg+xml,application/postscript,application/illustrator,application/pdf" hidden>
+<input type="color" id="picker" style="position:fixed;left:4rem;top:40%;width:1px;height:1px;opacity:0;border:0;padding:0" tabindex="-1" aria-hidden="true">
+
+<script>
+(()=>{
+const NS='http://www.w3.org/2000/svg';
+const $=s=>document.querySelector(s);
+const svg=$('#stage'),art=$('#art'),ov=$('#overlay'),defs=$('#defs'),temp=$('#temp'),tb=$('#toolbar'),fly=$('#flyout'),dd=$('#dropdown');
+const f1=n=>Math.round(n*10)/10;
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let uid=0;
+
+/* ---------- Icons (original line drawings) ---------- */
+const A='M6 3l12 9-5.5 1.2L16 20l-2.3 1-2.6-6.4L6 18z';
+const PENCIL='<path d="M4 20l1.2-4.5L14.5 6.2l3.3 3.3L8.5 18.8z"/><path d="M12.5 8.2l3.3 3.3"/>';
+const ICON={
+selection:`<path d="${A}" fill="currentColor"/>`,
+direct:`<path d="${A}" fill="var(--panel)"/>`,
+groupSel:`<path d="M4 3l10 7.6-4.6 1 2.1 5.3-1.9.8-2.2-5.4L4 15z"/><path d="M18 14v7M14.5 17.5h7"/>`,
+magicWand:'<path d="M4 20L14 10"/><path d="M17 3v3M17 11v3M21 8.5h-3M13 8.5h-.5M19.8 5.7l-1.4 1.4M19.8 11.3l-1.4-1.4"/>',
+lasso:'<ellipse cx="13" cy="9" rx="7.5" ry="5"/><path d="M8 13c-2.5 1-3 3-1 4s2.5 2.5.5 4"/>',
+pen:'<path d="M12 3l5.5 9L12 21l-5.5-9z"/><path d="M12 3v7.5"/><circle cx="12" cy="12" r="1.4"/>',
+addAnchor:'<path d="M10 3l4.5 7.5L10 18l-4.5-7.5z"/><path d="M18.5 14v7M15 17.5h7"/>',
+delAnchor:'<path d="M10 3l4.5 7.5L10 18l-4.5-7.5z"/><path d="M15 17.5h7"/>',
+anchorPt:'<path d="M5 19l7-14 7 14"/><rect x="10.5" y="3.5" width="3" height="3" fill="currentColor"/>',
+curvature:'<path d="M4 18C7 5 17 5 20 18"/><circle cx="12" cy="8.3" r="1.8" fill="currentColor"/><circle cx="4" cy="18" r="1.2"/><circle cx="20" cy="18" r="1.2"/>',
+type:'<path d="M6 5h12M12 5v14M9.5 19h5"/>',
+areaType:'<rect x="3.5" y="3.5" width="17" height="17" stroke-dasharray="2 2"/><path d="M8 8h8M12 8v9"/>',
+typePath:'<path d="M3 19c5-9 13-9 18 0" stroke-dasharray="2 2"/><path d="M8 4h8M12 4v8"/>',
+vertType:'<path d="M5 5h9M9.5 5v11"/><path d="M18 7v12M15.5 16.5L18 19l2.5-2.5"/>',
+touchType:'<path d="M5 5h11M10.5 5v14"/><rect x="14" y="13" width="6" height="7" stroke-dasharray="1.5 1.5"/>',
+line:'<path d="M5 19L19 5"/>',
+arc:'<path d="M5 19C5 10 10 5 19 5"/>',
+spiral:'<path d="M12 12a1.5 1.5 0 0 1 3 0a3 3 0 0 1-6 0a4.5 4.5 0 0 1 9 0a6 6 0 0 1-12 0"/>',
+rectGrid:'<rect x="4" y="4" width="16" height="16"/><path d="M4 9.3h16M4 14.6h16M9.3 4v16M14.6 4v16"/>',
+polarGrid:'<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 4v16M4 12h16"/>',
+rect:'<rect x="4" y="6" width="16" height="12"/>',
+rrect:'<rect x="4" y="6" width="16" height="12" rx="3.5"/>',
+ellipse:'<ellipse cx="12" cy="12" rx="8" ry="6.5"/>',
+polygon:'<path d="M8 4.5h8l4 7.5-4 7.5H8L4 12z"/>',
+star:'<path d="M12 3.5l2.5 5.4 5.9.7-4.4 4 1.2 5.8L12 16.5l-5.2 2.9L8 13.6 3.6 9.6l5.9-.7z"/>',
+flare:'<circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4M5.6 5.6l2.8 2.8M15.6 15.6l2.8 2.8M18.4 5.6l-2.8 2.8M8.4 15.6l-2.8 2.8"/>',
+paintbrush:'<path d="M20 4l-8.5 8.5"/><path d="M11.5 12.5c-3 0-4 2-4.5 4S4 20 4 20s4 .5 6-1 2.8-3.5 1.5-6.5z" fill="currentColor"/>',
+blob:'<path d="M20 4l-7 7"/><path d="M13 11c-5-1-9 3-8 7 3 2.5 10 1.5 8-7z" fill="currentColor"/>',
+shaper:'<path d="M4 16c3-9 6 3 9-5s6-3 7-3"/><rect x="13" y="14" width="7" height="6"/>',
+pencil:PENCIL,
+smooth:PENCIL+'<path d="M15 19c2-2 3.5 0 6-2"/>',
+pathEraser:PENCIL+'<rect x="16" y="15" width="5.5" height="5" rx="1"/>',
+join:'<path d="M3 18c4 0 6-2.5 9-6M21 18c-4 0-6-2.5-9-6"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>',
+eraser:'<path d="M9 20h11"/><path d="M4.5 15.5L13 7l6 6-6.5 6.5H8.5z"/><path d="M9 11.5l6 6"/>',
+scissors:'<circle cx="6.5" cy="17.5" r="2.5"/><circle cx="17.5" cy="17.5" r="2.5"/><path d="M8.2 15.7L18 4M15.8 15.7L6 4"/>',
+knife:'<path d="M5 19L17 7c2-2 3.5-1 2.5 1L8.5 19.5z"/>',
+rotate:'<path d="M19 12a7 7 0 1 1-2.1-5"/><path d="M17.5 3v4.5H13"/>',
+reflect:'<path d="M12 3v18" stroke-dasharray="2 2"/><path d="M9 7L4 17h5zM15 7l5 10h-5z"/>',
+scale:'<rect x="4" y="10" width="10" height="10"/><path d="M10 14L20 4M14 4h6v6"/>',
+shear:'<path d="M9 6h11l-5 12H4z"/>',
+reshape:'<path d="M4 18c4-9 12-9 16 0"/><rect x="10" y="7" width="4" height="4" fill="currentColor"/>',
+width:'<path d="M4 12c4-6 12-6 16 0M4 12c4 6 12 6 16 0"/><path d="M12 7.5v9M10.3 9.2L12 7.5l1.7 1.7M10.3 14.8l1.7 1.7 1.7-1.7"/>',
+warp:'<path d="M6 20c-1-4 1-6 4-8s5-4 4-8"/><circle cx="16.5" cy="16.5" r="3.5"/>',
+freeTransform:'<rect x="5" y="5" width="14" height="14" stroke-dasharray="2 2"/><path d="M9 15l6-6M11 9h4v4"/><rect x="3" y="3" width="4" height="4" fill="currentColor"/><rect x="17" y="17" width="4" height="4" fill="currentColor"/>',
+puppetWarp:'<circle cx="12" cy="4.5" r="1.8" fill="currentColor"/><path d="M12 7v6M7 10h10M8 20l4-7 4 7"/>',
+shapeBuilder:'<circle cx="9" cy="11" r="5"/><circle cx="15" cy="11" r="5"/><path d="M5 20h14"/><path d="M16 17l3 3"/>',
+livePaint:'<path d="M5 10l7-7 7 7-7 7z"/><path d="M19.5 12c1.3 2.3 1.6 3.7.8 4.5s-2-.3-.8-4.5z" fill="currentColor"/>',
+livePaintSel:`<path d="${A}"/><rect x="15" y="3" width="6" height="6" fill="currentColor"/>`,
+perspective:'<path d="M3 18l9-12 9 12zM6.8 13h10.4M12 6v12"/>',
+mesh:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 12c5-3 11 3 16 0M12 4c-3 5 3 11 0 16"/>',
+gradient:'<rect x="4" y="4" width="16" height="16"/><path d="M7 17L17 7"/><circle cx="7" cy="17" r="1.6" fill="currentColor"/><rect x="15.5" y="5.5" width="3" height="3"/>',
+eyedropper:'<path d="M16.2 3.8a2.3 2.3 0 0 1 3.3 3.3l-2.2 2.2-3.3-3.3z" fill="currentColor"/><path d="M13.5 7l3.5 3.5-8 8H5.5V15z"/>',
+measure:'<path d="M4 16L16 4l4 4L8 20z"/><path d="M8 12l2 2M11 9l2 2M14 6l2 2"/>',
+blend:'<rect x="3" y="3.5" width="7" height="7"/><circle cx="17" cy="16.5" r="3.5"/><path d="M9 13l1.8 1.8M11.8 10.2l1.8 1.8"/>',
+symbolSprayer:'<path d="M6 10h6v11H6zM8 10V6h2v4M10 7h3"/><circle cx="16.5" cy="5" r="1" fill="currentColor"/><circle cx="19.5" cy="8" r="1" fill="currentColor"/><circle cx="17" cy="11" r="1" fill="currentColor"/>',
+graph:'<path d="M4 20h16"/><rect x="6" y="11" width="3" height="9"/><rect x="11" y="6" width="3" height="14"/><rect x="16" y="14" width="3" height="6"/>',
+artboard:'<path d="M7 3v18M17 3v18M3 7h18M3 17h18"/>',
+slice:'<path d="M4 15L14 5c1.6-1.6 3-.8 2 1L7 16z"/><rect x="11" y="13" width="9" height="7" stroke-dasharray="1.5 1.5"/>',
+hand:'<path d="M8 12V6.5a1.5 1.5 0 0 1 3 0V11M11 11V5a1.5 1.5 0 0 1 3 0v6M14 11V6.5a1.5 1.5 0 0 1 3 0V13c0 5-3 8-7 8-3 0-4.5-2-6-4.5l-1.5-3a1.4 1.4 0 0 1 2.4-1.4L8 14"/>',
+rotateView:'<path d="M8 13V7.5a1.5 1.5 0 0 1 3 0V12M11 12V6.5a1.5 1.5 0 0 1 3 0V14c0 4-2 6-5 6"/><path d="M20.5 9A8 8 0 0 0 15 3.5M20.5 9l.3-3M20.5 9l-2.8-.9"/>',
+zoom:'<circle cx="10.5" cy="10.5" r="6"/><path d="M15 15l5 5"/>'
+};
+const EYE='<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>';
+const LOCK='<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>';
+const ic=(id,raw)=>`<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${raw||ICON[id]||''}</svg>`;
+
+/* ---------- Tools ---------- */
+const TOOLS=[
+{id:'selection',name:'Selection Tool',key:'V',g:0,fn:'select',d:'Selects and moves whole objects. Drag the bounding-box handles to resize.',h:'Click a shape to select it and drag to move it. Shift-click adds to the selection. Drag on empty canvas to marquee-select. Alt/Option-drag moves a copy.',t:'Solid black arrow = Selection Tool (whole objects). Hollow white arrow = Direct Selection Tool (individual anchor points).',q:'select and move whole objects'},
+{id:'direct',name:'Direct Selection Tool',key:'A',g:1,fn:'direct',d:'Selects individual anchor points and their direction handles so you can reshape a path.',h:'Click a shape to show its anchor points (small squares). Click an anchor to select it and reveal its handles. Drag an anchor to move it; drag a round handle end to bend the curve. Alt/Option-drag a handle to move it on its own.',t:'Dragging one handle of a smooth point swings the opposite handle too, keeping the curve smooth. Alt/Option-drag breaks them apart into a corner.',q:'select individual anchor points to reshape a path'},
+{id:'groupSel',name:'Group Selection Tool',g:1,fn:'select',d:'Selects one object inside a group without ungrouping. Each extra click adds the next group up.',h:'Behaves like the Selection Tool in this trainer.'},
+{id:'magicWand',name:'Magic Wand Tool',key:'Y',g:2,fn:'magic',d:'Selects all objects with similar attributes, such as the same fill color.',h:'Click a shape and every object with the same fill color is selected.',t:'Double-click the tool icon in Illustrator to choose what it matches (fill, stroke, opacity) and set the Tolerance.',q:'select every object that shares the same fill color'},
+{id:'lasso',name:'Lasso Tool',key:'Q',g:3,fn:'lasso',d:'Selects anchor points or objects by drawing a freeform loop around them.',h:'Drag across objects to select them (simplified to a rectangle here).',q:'draw a freeform loop around anchor points to select them'},
+{id:'pen',name:'Pen Tool',key:'P',g:4,fn:'pen',d:'Draws precise straight and curved paths by placing anchor points.',h:'Click to place a corner point. Click and DRAG to place a smooth point with direction handles — drag the way you want the curve to travel. Shift keeps handles at 45°; Alt/Option while dragging moves only the forward handle. Click the last point again to remove its forward handle. Click the first point to close; Enter or Esc to finish open.',t:'Click = corner point. Click-and-drag = smooth point with handles. Afterward, press A (Direct Selection) and click an anchor to adjust its handles. The Pen Tool is one of the most tested skills on the ACP exam.',q:'draw precise paths by placing anchor points one at a time'},
+{id:'addAnchor',name:'Add Anchor Point Tool',key:'+',g:4,fn:'addpt',d:'Adds an anchor point to an existing path without changing its shape.',h:'Click a shape to select it, then click on the path between two anchor points to add one.'},
+{id:'delAnchor',name:'Delete Anchor Point Tool',key:'-',g:4,fn:'delpt',d:'Removes an anchor point without breaking the path.',h:'Click a shape to select it, then click one of its anchor points to remove it.'},
+{id:'anchorPt',name:'Anchor Point Tool',key:'Shift+C',g:4,fn:'convert',d:'Converts anchor points between smooth points and corner points.',h:'Select a shape, then click a smooth anchor to make it a sharp corner. Drag from a corner anchor to pull out smooth handles. Drag one handle to move it independently.',q:'convert a smooth anchor point into a sharp corner point'},
+{id:'curvature',name:'Curvature Tool',key:'Shift+~',g:4,fn:'curve',d:'Draws smooth curves easily — Illustrator bends the path through each point you click.',h:'Click to place points and watch the path curve through them. Click the first point to close; Enter or Esc to finish.',t:'Easier than the Pen Tool for smooth, flowing shapes like waves and swooshes.',q:'draw smooth curves just by clicking points'},
+{id:'type',name:'Type Tool',key:'T',g:5,fn:'type',d:'Creates point type (click) or area type (drag a box).',h:'Click the artboard, type, and press Enter. Choose the font and size in the Control bar. Click existing text to edit it.',t:'Point type (click) is best for headlines. Area type (drag a box) is best for paragraphs.',q:'add a headline to the artboard'},
+{id:'areaType',name:'Area Type Tool',g:5,fn:null,d:'Turns a closed shape into a container that text flows inside.',h:'Click the edge of a closed shape, then type — the text wraps inside the shape.',q:'flow paragraph text inside a shape'},
+{id:'typePath',name:'Type on a Path Tool',g:5,fn:'typePath',d:'Places text along the edge of a path, such as a curved line or a circle.',h:'Click the edge of a shape or path (try the circle or a pencil line), type, and press Enter.',t:'In Illustrator, drag the center bracket across the path to flip the text to the other side.',q:'make text follow a curved line or circle'},
+{id:'vertType',name:'Vertical Type Tool',g:5,fn:null,d:'Creates text that runs from top to bottom.',h:'Click and type; the letters stack vertically.'},
+{id:'touchType',name:'Touch Type Tool',key:'Shift+T',g:5,fn:null,d:'Moves, scales, and rotates individual characters while the text stays editable.',h:'Click one letter to get a box around it, then drag its handles.',q:'rotate or resize one letter while keeping the text editable'},
+{id:'line',name:'Line Segment Tool',key:'\\',g:6,fn:'shape',shape:'line',d:'Draws straight line segments.',h:'Drag to draw. Hold Shift to snap to 45° angles.',t:'A line has no fill — its color comes from the Stroke.',q:'draw a single straight line'},
+{id:'arc',name:'Arc Tool',g:6,fn:'shape',shape:'arc',d:'Draws curved arc segments.',h:'Drag to draw a quarter-curve.'},
+{id:'spiral',name:'Spiral Tool',g:6,fn:null,d:'Draws spirals.',h:'Drag from the center; press ↑/↓ while dragging to change the number of segments.'},
+{id:'rectGrid',name:'Rectangular Grid Tool',g:6,fn:null,d:'Draws grids with a set number of rows and columns.',h:'Drag to draw; arrow keys while dragging add or remove rows and columns.'},
+{id:'polarGrid',name:'Polar Grid Tool',g:6,fn:null,d:'Draws rings with dividers, like a target.',h:'Drag to draw; arrow keys change the rings and dividers.'},
+{id:'rect',name:'Rectangle Tool',key:'M',g:7,fn:'shape',shape:'rect',d:'Draws rectangles and squares.',h:'Drag to draw. Hold Shift for a perfect square, Alt/Option to draw from the center. A single click makes a 100 × 100 shape.',t:'A single click (no drag) in Illustrator opens a dialog where you type an exact Width and Height.',q:'draw rectangles and squares'},
+{id:'rrect',name:'Rounded Rectangle Tool',g:7,fn:'shape',shape:'rrect',d:'Draws rectangles with rounded corners.',h:'Drag to draw. In Illustrator, press ↑/↓ while dragging to change the corner radius.',q:'draw a box with rounded corners'},
+{id:'ellipse',name:'Ellipse Tool',key:'L',g:7,fn:'shape',shape:'ellipse',d:'Draws ovals and circles.',h:'Drag to draw. Hold Shift for a perfect circle, Alt/Option to draw from the center.',t:'Holding Shift for a perfect circle or square is a classic ACP question.',q:'draw a perfect circle'},
+{id:'polygon',name:'Polygon Tool',g:7,fn:'shape',shape:'polygon',d:'Draws shapes with equal sides (a hexagon by default).',h:'Drag outward from the center. Hold Shift to keep it upright. In Illustrator, ↑/↓ while dragging adds or removes sides.',q:'draw a hexagon'},
+{id:'star',name:'Star Tool',g:7,fn:'shape',shape:'star',d:'Draws stars.',h:'Drag outward from the center. Hold Shift to keep it upright.',q:'draw a star'},
+{id:'flare',name:'Flare Tool',g:7,fn:null,d:'Creates lens-flare effects with a center, halo, and rays.',h:'Drag to place and size the flare.'},
+{id:'paintbrush',name:'Paintbrush Tool',key:'B',g:8,fn:'free',free:'brush',d:'Paints freeform paths using brushes (calligraphic, art, pattern, bristle).',h:'Drag to paint. It uses the Stroke color and weight.',t:'The Paintbrush makes stroked paths. The Blob Brush makes filled shapes.',q:'paint a freeform stroke with a brush'},
+{id:'blob',name:'Blob Brush Tool',key:'Shift+B',g:8,fn:'free',free:'blob',d:'Paints filled shapes that merge with overlapping shapes of the same color.',h:'Drag to paint thick marks (shown here as a heavy stroke).',q:'paint marks that become filled shapes that merge together'},
+{id:'shaper',name:'Shaper Tool',key:'Shift+N',g:9,fn:null,d:'Turns rough gestures into clean geometric shapes; scribble over overlaps to merge or delete them.',h:'Roughly sketch a rectangle or circle and Illustrator snaps it into a perfect shape.',q:'sketch a rough shape and have it turned into a perfect rectangle or circle'},
+{id:'pencil',name:'Pencil Tool',key:'N',g:9,fn:'free',free:'pencil',d:'Draws freeform paths, like sketching with a real pencil.',h:'Drag to draw. It uses the Stroke color.',t:'Double-click the tool icon in Illustrator to set Fidelity (accurate vs. smooth).',q:'draw freehand, like sketching with a pencil'},
+{id:'smooth',name:'Smooth Tool',g:9,fn:null,d:'Smooths out bumpy parts of a selected path.',h:'Drag along a selected path to smooth it.'},
+{id:'pathEraser',name:'Path Eraser Tool',g:9,fn:null,d:'Erases part of a selected path by dragging along it.',h:'Drag along a selected path.'},
+{id:'join',name:'Join Tool',g:9,fn:null,d:'Joins open paths by scrubbing across where they meet or overlap.',h:'Scrub across the gap between two path ends.'},
+{id:'eraser',name:'Eraser Tool',key:'Shift+E',g:10,fn:null,d:'Erases areas of shapes by dragging, like a real eraser.',h:'Drag over shapes to remove areas. Alt/Option-drag erases a rectangle.',q:'erase part of a filled shape by dragging over it'},
+{id:'scissors',name:'Scissors Tool',key:'C',g:10,fn:null,d:'Cuts a path at a specific point.',h:'Click on a path to split it into two open paths.',q:'cut a path at a single point'},
+{id:'knife',name:'Knife Tool',g:10,fn:null,d:'Slices shapes into separate closed pieces along a freehand line.',h:'Drag through a shape to slice it.'},
+{id:'rotate',name:'Rotate Tool',key:'R',g:11,fn:'rotate',d:'Rotates objects around a reference point (the center by default).',h:'Select an object first (V), switch to Rotate, then drag on the canvas. Hold Shift to snap to 45°.',t:'Double-click the tool icon in Illustrator to type an exact angle, and click Copy to rotate a duplicate.',q:'turn an object to a new angle'},
+{id:'reflect',name:'Reflect Tool',key:'O',g:11,fn:'reflect',d:'Flips objects across an axis to make a mirror image.',h:'Select an object first, then click the canvas to flip it left-to-right. Alt/Option-click flips it top-to-bottom.',q:'create a mirror image of an object'},
+{id:'scale',name:'Scale Tool',key:'S',g:12,fn:'scale',d:'Resizes objects around a reference point.',h:'Select an object first, then drag away from it to enlarge or toward it to shrink.',t:'Double-click in Illustrator to type an exact percentage and toggle "Scale Strokes & Effects."',q:'resize an object by an exact percentage'},
+{id:'shear',name:'Shear Tool',g:12,fn:null,d:'Slants (skews) objects along an axis.',h:'Drag to slant the selected object.'},
+{id:'reshape',name:'Reshape Tool',g:12,fn:null,d:'Adjusts selected anchor points while keeping the overall path detail.',h:'Drag a point on a selected path.'},
+{id:'width',name:'Width Tool',key:'Shift+W',g:13,fn:null,d:'Varies the thickness of a stroke at any point along the path.',h:'Drag outward from a stroke to make it thicker at that spot.',q:'make a stroke thicker in some places and thinner in others'},
+{id:'warp',name:'Warp Tool',key:'Shift+R',g:13,fn:null,d:'Pushes and pulls artwork like clay (one of the Liquify tools).',h:'Drag across artwork to smear it.'},
+{id:'freeTransform',name:'Free Transform Tool',key:'E',g:14,fn:'select',d:'Rotates, scales, skews, and distorts with an on-screen widget.',h:'Works like the Selection Tool here — drag the handles to resize.',q:'scale, rotate, and distort with one tool'},
+{id:'puppetWarp',name:'Puppet Warp Tool',g:14,fn:null,d:'Adds pins to artwork so you can bend it naturally, like a puppet.',h:'Click to add pins, then drag a pin.'},
+{id:'shapeBuilder',name:'Shape Builder Tool',key:'Shift+M',g:15,fn:null,d:'Merges, divides, and deletes overlapping shapes by clicking and dragging across them.',h:'Select overlapping shapes, drag across regions to merge them, and Alt/Option-click a region to delete it.',t:'Heavily tested on the ACP exam — remember Alt/Option-click deletes a region.',q:'merge overlapping shapes by dragging across them'},
+{id:'livePaint',name:'Live Paint Bucket',key:'K',g:15,fn:'bucket',d:'Fills regions of a Live Paint group, like a coloring book.',h:'Click any shape to fill it with the current Fill color.',t:'In Illustrator, first select shapes and choose Object › Live Paint › Make (Alt+Ctrl+X / Option+Cmd+X).',q:'fill regions like a coloring book'},
+{id:'livePaintSel',name:'Live Paint Selection Tool',key:'Shift+L',g:15,fn:null,d:'Selects faces and edges inside Live Paint groups.',h:'Click a face or edge of a Live Paint group.'},
+{id:'perspective',name:'Perspective Grid Tool',key:'Shift+P',g:16,fn:null,d:'Shows a 1-, 2-, or 3-point perspective grid to draw on.',h:'Turn on the grid, then draw shapes that snap to it.'},
+{id:'mesh',name:'Mesh Tool',key:'U',g:17,fn:null,d:'Creates multicolored mesh fills that blend smoothly in any direction.',h:'Click inside a shape to add mesh points, then color each point.'},
+{id:'gradient',name:'Gradient Tool',key:'G',g:18,fn:'gradient',d:'Applies and adjusts gradients directly on an object.',h:'Click a shape to apply a linear gradient from your Fill color to your Stroke color.',t:'Gradient types: Linear, Radial, and Freeform. Edit color stops in the Gradient panel (Ctrl/Cmd+F9).',q:'apply a smooth blend between two colors'},
+{id:'eyedropper',name:'Eyedropper Tool',key:'I',g:19,fn:'eyedrop',d:'Samples color and appearance from one object and applies it to another.',h:'Select an object, then click a different object to copy its look. With nothing selected, it just picks up the colors.',q:'copy the color from one object onto another'},
+{id:'measure',name:'Measure Tool',g:19,fn:null,d:'Measures distance and angle between two points.',h:'Drag between two points; results show in the Info panel.'},
+{id:'blend',name:'Blend Tool',key:'W',g:20,fn:null,d:'Creates a series of in-between shapes and colors between two objects.',h:'Click one object, then another.',q:'create steps of shapes and colors between two objects'},
+{id:'symbolSprayer',name:'Symbol Sprayer Tool',key:'Shift+S',g:21,fn:null,d:'Sprays many copies of a symbol onto the artboard.',h:'Pick a symbol in the Symbols panel, then drag.'},
+{id:'graph',name:'Column Graph Tool',key:'J',g:22,fn:null,d:'Creates charts from data you type in.',h:'Drag to set the graph size, then enter the data.'},
+{id:'artboard',name:'Artboard Tool',key:'Shift+O',g:23,fn:null,d:'Creates, resizes, and arranges artboards — the printable and exportable pages of your document.',h:'Drag to draw a new artboard, or drag its handles to resize. Double-click the tool (or press Enter) to type an exact width and height in Artboard Options. In this trainer, clicking the tool opens Artboard Options.',t:'One file can hold many artboards — useful for showing a logo at several sizes. File › Document Setup › Edit Artboards also resizes them.',q:'resize or add pages to your document'},
+{id:'slice',name:'Slice Tool',key:'Shift+K',g:23,fn:null,d:'Divides artwork into pieces for web export.',h:'Drag to define a slice.'},
+{id:'hand',name:'Hand Tool',key:'H',g:24,fn:'hand',d:'Moves (pans) your view of the canvas without moving the artwork.',h:'Drag the canvas. Shortcut: hold the Spacebar with any tool.',q:'move your view around the canvas without moving any artwork'},
+{id:'rotateView',name:'Rotate View Tool',key:'Shift+H',g:24,fn:null,d:'Rotates your view of the canvas, not the artwork.',h:'Drag to rotate the view.'},
+{id:'zoom',name:'Zoom Tool',key:'Z',g:25,fn:'zoom',d:'Magnifies or reduces your view.',h:'Click to zoom in. Alt/Option-click to zoom out.',t:'Ctrl/Cmd+0 fits the artboard in the window; Ctrl/Cmd+1 shows actual size (100%).',q:'get a closer look at small details'}
+];
+const T={};TOOLS.forEach(t=>T[t.id]=t);
+const groups=[];TOOLS.forEach(t=>(groups[t.g]=groups[t.g]||[]).push(t));
+const groupCur=groups.map(g=>g[0].id);
+const SEPS=[4,10,15,23];
+const KEYMAP={};TOOLS.forEach(t=>{if(t.key)KEYMAP[t.key]=t.id;});
+const KIND={rect:'Rectangle',rrect:'Rounded Rectangle',ellipse:'Ellipse',polygon:'Polygon',star:'Star',line:'Line',arc:'Path'};
+const FONTS=['Arial','Helvetica','Georgia','Times New Roman','Cambria','Calibri','Verdana','Trebuchet MS','Courier New','Impact','Comic Sans MS'];
+
+const S={tool:'selection',fill:'#FFFFFF',stroke:'#000000',active:'fill',sw:2,font:'Arial',fsize:36,sel:[],outline:false,grid:false,hideBBox:false,
+  undo:[],redo:[],clip:[],pen:null,anc:null,spaceHand:false,mac:/Mac|iPhone|iPad/.test(navigator.userAgent),tab:'props',docW:800,docH:600,units:'px'};
+let vb={x:0,y:0,w:800,h:600},zoom=1,D=null,txt=null,inited=false;
+
+/* ---------- Helpers ---------- */
+function mk(tag,attrs,parent){const el=document.createElementNS(NS,tag);for(const k in attrs)el.setAttribute(k,attrs[k]);if(parent)parent.appendChild(el);return el;}
+function newObj(tag,attrs,kind){const el=mk(tag,attrs,art);el.classList.add('obj');el.id='o'+(++uid);Object.assign(el.dataset,{kind,tx:0,ty:0,rot:0,sx:1,sy:1});return el;}
+const objs=()=>[...art.children].filter(n=>n.classList.contains('obj'));
+const selectable=o=>!o.dataset.hidden&&!o.dataset.locked;
+function objFrom(t){const o=t&&t.closest?t.closest('.obj'):null;return o&&art.contains(o)&&selectable(o)?o:null;}
+function pt(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+function tpt(x,y,m){const p=svg.createSVGPoint();p.x=x;p.y=y;return p.matrixTransform(m);}
+function mat(el){const a=el.getScreenCTM(),r=svg.getScreenCTM();return a&&r?r.inverse().multiply(a):null;}
+function applyT(el){const d=el.dataset;let bb;try{bb=el.getBBox();}catch(e){return;}const cx=bb.x+bb.width/2,cy=bb.y+bb.height/2;
+  el.setAttribute('transform',`translate(${+d.tx} ${+d.ty}) translate(${cx} ${cy}) rotate(${+d.rot}) scale(${+d.sx} ${+d.sy}) translate(${-cx} ${-cy})`);}
+function corners(el){if(el.dataset.hidden)return null;let bb;try{bb=el.getBBox();}catch(e){return null;}const m=mat(el);if(!m)return null;
+  return [[bb.x,bb.y],[bb.x+bb.width,bb.y],[bb.x+bb.width,bb.y+bb.height],[bb.x,bb.y+bb.height]].map(([x,y])=>tpt(x,y,m));}
+function union(list){let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;list.forEach(el=>{const c=corners(el);if(!c)return;c.forEach(p=>{x0=Math.min(x0,p.x);y0=Math.min(y0,p.y);x1=Math.max(x1,p.x);y1=Math.max(y1,p.y);});});
+  return x0===Infinity?{x:0,y:0,w:0,h:0}:{x:x0,y:y0,w:x1-x0,h:y1-y0};}
+const isNone=c=>!c||c==='none';
+function gradStops(c){const g=defs.querySelector(c.slice(4,-1));return g?[...g.querySelectorAll('stop')].map(s=>s.getAttribute('stop-color')):null;}
+function solid(c){if(isNone(c))return null;if(c.startsWith('url(')){const s=gradStops(c);return s?s[0]:null;}return c;}
+function swStyle(c){if(isNone(c))return '';if(c.startsWith('url(')){const s=gradStops(c);return s?`background:linear-gradient(90deg,${s.join(',')})`:'';}return `background:${c}`;}
+function colorName(c){if(isNone(c))return 'None';if(c.startsWith('url('))return 'Gradient';return c.toUpperCase();}
+function label(el){if(el.tagName==='text'){const s=el.textContent.trim();return s?(s.length>22?s.slice(0,22)+'…':s):'<Type>';}return `<${el.dataset.kind}>`;}
+const fmt=sc=>!sc?'':S.mac?sc.replace(/Ctrl\+?/g,'⌘').replace(/Alt\+?/g,'⌥').replace(/Shift\+/g,'⇧'):sc;
+function toPathD(el){const n=a=>+el.getAttribute(a);switch(el.tagName){
+  case 'rect':return `M${n('x')} ${n('y')}H${n('x')+n('width')}V${n('y')+n('height')}H${n('x')}Z`;
+  case 'ellipse':{const cx=n('cx'),cy=n('cy'),rx=n('rx'),ry=n('ry');return `M${cx-rx} ${cy}A${rx} ${ry} 0 1 1 ${cx+rx} ${cy}A${rx} ${ry} 0 1 1 ${cx-rx} ${cy}`;}
+  case 'line':return `M${n('x1')} ${n('y1')}L${n('x2')} ${n('y2')}`;
+  case 'polygon':return 'M'+el.getAttribute('points').trim().replace(/\s+/g,' L')+'Z';
+  case 'path':return el.getAttribute('d');}return null;}
+function anchorsOf(el){const n=a=>+el.getAttribute(a);switch(el.tagName){
+  case 'rect':return [[n('x'),n('y')],[n('x')+n('width'),n('y')],[n('x')+n('width'),n('y')+n('height')],[n('x'),n('y')+n('height')]];
+  case 'ellipse':return [[n('cx'),n('cy')-n('ry')],[n('cx')+n('rx'),n('cy')],[n('cx'),n('cy')+n('ry')],[n('cx')-n('rx'),n('cy')]];
+  case 'line':return [[n('x1'),n('y1')],[n('x2'),n('y2')]];
+  case 'polygon':return el.getAttribute('points').trim().split(/\s+/).map(s=>s.split(',').map(Number));
+  case 'path':try{return JSON.parse(el.dataset.pts||'[]');}catch(e){return [];}}return [];}
+function linD(pts,closed){return 'M'+pts.map(p=>f1(p.x)+' '+f1(p.y)).join(' L')+(closed?'Z':'');}
+function smoothD(pts,closed){if(pts.length<3)return linD(pts,closed);
+  const P=closed?[pts[pts.length-1],...pts,pts[0],pts[1]]:[pts[0],...pts,pts[pts.length-1]];
+  let d=`M${f1(P[1].x)} ${f1(P[1].y)}`;const n=closed?pts.length:pts.length-1;
+  for(let i=1;i<=n;i++){const p0=P[i-1],p1=P[i],p2=P[i+1],p3=P[i+2];
+    d+=` C${f1(p1.x+(p2.x-p0.x)/6)} ${f1(p1.y+(p2.y-p0.y)/6)} ${f1(p2.x-(p3.x-p1.x)/6)} ${f1(p2.y-(p3.y-p1.y)/6)} ${f1(p2.x)} ${f1(p2.y)}`;}
+  return d+(closed?'Z':'');}
+/* Bezier node model: {x,y,i:[x,y]|null (incoming handle),o:[x,y]|null (outgoing handle),s:smooth} */
+function nodesD(N,closed){if(!N.length)return '';let d=`M${f1(N[0].x)} ${f1(N[0].y)}`;
+  const seg=(a,b)=>{if(!a.o&&!b.i)d+=` L${f1(b.x)} ${f1(b.y)}`;else{const o=a.o||[a.x,a.y],i=b.i||[b.x,b.y];d+=` C${f1(o[0])} ${f1(o[1])} ${f1(i[0])} ${f1(i[1])} ${f1(b.x)} ${f1(b.y)}`;}};
+  for(let k=1;k<N.length;k++)seg(N[k-1],N[k]);if(closed&&N.length>1){seg(N[N.length-1],N[0]);d+='Z';}return d;}
+const rp=a=>a&&[f1(a[0]),f1(a[1])];
+function saveNodes(el,N,c){el.setAttribute('d',nodesD(N,c));el.dataset.nodes=JSON.stringify({n:N.map(q=>({x:f1(q.x),y:f1(q.y),i:rp(q.i),o:rp(q.o),s:!!q.s})),c:!!c});
+  el.dataset.pts=JSON.stringify(N.map(q=>[f1(q.x),f1(q.y)]));delete el.dataset.smooth;delete el.dataset.arc;}
+function deriveNodes(el){const n=a=>+el.getAttribute(a)||0,C=(x,y)=>({x,y,i:null,o:null,s:false}),K=.5523;
+  switch(el.tagName){
+  case 'rect':{const x=n('x'),y=n('y'),w=n('width'),h=n('height'),r=Math.min(n('rx'),w/2,h/2);
+    if(!r)return {c:true,n:[C(x,y),C(x+w,y),C(x+w,y+h),C(x,y+h)]};const k=K*r;
+    return {c:true,n:[{x:x+r,y,i:[x+r-k,y],o:null},{x:x+w-r,y,i:null,o:[x+w-r+k,y]},{x:x+w,y:y+r,i:[x+w,y+r-k],o:null},{x:x+w,y:y+h-r,i:null,o:[x+w,y+h-r+k]},
+      {x:x+w-r,y:y+h,i:[x+w-r+k,y+h],o:null},{x:x+r,y:y+h,i:null,o:[x+r-k,y+h]},{x,y:y+h-r,i:[x,y+h-r+k],o:null},{x,y:y+r,i:null,o:[x,y+r-k]}].map(q=>({...q,s:false}))};}
+  case 'ellipse':{const cx=n('cx'),cy=n('cy'),rx=n('rx'),ry=n('ry'),kx=K*rx,ky=K*ry;
+    return {c:true,n:[{x:cx,y:cy-ry,i:[cx-kx,cy-ry],o:[cx+kx,cy-ry],s:true},{x:cx+rx,y:cy,i:[cx+rx,cy-ky],o:[cx+rx,cy+ky],s:true},
+      {x:cx,y:cy+ry,i:[cx+kx,cy+ry],o:[cx-kx,cy+ry],s:true},{x:cx-rx,y:cy,i:[cx-rx,cy+ky],o:[cx-rx,cy-ky],s:true}]};}
+  case 'line':return {c:false,n:[C(n('x1'),n('y1')),C(n('x2'),n('y2'))]};
+  case 'polygon':return {c:true,n:el.getAttribute('points').trim().split(/\s+/).map(s=>{const [x,y]=s.split(',').map(Number);return C(x,y);})};
+  case 'path':{if(el.dataset.nodes)return JSON.parse(el.dataset.nodes);let pts;try{pts=JSON.parse(el.dataset.pts||'[]');}catch(e){pts=[];}if(pts.length<2)return null;
+    const P=pts.map(([x,y])=>({x,y})),closed=/Z\s*$/i.test(el.getAttribute('d')||'');
+    if(el.dataset.arc){const [a,b]=P;return {c:false,n:[{x:a.x,y:a.y,i:null,o:[a.x,a.y+(b.y-a.y)*.55],s:false},{x:b.x,y:b.y,i:[b.x-(b.x-a.x)*.55,b.y],o:null,s:false}]};}
+    if(!el.dataset.smooth||P.length<3)return {c:closed,n:P.map(q=>C(q.x,q.y))};
+    const L=P.length,N=P.map((q,i)=>{const pv=closed?P[(i-1+L)%L]:P[Math.max(0,i-1)],nx=closed?P[(i+1)%L]:P[Math.min(L-1,i+1)],dx=(nx.x-pv.x)/6,dy=(nx.y-pv.y)/6;
+      return {x:q.x,y:q.y,i:[q.x-dx,q.y-dy],o:[q.x+dx,q.y+dy],s:true};});
+    if(!closed){N[0].i=null;N[L-1].o=null;}return {c:closed,n:N};}}
+  return null;}
+const nodesOf=el=>el.dataset.nodes?JSON.parse(el.dataset.nodes):deriveNodes(el);
+const GEOM=['x','y','width','height','rx','ry','cx','cy','points','x1','y1','x2','y2','d'];
+function toEditable(el){if(!el||el.tagName==='text')return el;if(el.tagName==='path'&&el.dataset.nodes)return el;const r=deriveNodes(el);if(!r)return el;let p=el;
+  if(el.tagName!=='path'){p=document.createElementNS(NS,'path');[...el.attributes].forEach(a=>{if(!GEOM.includes(a.name))p.setAttribute(a.name,a.value);});
+    el.replaceWith(p);S.sel=S.sel.map(x=>x===el?p:x);if(S.anc&&S.anc.el===el)S.anc.el=p;}
+  p.dataset.kind='Path';saveNodes(p,r.n,r.c);return p;}
+/* change geometry without the object jumping, even when rotated or scaled */
+function reT(el,fn){let bb=el.getBBox();const c0={x:bb.x+bb.width/2,y:bb.y+bb.height/2};fn();bb=el.getBBox();
+  const d=el.dataset,dx=c0.x-(bb.x+bb.width/2),dy=c0.y-(bb.y+bb.height/2),r=+d.rot*Math.PI/180,ux=+d.sx*dx,uy=+d.sy*dy;
+  d.tx=+d.tx+dx-(ux*Math.cos(r)-uy*Math.sin(r));d.ty=+d.ty+dy-(ux*Math.sin(r)+uy*Math.cos(r));applyT(el);}
+function toLocal(el,p){return tpt(p.x,p.y,mat(el).inverse());}
+function snap45(ox,oy,x,y){const a=Math.round(Math.atan2(y-oy,x-ox)/(Math.PI/4))*(Math.PI/4),r=Math.hypot(x-ox,y-oy);return [ox+r*Math.cos(a),oy+r*Math.sin(a)];}
+function bez(a,b,t){const P0=[a.x,a.y],P1=a.o||P0,P3=[b.x,b.y],P2=b.i||P3,m=1-t;
+  return [0,1].map(k=>m*m*m*P0[k]+3*m*m*t*P1[k]+3*m*t*t*P2[k]+t*t*t*P3[k]);}
+function splitSeg(a,b,t){if(!a.o&&!b.i)return {x:a.x+(b.x-a.x)*t,y:a.y+(b.y-a.y)*t,i:null,o:null,s:false};
+  const P0=[a.x,a.y],P1=a.o||P0,P3=[b.x,b.y],P2=b.i||P3,L=(p,q)=>[p[0]+(q[0]-p[0])*t,p[1]+(q[1]-p[1])*t];
+  const A=L(P0,P1),B=L(P1,P2),Cc=L(P2,P3),E=L(A,B),F=L(B,Cc),G=L(E,F);if(a.o)a.o=A;if(b.i)b.i=Cc;return {x:G[0],y:G[1],i:E,o:F,s:true};}
+function polyPts(c,r,a,kind){const n=kind==='star'?10:6,out=[];for(let i=0;i<n;i++){const rr=kind==='star'&&i%2?r*.45:r,ang=a+i*2*Math.PI/n;out.push(f1(c.x+rr*Math.cos(ang))+','+f1(c.y+rr*Math.sin(ang)));}return out.join(' ');}
+const paint=()=>({fill:S.fill,stroke:S.stroke,'stroke-width':S.sw});
+let tt;function toast(msg,ms=3600){const t=$('#toast');t.innerHTML=msg;t.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>t.classList.remove('show'),ms);}
+
+/* ---------- Undo ---------- */
+const snap=()=>({a:art.innerHTML,d:defs.innerHTML,w:S.docW,h:S.docH,u:S.units});
+function pushUndo(){markDirty();S.undo.push(snap());if(S.undo.length>80)S.undo.shift();S.redo=[];}
+function restore(s){markDirty();art.innerHTML=s.a;defs.innerHTML=s.d;S.sel=[];S.anc=null;if(s.w&&(s.w!==S.docW||s.h!==S.docH||s.u!==S.units)){S.units=s.u||S.units;applyBoard(s.w,s.h);fit();}refresh();}
+function undo(){finishPen(false);if(!S.undo.length)return toast('Nothing left to undo.');S.redo.push(snap());restore(S.undo.pop());toast('Undo');}
+function redo(){if(!S.redo.length)return toast('Nothing to redo.');S.undo.push(snap());restore(S.redo.pop());toast('Redo');}
+
+/* ---------- View ---------- */
+function setVB(){svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);$('#stZoom').textContent=Math.round(zoom*100)+'%';
+  const L=$('#abLabel');if(L){L.setAttribute('font-size',f1(13/zoom*100)/100);L.setAttribute('y',-8/zoom);}const sh=$('#abShadow');if(sh){sh.setAttribute('x',4/zoom);sh.setAttribute('y',4/zoom);}}
+function zoomAt(z,p){z=Math.max(.05,Math.min(32,z));const fx=(p.x-vb.x)/vb.w,fy=(p.y-vb.y)/vb.h;zoom=z;vb.w=svg.clientWidth/z;vb.h=svg.clientHeight/z;vb.x=p.x-fx*vb.w;vb.y=p.y-fy*vb.h;setVB();drawOverlay();}
+const vcenter=()=>({x:vb.x+vb.w/2,y:vb.y+vb.h/2});
+function fit(){const W=svg.clientWidth||800,H=svg.clientHeight||600,dw=S.docW,dh=S.docH;zoom=Math.min(W/(dw+Math.max(80,dw*.1)),H/(dh+Math.max(90,dh*.15)));vb.w=W/zoom;vb.h=H/zoom;vb.x=dw/2-vb.w/2;vb.y=dh/2-vb.h/2;setVB();drawOverlay();}
+new ResizeObserver(()=>{if(!svg.clientWidth)return;if(!inited){inited=true;fit();return;}const c=vcenter();vb.w=svg.clientWidth/zoom;vb.h=svg.clientHeight/zoom;vb.x=c.x-vb.w/2;vb.y=c.y-vb.h/2;setVB();}).observe(svg);
+
+/* ---------- Selection overlay ---------- */
+const HC=['nwse','ns','nesw','ew','nwse','ns','nesw','ew'];
+function canResize(el){return Math.abs((+el.dataset.rot)%360)<.01;}
+const EDIT=['direct','convert','addpt','delpt'];
+function drawNodes(el){const r=nodesOf(el);if(!r)return;const m=mat(el);if(!m)return;const N=r.n,L=N.length,sel=S.anc&&S.anc.el===el?S.anc.i:-1,a=4/zoom;
+  if(sel>=0&&sel<L){const prev=r.c?(sel-1+L)%L:sel-1,next=r.c?(sel+1)%L:sel+1;
+    const H=(i,w)=>{const nd=N[i];if(!nd||!nd[w])return;const A=tpt(nd.x,nd.y,m),B=tpt(nd[w][0],nd[w][1],m);mk('line',{x1:A.x,y1:A.y,x2:B.x,y2:B.y,class:'hline'},ov);
+      const h=mk('circle',{cx:B.x,cy:B.y,r:4.5/zoom,class:'hnd'},ov);h.dataset.hnd=w;h.dataset.i=i;h.dataset.el=el.id;};
+    H(sel,'i');H(sel,'o');if(prev>=0&&prev!==sel)H(prev,'o');if(next<L&&next!==sel)H(next,'i');}
+  N.forEach((nd,i)=>{const A=tpt(nd.x,nd.y,m),q=mk('rect',{x:A.x-a,y:A.y-a,width:2*a,height:2*a,class:'anc hot'+(i===sel?' on':'')},ov);q.dataset.anc=i;q.dataset.el=el.id;});}
+function drawOverlay(){ov.innerHTML='';if(!S.sel.length)return;const fn=T[S.tool].fn,hs=7/zoom,direct=EDIT.includes(fn);
+  S.sel.forEach(el=>{if(!el.isConnected)return;const c=corners(el);if(!c)return;
+    if(direct){mk('polygon',{points:c.map(p=>p.x+','+p.y).join(' '),class:'selbox thin'},ov);drawNodes(el);}
+    else if(!S.hideBBox&&S.sel.length>1)mk('polygon',{points:c.map(p=>p.x+','+p.y).join(' '),class:'selbox thin'},ov);});
+  if(direct||S.hideBBox)return;
+  const b=union(S.sel);mk('rect',{x:b.x,y:b.y,width:b.w,height:b.h,class:'selbox'},ov);
+  const live=S.sel.length===1&&canResize(S.sel[0])&&fn==='select';
+  [[b.x,b.y],[b.x+b.w/2,b.y],[b.x+b.w,b.y],[b.x+b.w,b.y+b.h/2],[b.x+b.w,b.y+b.h],[b.x+b.w/2,b.y+b.h],[b.x,b.y+b.h],[b.x,b.y+b.h/2]].forEach(([x,y],i)=>{
+    const h=mk('rect',{x:x-hs/2,y:y-hs/2,width:hs,height:hs,class:'hdl'},ov);if(live){h.dataset.h=i;h.style.cursor=HC[i]+'-resize';}else h.style.pointerEvents='none';});}
+function setBox(el,L,Tp,W,H){const d=el.dataset,bb=el.getBBox(),cx=bb.x+bb.width/2,cy=bb.y+bb.height/2,cur=union([el]);
+  let sx=+d.sx,sy=+d.sy;if(cur.w>.01)sx*=W/cur.w;if(cur.h>.01)sy*=H/cur.h;
+  const ax=cx+sx*(bb.x-cx),bx=cx+sx*(bb.x+bb.width-cx),ay=cy+sy*(bb.y-cy),by=cy+sy*(bb.y+bb.height-cy);
+  d.sx=sx;d.sy=sy;d.tx=L-Math.min(ax,bx);d.ty=Tp-Math.min(ay,by);applyT(el);}
+
+function setSel(arr){S.sel=arr.filter(Boolean);if(S.anc&&!S.sel.includes(S.anc.el))S.anc=null;if(S.sel.length){const el=S.sel[0];S.fill=el.getAttribute('fill')||'none';S.stroke=el.getAttribute('stroke')||'none';
+  const sw=el.getAttribute('stroke-width');if(sw)S.sw=+sw;if(el.tagName==='text'){S.font=el.getAttribute('font-family')||S.font;S.fsize=+el.getAttribute('font-size')||S.fsize;}}refresh();}
+function refresh(){drawOverlay();renderLayers();renderProps();renderControl();updateFS();renderSwatches();}
+
+/* ---------- Toolbar ---------- */
+function renderToolbar(){let h=`<button class="tbtop" data-act="tbtoggle" title="Switch between single and double column toolbar">${tb.classList.contains('single')?'»':'«'}</button>`;
+  groups.forEach((g,i)=>{if(SEPS.includes(i))h+='<div class="tsep"></div>';const c=T[groupCur[i]],on=g.some(t=>t.id===S.tool);
+    h+=`<button class="tool${on?' on':''}" data-g="${i}" title="${esc(c.name)}${c.key?' ('+esc(c.key)+')':''}" aria-label="${esc(c.name)}">${ic(c.id)}${g.length>1?'<span class="tri" data-tri="1"></span>':''}</button>`;});
+  h+=`<button class="tbtop" data-act="edittb" title="Edit Toolbar">•••</button>
+  <div class="fs"><button class="fsbox fsFill" data-act="actfill" title="Fill (double-click to pick a color)"></button><button class="fsbox fsStroke" data-act="actstroke" title="Stroke (double-click to pick a color)"></button>
+  <button class="fsSm fsSwap" data-act="swap" title="Swap Fill and Stroke (Shift+X)">⇄</button><button class="fsSm fsDef" data-act="defaults" title="Default Fill and Stroke (D)" aria-label="Default Fill and Stroke"></button></div>
+  <div class="fsmodes"><button data-act="modecolor" title="Color (,)" style="background:#000"></button><button data-act="applygrad" title="Gradient (.)" style="background:linear-gradient(90deg,#fff,#000)"></button><button data-act="modenone" title="None (/)" class="none"></button></div>`;
+  tb.innerHTML=h;updateFS();}
+function updateFS(){const fb=tb.querySelector('.fsFill'),sb=tb.querySelector('.fsStroke');if(!fb)return;
+  fb.className='fsbox fsFill'+(isNone(S.fill)?' none':'');fb.style.cssText=swStyle(S.fill);
+  sb.className='fsbox fsStroke'+(isNone(S.stroke)?' none':'');sb.style.cssText=swStyle(S.stroke);
+  tb.querySelector('.fs').classList.toggle('stroke-on',S.active==='stroke');}
+let press=null;
+tb.addEventListener('pointerdown',e=>{const b=e.target.closest('.tool');if(!b)return;e.preventDefault();const g=+b.dataset.g;
+  if(e.target.closest('[data-tri]')||e.button===2){openFly(g,b);return;}
+  press={g,timer:setTimeout(()=>{openFly(g,b);press=null;},400)};});
+tb.addEventListener('pointerup',e=>{if(!press)return;clearTimeout(press.timer);const g=press.g;press=null;
+  if(e.altKey){const arr=groups[g],i=arr.findIndex(t=>t.id===groupCur[g]);groupCur[g]=arr[(i+1)%arr.length].id;}
+  selectTool(groupCur[g],'click');});
+tb.addEventListener('contextmenu',e=>{if(e.target.closest('.tool'))e.preventDefault();});
+tb.addEventListener('dblclick',e=>{if(e.target.closest('.fsFill'))openPicker('fill');else if(e.target.closest('.fsStroke'))openPicker('stroke');});
+function openFly(g,b){closeMenus();const r=b.getBoundingClientRect();
+  fly.innerHTML=groups[g].map(t=>`<button class="fi${t.id===S.tool?' on':''}" data-id="${t.id}">${ic(t.id)}<span>${esc(t.name)}</span><kbd>${esc(t.key||'')}</kbd></button>`).join('');
+  fly.hidden=false;fly.style.left=Math.min(r.right+4,innerWidth-fly.offsetWidth-6)+'px';fly.style.top=Math.max(6,Math.min(r.top,innerHeight-fly.offsetHeight-6))+'px';}
+fly.addEventListener('click',e=>{const b=e.target.closest('.fi');if(b)selectTool(b.dataset.id,'click');});
+
+function selectTool(id,src){const t=T[id];if(!t)return;finishPen(false);commitText();S.tool=id;groupCur[t.g]=id;fly.hidden=true;
+  renderToolbar();renderInfo();renderControl();setCursor();drawOverlay();
+  $('#stTool').textContent=t.name;$('#stHint').textContent=t.fn?t.h:id==='artboard'?'Clicking the Artboard Tool opens Artboard Options — type an exact width and height.':'Demo only in this trainer — see the Tool Guide.';
+  if(Q.on&&Q.type==='find'&&src==='click')answerFind(id);
+  else if(id==='artboard'&&src&&!Q.on)artboardDialog('Artboard Options');}
+function setCursor(){const fn=S.spaceHand?'hand':T[S.tool].fn;
+  svg.style.cursor={select:'default',direct:'default',magic:'default',lasso:'default',hand:'grab',zoom:'zoom-in',type:'text',typePath:'text'}[fn]||(fn?'crosshair':'not-allowed');}
+
+function renderInfo(){const t=T[S.tool],g=groups[t.g];
+  const loc=g.length>1?(g[0].id===t.id?`Default tool in its toolbar slot. Press and hold the slot to reveal: ${g.slice(1).map(x=>esc(x.name)).join(', ')}.`:`Nested under the <b>${esc(g[0].name)}</b> slot — press and hold that slot to find it.`):'Has its own slot in the toolbar.';
+  $('#toolInfo').innerHTML=`<div class="tihead"><div class="tiicon">${ic(t.id)}</div><div><div class="tiname">${esc(t.name)}</div><div class="tikey">${t.key?`Shortcut <kbd>${esc(t.key)}</kbd>`:'No default shortcut'}</div></div><span class="badge ${t.fn?'live':'demo'}">${t.fn?'Try it':'Demo only'}</span></div>
+  <p>${esc(t.d)}</p>${t.h?`<p><b>${t.fn?'Try it:':'In Illustrator:'}</b> ${esc(t.h)}</p>`:''}${t.t?`<div class="acp"><b>ACP tip</b>${esc(t.t)}</div>`:''}<p class="loc">${loc}</p>`;}
+
+/* ---------- Control bar ---------- */
+const fontSel=(id,v)=>`<select id="${id}">${FONTS.map(f=>`<option ${f===v?'selected':''}>${f}</option>`).join('')}</select>`;
+function renderControl(){const sel=S.sel,c=$('#control');
+  const lbl=sel.length?(sel.length===1?(sel[0].tagName==='text'?'Type':(['Line','Path'].includes(sel[0].dataset.kind)?'Path':sel[0].dataset.kind)):'Mixed Objects'):'No Selection';
+  const hasText=['type','typePath'].includes(T[S.tool].fn)||sel.some(el=>el.tagName==='text');
+  const sw=sel.length?(+sel[0].getAttribute('stroke-width')||0):S.sw,op=sel.length?Math.round((+(sel[0].getAttribute('opacity')??1))*100):100;
+  const sws=[0,0.5,1,2,3,4,6,8,12,16,24];if(!sws.includes(sw))sws.push(sw);sws.sort((a,b)=>a-b);
+  c.innerHTML=`<span class="lbl">${lbl}</span>
+  <span class="ctl">Fill <button class="mini ${isNone(S.fill)?'none':''}" data-act="pick-fill" style="${swStyle(S.fill)}" title="Fill"></button></span>
+  <span class="ctl">Stroke <button class="mini ${isNone(S.stroke)?'none':''}" data-act="pick-stroke" style="${swStyle(S.stroke)}" title="Stroke"></button>
+  <select id="cSW" title="Stroke weight">${sws.map(v=>`<option value="${v}" ${v==sw?'selected':''}>${v} pt</option>`).join('')}</select></span>
+  <span class="ctl">Opacity <input id="cOp" type="number" min="0" max="100" value="${op}">%</span>
+  ${hasText?`<span class="ctl">Character ${fontSel('cFont',S.font)}<input id="cSize" type="number" min="4" max="400" value="${S.fsize}"> pt</span>`:''}
+  <span class="spacer"></span><button class="appbtn" data-act="docsetup">Document Setup</button><button class="appbtn" data-act="prefs">Preferences</button>`;}
+$('#control').addEventListener('change',e=>{const v=e.target.value;switch(e.target.id){
+  case 'cSW':setSW(+v);break;case 'cOp':setOpacity(Math.max(0,Math.min(100,+v)));break;case 'cFont':setFont(v);break;case 'cSize':setSize(+v);break;}});
+
+function setSW(v){S.sw=v;if(S.sel.length){pushUndo();S.sel.forEach(el=>el.setAttribute('stroke-width',v));}refresh();}
+function setOpacity(v){if(!S.sel.length)return toast('Select an object to change its opacity.');pushUndo();S.sel.forEach(el=>el.setAttribute('opacity',v/100));refresh();}
+function setFont(v){S.font=v;const t=S.sel.filter(el=>el.tagName==='text');if(t.length){pushUndo();t.forEach(el=>{el.setAttribute('font-family',v);applyT(el);});}refresh();}
+function setSize(v){if(!(v>0))return;S.fsize=v;const t=S.sel.filter(el=>el.tagName==='text');if(t.length){pushUndo();t.forEach(el=>{el.setAttribute('font-size',v);applyT(el);});}refresh();}
+function setColor(which,val,noUndo){S[which]=val;if(S.sel.length){if(!noUndo)pushUndo();S.sel.forEach(el=>el.setAttribute(which,val));}refresh();}
+function setActive(w){S.active=w;updateFS();renderSwatches();}
+const picker=$('#picker');
+function openPicker(which){S.pickFor=which;const c=solid(S[which])||'#000000';picker.value=/^#[0-9a-f]{6}$/i.test(c)?c:'#000000';if(S.sel.length)pushUndo();picker.click();}
+picker.addEventListener('input',()=>setColor(S.pickFor,picker.value.toUpperCase(),true));
+function gradFill(el){const id='g'+(++uid);let c1=solid(S.fill)||'#8A0635',c2=solid(S.stroke)||'#FFFFFF';if(c1.toUpperCase()===c2.toUpperCase())c2='#000000';
+  const g=mk('linearGradient',{id,x1:0,y1:0,x2:1,y2:0},defs);mk('stop',{offset:0,'stop-color':c1},g);mk('stop',{offset:1,'stop-color':c2},g);el.setAttribute('fill',`url(#${id})`);}
+
+/* ---------- Panels ---------- */
+function showTab(n){S.tab=n;['props','layers','swatches'].forEach(k=>{$('#tab-'+k).hidden=k!==n;$('#tb-'+k).classList.toggle('on',k===n);});}
+function renderProps(){const b=$('#tab-props'),sel=S.sel;
+  if(!sel.length){b.innerHTML=`<h4>Document</h4><div class="prow"><span>Artboard</span><b>Artboard 1</b></div><div class="prow"><span>Size</span><b>${docSizeText()}</b></div>
+  <div class="prow"><span>Units</span><select id="pUnits">${Object.keys(UNITS).map(k=>`<option value="${k}" ${k===S.units?'selected':''}>${UNITS[k].n}</option>`).join('')}</select></div>
+  <div class="qa"><button data-act="artboardopts">Edit Artboards</button><button data-act="docsetup">Document Setup</button></div>
+  <h4>View</h4><label class="chk"><input type="checkbox" id="pGrid" ${S.grid?'checked':''}> Show Grid <kbd>${fmt("Ctrl+'")}</kbd></label><label class="chk"><input type="checkbox" id="pOutline" ${S.outline?'checked':''}> Outline Mode <kbd>${fmt('Ctrl+Y')}</kbd></label>
+  <h4>Quick Actions</h4><div class="qa"><button data-act="fit">Fit Artboard</button><button data-act="selall">Select All</button><button data-act="clear">Clear Artboard</button></div>
+  <p class="note">The Properties panel changes based on what's selected. Select an object to see its Transform and Appearance options.</p>`;return;}
+  const bx=union(sel),one=sel.length===1?sel[0]:null,el=sel[0],isT=sel.some(x=>x.tagName==='text'),rs=one&&canResize(one);
+  const op=Math.round((+(el.getAttribute('opacity')??1))*100);
+  b.innerHTML=`<h4>${one?esc(label(one)):sel.length+' objects selected'}</h4>
+  <h4>Transform</h4><div class="grid2"><label>X <input type="number" step="any" id="pX" value="${toU(bx.x)}"></label><label>Y <input type="number" step="any" id="pY" value="${toU(bx.y)}"></label>
+  <label>W <input type="number" step="any" id="pW" value="${toU(bx.w)}" ${rs?'':'disabled'}></label><label>H <input type="number" step="any" id="pH" value="${toU(bx.h)}" ${rs?'':'disabled'}></label>
+  ${one?`<label>Angle <input type="number" id="pR" value="${f1(+one.dataset.rot)}"></label>`:''}</div>
+  <h4>Appearance</h4>
+  <div class="prow"><span>Fill</span><button class="mini ${isNone(el.getAttribute('fill'))?'none':''}" data-act="pick-fill" style="${swStyle(el.getAttribute('fill'))}"></button><code>${colorName(el.getAttribute('fill'))}</code></div>
+  <div class="prow"><span>Stroke</span><button class="mini ${isNone(el.getAttribute('stroke'))?'none':''}" data-act="pick-stroke" style="${swStyle(el.getAttribute('stroke'))}"></button><input type="number" id="pSW" min="0" step="0.5" value="${+el.getAttribute('stroke-width')||0}"> pt</div>
+  <div class="prow"><span>Opacity</span><input type="range" id="pOp" min="0" max="100" value="${op}"><span id="pOpV">${op}%</span></div>
+  ${isT?`<h4>Character</h4><div class="prow"><span>Font</span>${fontSel('pFont',S.font)}</div><div class="prow"><span>Size</span><input type="number" id="pSize" value="${S.fsize}"> pt</div>`:''}
+  <h4>Quick Actions</h4><div class="qa"><button data-act="dup">Duplicate</button><button data-act="del">Delete</button><button data-act="front">Bring to Front</button><button data-act="back">Send to Back</button><button data-act="shadow">Drop Shadow</button><button data-act="lock">Lock</button></div>`;}
+const pp=$('#tab-props');
+pp.addEventListener('change',e=>{const id=e.target.id;let v=+e.target.value;if(id==='pUnits')return setUnits(e.target.value);if(['pX','pY','pW','pH'].includes(id))v=fromU(v);
+  switch(id){case 'pX':case 'pY':{const b=union(S.sel),dx=id==='pX'?v-b.x:0,dy=id==='pY'?v-b.y:0;pushUndo();S.sel.forEach(el=>{el.dataset.tx=+el.dataset.tx+dx;el.dataset.ty=+el.dataset.ty+dy;applyT(el);});break;}
+  case 'pW':case 'pH':{const el=S.sel[0],b=union([el]);pushUndo();setBox(el,b.x,b.y,id==='pW'?Math.max(1,v):b.w,id==='pH'?Math.max(1,v):b.h);break;}
+  case 'pR':pushUndo();S.sel.forEach(el=>{el.dataset.rot=v;applyT(el);});break;
+  case 'pSW':setSW(v);return;case 'pFont':setFont(e.target.value);return;case 'pSize':setSize(v);return;
+  case 'pGrid':doAct('grid');return;case 'pOutline':doAct('outline');return;case 'pOp':return;default:return;}
+  refresh();});
+pp.addEventListener('pointerdown',e=>{if(e.target.id==='pOp'&&S.sel.length)pushUndo();});
+pp.addEventListener('input',e=>{if(e.target.id==='pOp'){S.sel.forEach(el=>el.setAttribute('opacity',e.target.value/100));$('#pOpV').textContent=e.target.value+'%';}});
+
+function renderLayers(){const list=objs().reverse();
+  let h=`<div class="lyr-top"><span class="chip"></span><span class="lb">${ic(0,EYE)}</span><b>Layer 1</b><span class="muted" style="margin-left:auto">${list.length} object${list.length===1?'':'s'}</span></div>`;
+  list.forEach(el=>{h+=`<div class="lrow${S.sel.includes(el)?' sel':''}" data-id="${el.id}"><button class="lb" data-l="vis" title="Toggle visibility">${el.dataset.hidden?'':ic(0,EYE)}</button><button class="lb" data-l="lock" title="Toggle lock">${el.dataset.locked?ic(0,LOCK):''}</button><span class="lsw ${isNone(el.getAttribute('fill'))?'none':''}" style="${swStyle(el.getAttribute('fill'))}"></span><span class="lname">${esc(label(el))}</span></div>`;});
+  if(!list.length)h+='<p class="note">This layer is empty. Draw something to see it listed here.</p>';
+  h+='<p class="note">The top of the list is the front of the stacking order. Use Object › Arrange (or the Quick Actions) to change it. Click the eye to hide an object, the empty box to lock it.</p>';
+  $('#tab-layers').innerHTML=h;}
+$('#tab-layers').addEventListener('click',e=>{const row=e.target.closest('.lrow');if(!row)return;const el=document.getElementById(row.dataset.id);if(!el)return;const l=e.target.closest('[data-l]');
+  if(l){pushUndo();if(l.dataset.l==='vis'){if(el.dataset.hidden){delete el.dataset.hidden;el.style.display='';}else{el.dataset.hidden='1';el.style.display='none';}}
+    else{if(el.dataset.locked)delete el.dataset.locked;else el.dataset.locked='1';}setSel(S.sel.filter(x=>selectable(x)));return;}
+  if(!selectable(el))return toast('That object is hidden or locked. Toggle it in the Layers panel first.');
+  setSel(e.shiftKey?(S.sel.includes(el)?S.sel.filter(x=>x!==el):[...S.sel,el]):[el]);});
+
+const SW=['none','#FFFFFF','#000000','#E6E6E6','#B3B3B3','#808080','#4D4D4D','#ED1C24','#F7931E','#FFF200','#8DC63F','#39B54A','#00A99D','#29ABE2','#0071BC','#2E3192','#662D91','#93278F','#ED1E79','#C69C6D','#8C6239','#603813'];
+const COWBOYS=['#8A0635','#0A0A0A','#9E9FA3','#FFFFFF'];
+function renderSwatches(){const cur=(S[S.active]||'').toUpperCase();
+  const sw=c=>`<button class="swc ${c==='none'?'none':''} ${c.toUpperCase()===cur?'cur':''}" data-sw="${c}" title="${c==='none'?'None':c}" style="${c==='none'?'':'background:'+c}"></button>`;
+  $('#tab-swatches').innerHTML=`<div class="swtarget">Apply to <button data-act="actfill" class="${S.active==='fill'?'on':''}">Fill</button><button data-act="actstroke" class="${S.active==='stroke'?'on':''}">Stroke</button><span class="muted">X toggles</span></div>
+  <div class="swgrid">${SW.map(sw).join('')}</div><h4>Cowboys brand (color group)</h4><div class="swgrid">${COWBOYS.map(sw).join('')}</div>
+  <div class="qa" style="margin-top:.7rem"><button data-act="custom">Custom color…</button><button data-act="applygrad">Apply gradient</button></div>
+  <p class="note">A folder of swatches is a <b>Color Group</b>. In Illustrator, save a new swatch with the New Swatch button at the bottom of this panel.</p>`;}
+$('#tab-swatches').addEventListener('click',e=>{const b=e.target.closest('[data-sw]');if(b)setColor(S.active,b.dataset.sw);});
+
+/* ---------- Menus ---------- */
+const I=s=>'i:'+s;
+const MENUS=[
+['File',[['New…','Ctrl+N','new'],['Open…','Ctrl+O','open'],'-',['Save','Ctrl+S','save'],['Save As…','Shift+Ctrl+S','saveas'],['Save a Copy…','Alt+Ctrl+S','saveas'],'-',
+  ['Export',null,null,[['Export As PNG…',null,'exportpng'],['Export for Screens…','Alt+Ctrl+E',I('Exports artboards or assets at several sizes and formats at once (PNG, JPG, SVG, PDF).')],['Save for Web (Legacy)…','Alt+Shift+Ctrl+S',I('The older web-optimized export dialog.')]]],
+  ['Package…','Alt+Shift+Ctrl+P',I('Collects the .ai file, linked images, and fonts into one folder — for sending to a printer or another designer.')],'-',['Document Setup…','Alt+Ctrl+P','docsetup'],['Print…','Ctrl+P',I('Prints artboards. For print work, check that the Document Color Mode is CMYK.')]]],
+['Edit',[['Undo','Ctrl+Z','undo'],['Redo','Shift+Ctrl+Z','redo'],'-',['Cut','Ctrl+X','cut'],['Copy','Ctrl+C','copy'],['Paste','Ctrl+V','paste'],['Paste in Front','Ctrl+F','pastefront'],['Paste in Back','Ctrl+B','pasteback'],['Clear',null,'del'],'-',
+  ['Edit Colors',null,null,[['Recolor Artwork…',null,I('Swaps or adjusts every color in the selected artwork at once — great for trying new palettes.')],['Convert to Grayscale',null,I('Turns selected artwork into shades of gray.')]]],'-',['Keyboard Shortcuts…','Alt+Shift+Ctrl+K','shortcutref'],['Preferences…','Ctrl+K','prefs']]],
+['Object',[['Transform',null,null,[['Move…','Shift+Ctrl+M',I('Moves the selection an exact distance.')],['Rotate…',null,I('Rotates by an exact angle.')],['Reflect…',null,I('Flips across a horizontal or vertical axis.')],['Scale…',null,I('Resizes by an exact percentage.')],['Transform Again','Ctrl+D',I('Repeats your last transformation — great for making evenly spaced copies.')]]],
+  ['Arrange',null,null,[['Bring to Front','Shift+Ctrl+]','front'],['Bring Forward','Ctrl+]','fwd'],['Send Backward','Ctrl+[','bwd'],['Send to Back','Shift+Ctrl+[','back']]],'-',
+  ['Group','Ctrl+G',I('Combines selected objects so they move and scale together. (Not simulated in this trainer.)')],['Ungroup','Shift+Ctrl+G',I('Separates a group back into individual objects.')],['Lock',null,null,[['Selection','Ctrl+2','lock']]],['Unlock All','Alt+Ctrl+2','unlock'],['Hide',null,null,[['Selection','Ctrl+3','hide']]],['Show All','Alt+Ctrl+3','show'],'-',
+  ['Expand…',null,I('Turns strokes, gradients, and live effects into regular editable shapes.')],['Expand Appearance',null,I('Converts effects into real artwork.')],'-',
+  ['Path',null,null,[['Join','Ctrl+J',I('Connects two open endpoints.')],['Average…','Alt+Ctrl+J',I('Lines up selected anchor points.')],['Outline Stroke',null,I('Turns a stroke into a filled shape.')],['Offset Path…',null,I('Creates an outline copy around a shape, a set distance away.')],['Simplify…',null,I('Reduces the number of anchor points.')]]],
+  ['Live Paint',null,null,[['Make','Alt+Ctrl+X',I('Turns selected shapes into a Live Paint group you can color with the Live Paint Bucket (K).')]]],
+  ['Image Trace',null,null,[['Make',null,I('Converts a raster image (photo or scan) into vector paths.')]]],
+  ['Clipping Mask',null,null,[['Make','Ctrl+7',I('Uses the top shape as a window — only artwork inside it shows.')],['Release','Alt+Ctrl+7',I('Removes the clipping mask.')]]],
+  ['Compound Path',null,null,[['Make','Ctrl+8',I('Combines shapes so overlapping areas become holes — like the center of a donut.')]]]]],
+['Type',[['Create Outlines','Shift+Ctrl+O',I('Converts text into vector shapes. The text is no longer editable, but the font no longer needs to be installed to print. Commonly tested on the ACP exam.')],'-',
+  ['Area Type Options…',null,I('Sets columns, rows, and inset spacing for area type.')],['Type on a Path',null,null,[['Type on a Path Options…',null,I('Sets effects like Rainbow or Skew and flips text along its path.')]]],['Threaded Text',null,I('Links text boxes so overflow text continues from one to the next.')],'-',['Find Font…',null,I('Lists and replaces every font used in the document.')],
+  ['Change Case',null,null,[['UPPERCASE',null,'upper'],['lowercase',null,'lower'],['Title Case',null,'title']]],['Show Hidden Characters','Alt+Ctrl+I',I('Shows spaces, returns, and tabs as symbols.')]]],
+['Select',[['All','Ctrl+A','selall'],['All on Active Artboard','Alt+Ctrl+A','selall'],['Deselect','Shift+Ctrl+A','desel'],['Reselect','Ctrl+6',I('Repeats your last selection method.')],['Inverse',null,'inverse'],'-',
+  ['Same',null,null,[['Fill Color',null,'samefill'],['Stroke Color',null,'samestroke']]],['Save Selection…',null,I('Saves the current selection with a name so you can reselect it later.')]]],
+['Effect',[['Apply Last Effect','Shift+Ctrl+E',I('Applies your most recent effect again.')],'-',['3D and Materials',null,I('Adds 3D depth, lighting, and materials to flat artwork.')],
+  ['Distort & Transform',null,null,[['Transform…',null,I('Adds a transform as an editable effect.')],['Zig Zag…',null,I('Adds zig-zag or wavy ridges to a path.')]]],
+  ['Stylize',null,null,[['Drop Shadow…',null,'shadow'],['Feather…',null,I('Softens edges.')],['Inner Glow…',null,I('Adds a glow inside the edges.')],['Outer Glow…',null,I('Adds a glow outside the edges.')],['Round Corners…',null,I('Rounds every corner.')]]],
+  ['Warp',null,null,[['Arc…',null,I('Bends artwork into an arc — popular for text.')],['Flag…',null,I('Waves artwork like a flag.')]]],'-',
+  ['Photoshop Effects',null,null,[['Gaussian Blur…',null,'blur'],['Texture…',null,I('Adds a raster texture.')]]]]],
+['View',[['Outline / Preview','Ctrl+Y','outline'],'-',['Zoom In','Ctrl++','zin'],['Zoom Out','Ctrl+-','zout'],['Fit Artboard in Window','Ctrl+0','fit'],['Actual Size','Ctrl+1','actual'],'-',
+  ['Rulers',null,null,[['Show Rulers','Ctrl+R',I('Shows rulers along the top and left edges. Drag from a ruler to create a guide.')]]],['Hide Bounding Box','Shift+Ctrl+B','bbox'],['Smart Guides','Ctrl+U',I('Shows pop-up alignment and spacing guides while you draw and move.')],
+  ['Show Grid',"Ctrl+'",'grid'],['Snap to Grid',"Shift+Ctrl+'",I('Makes objects snap to grid lines.')],['Guides',null,null,[['Hide Guides','Ctrl+;',I('Hides or shows your guides.')],['Make Guides','Ctrl+5',I('Turns a selected path into a guide.')]]]]],
+['Window',[['Workspace',null,null,[['Essentials','resetws','resetws'],['Reset Essentials',null,'resetws'],['Typography',null,I('A workspace with Character, Paragraph, and Glyphs panels open.')],['Painting',null,I('A workspace with color and brush panels open.')]]],'-',
+  ['Align','Shift+F7',I('Lines up and evenly spaces objects.')],['Appearance','Shift+F6',I('Shows every fill, stroke, and effect on the selection.')],['Artboards',null,'artboardopts'],['Brushes','F5',I('Holds calligraphic, art, pattern, and bristle brushes.')],
+  ['Color','F6',I('Mixes colors with sliders (RGB, CMYK, HSB).')],['Gradient','Ctrl+F9',I('Sets gradient type, angle, and color stops.')],['Layers','F7','tab-layers'],['Pathfinder','Shift+Ctrl+F9',I('Combines shapes: Unite, Minus Front, Intersect, Exclude, Divide.')],
+  ['Properties',null,'tab-props'],['Stroke','Ctrl+F10',I('Sets weight, caps, corners, dashes, and arrowheads.')],['Swatches',null,'tab-swatches'],['Symbols','Shift+Ctrl+F11',I('Stores reusable artwork.')],['Transform','Shift+F8',I('Shows exact X, Y, W, H, and angle.')],['Transparency','Shift+Ctrl+F10',I('Sets opacity and blending modes.')],
+  ['Type',null,null,[['Character','Ctrl+T',I('Font, size, leading, kerning, and tracking.')],['Paragraph','Alt+Ctrl+T',I('Alignment, indents, and spacing between paragraphs.')],['Glyphs',null,I('Every character in a font, including special symbols.')]]]]],
+['Help',[['Illustrator Help…',null,I('Opens Adobe\'s online help.')],'-',['Welcome & how to use this trainer',null,'welcome'],['Keyboard shortcut reference',null,'shortcutref']]]
+];
+const mb=$('#menubar');let openMenu=-1,ACTS=[];
+MENUS.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m[0];b.dataset.m=i;mb.appendChild(b);});
+function itemsHTML(items){return items.map(it=>{if(it==='-')return '<div class="msep"></div>';const [l,sc,act,sub]=it;
+  if(sub)return `<div class="mi has-sub"><span>${esc(l)}</span><span class="arr">›</span><div class="sub">${itemsHTML(sub)}</div></div>`;
+  ACTS.push({l,act});return `<div class="mi" data-a="${ACTS.length-1}"><span>${esc(l)}</span><kbd>${esc(sc&&sc!=='resetws'?fmt(sc):'')}</kbd></div>`;}).join('');}
+function showMenu(i){fly.hidden=true;openMenu=i;const btn=mb.children[i];[...mb.children].forEach(b=>b.classList.toggle('open',b===btn));ACTS=[];dd.innerHTML=itemsHTML(MENUS[i][1]);dd.hidden=false;
+  const r=btn.getBoundingClientRect();dd.style.left=Math.max(4,Math.min(r.left,innerWidth-dd.offsetWidth-4))+'px';dd.style.top=r.bottom+'px';dd.classList.toggle('flip',r.left+dd.offsetWidth+260>innerWidth);}
+function closeMenus(){dd.hidden=true;openMenu=-1;[...mb.children].forEach(b=>b.classList.remove('open'));}
+mb.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;const i=+b.dataset.m;openMenu===i?closeMenus():showMenu(i);});
+mb.addEventListener('mouseover',e=>{const b=e.target.closest('button');if(b&&openMenu>=0&&+b.dataset.m!==openMenu)showMenu(+b.dataset.m);});
+dd.addEventListener('click',e=>{const hs=e.target.closest('.has-sub');const mi=e.target.closest('.mi[data-a]');
+  if(!mi&&hs){hs.classList.toggle('open');return;}if(!mi)return;const a=ACTS[+mi.dataset.a];closeMenus();runAct(a.l,a.act);});
+function runAct(l,act){if(act.startsWith('i:'))toast(`<b>${esc(l)}</b> — ${esc(act.slice(2))}`,6000);else doAct(act);}
+document.addEventListener('pointerdown',e=>{if(!dd.hidden&&!dd.contains(e.target)&&!mb.contains(e.target))closeMenus();if(!fly.hidden&&!fly.contains(e.target)&&!e.target.closest('.tool'))fly.hidden=true;},true);
+
+/* keyboard map from menus */
+const KB={};const CODE={']':'BracketRight','[':'BracketLeft','+':'Equal','-':'Minus',"'":'Quote',';':'Semicolon','\\':'Backslash'};
+function keyCode(k){if(/^[A-Z]$/.test(k))return 'Key'+k;if(/^\d$/.test(k))return 'Digit'+k;if(/^F\d+$/.test(k))return k;return CODE[k]||null;}
+function parseSC(sc){let key,rest;if(sc.endsWith('++')){key='+';rest=sc.slice(0,-2);}else{const i=sc.lastIndexOf('+');key=i<0?sc:sc.slice(i+1);rest=i<0?'':sc.slice(0,i);}const m=rest?rest.split('+'):[];return {c:m.includes('Ctrl'),a:m.includes('Alt'),s:m.includes('Shift'),key};}
+(function walk(items){items.forEach(it=>{if(it==='-')return;const [l,sc,act,sub]=it;if(sub)return walk(sub);if(!sc||!act||sc==='resetws')return;
+  if(['F1','F5','F6','F11','F12'].includes(sc))return;const p=parseSC(sc),code=keyCode(p.key);if(!code)return;KB[`${p.c?'C':''}${p.a?'A':''}${p.s?'S':''}-${code}`]={l,act};});})(MENUS.flatMap(m=>m[1]));
+KB['CS-Equal']=KB['C-Equal'];KB['C-NumpadAdd']=KB['C-Equal'];KB['C-NumpadSubtract']=KB['C-Minus'];
+
+/* ---------- Actions ---------- */
+function need(){if(!S.sel.length){toast('Select an object first — press <kbd>V</kbd> and click a shape.');return false;}return true;}
+function dupEl(el){const c=el.cloneNode(true);c.id='o'+(++uid);el.after(c);return c;}
+function paste(mode){if(!S.clip.length)return toast('The clipboard is empty. Copy something first (Ctrl/Cmd+C).');pushUndo();
+  const out=S.clip.map(c=>{const n=c.cloneNode(true);n.id='o'+(++uid);if(mode==='back')art.insertBefore(n,art.firstChild);else art.appendChild(n);
+    if(mode==='center'){n.dataset.tx=+n.dataset.tx+20;n.dataset.ty=+n.dataset.ty+20;applyT(n);}return n;});setSel(out);
+  toast(mode==='front'?'Paste in Front: pasted in the same spot, on top.':mode==='back'?'Paste in Back: pasted in the same spot, behind everything.':'Pasted.');}
+function caseText(fnc){const t=S.sel.filter(el=>el.tagName==='text');if(!t.length)return toast('Select some text first (Type or Selection Tool).');pushUndo();
+  t.forEach(el=>{const n=el.querySelector('textPath')||el;n.textContent=fnc(n.textContent);applyT(el);});refresh();}
+function toggleFilter(f,name){if(!need())return;pushUndo();const on=S.sel[0].getAttribute('filter')===`url(#${f})`;S.sel.forEach(el=>on?el.removeAttribute('filter'):el.setAttribute('filter',`url(#${f})`));refresh();toast(on?`${name} removed.`:`${name} applied. In Illustrator you'd set its options in a dialog first.`);}
+function doAct(a){
+  if(a.startsWith('mode-'))return setMode(a.slice(5));
+  if(a.startsWith('tab-'))return showTab(a.slice(4));
+  switch(a){
+  case 'undo':return undo();case 'redo':return redo();
+  case 'copy':if(!need())return;S.clip=S.sel.map(el=>el.cloneNode(true));return toast(`Copied ${S.clip.length} object${S.clip.length>1?'s':''}.`);
+  case 'cut':if(!need())return;S.clip=S.sel.map(el=>el.cloneNode(true));pushUndo();S.sel.forEach(el=>el.remove());setSel([]);return toast('Cut to the clipboard.');
+  case 'paste':return paste('center');case 'pastefront':return paste('front');case 'pasteback':return paste('back');
+  case 'dup':if(!need())return;pushUndo();{const c=S.sel.map(el=>{const n=dupEl(el);n.dataset.tx=+n.dataset.tx+20;n.dataset.ty=+n.dataset.ty+20;applyT(n);return n;});setSel(c);}return;
+  case 'del':if(!need())return;pushUndo();S.sel.forEach(el=>el.remove());return setSel([]);
+  case 'front':if(!need())return;pushUndo();S.sel.forEach(el=>art.appendChild(el));return refresh();
+  case 'back':if(!need())return;pushUndo();[...S.sel].reverse().forEach(el=>art.insertBefore(el,art.firstChild));return refresh();
+  case 'fwd':if(!need())return;pushUndo();[...S.sel].sort((x,y)=>objs().indexOf(y)-objs().indexOf(x)).forEach(el=>{const n=el.nextElementSibling;if(n)n.after(el);});return refresh();
+  case 'bwd':if(!need())return;pushUndo();[...S.sel].sort((x,y)=>objs().indexOf(x)-objs().indexOf(y)).forEach(el=>{const p=el.previousElementSibling;if(p)p.before(el);});return refresh();
+  case 'lock':if(!need())return;pushUndo();S.sel.forEach(el=>el.dataset.locked='1');setSel([]);return toast('Locked. Use Object › Unlock All to unlock.');
+  case 'unlock':pushUndo();objs().forEach(el=>delete el.dataset.locked);return refresh();
+  case 'hide':if(!need())return;pushUndo();S.sel.forEach(el=>{el.dataset.hidden='1';el.style.display='none';});setSel([]);return toast('Hidden. Use Object › Show All to bring it back.');
+  case 'show':pushUndo();objs().forEach(el=>{delete el.dataset.hidden;el.style.display='';});return refresh();
+  case 'selall':return setSel(objs().filter(selectable));
+  case 'desel':return setSel([]);
+  case 'inverse':return setSel(objs().filter(o=>selectable(o)&&!S.sel.includes(o)));
+  case 'samefill':case 'samestroke':{if(!need())return;const at=a==='samefill'?'fill':'stroke',v=S.sel[0].getAttribute(at);return setSel(objs().filter(o=>selectable(o)&&o.getAttribute(at)===v));}
+  case 'upper':return caseText(s=>s.toUpperCase());case 'lower':return caseText(s=>s.toLowerCase());
+  case 'title':return caseText(s=>s.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase()));
+  case 'shadow':return toggleFilter('ds','Drop Shadow');case 'blur':return toggleFilter('blur','Gaussian Blur');
+  case 'outline':S.outline=!S.outline;svg.classList.toggle('outline',S.outline);renderProps();return toast(S.outline?'Outline Mode: you see only the paths. Press Ctrl/Cmd+Y again for Preview.':'Preview Mode');
+  case 'grid':S.grid=!S.grid;$('#gridR').style.display=S.grid?'':'none';return renderProps();
+  case 'bbox':S.hideBBox=!S.hideBBox;drawOverlay();return toast(S.hideBBox?'Bounding box hidden. Shift+Ctrl/Cmd+B shows it again.':'Bounding box shown.');
+  case 'zin':return zoomAt(zoom*1.25,vcenter());case 'zout':return zoomAt(zoom/1.25,vcenter());case 'fit':return fit();case 'actual':return zoomAt(1,vcenter());
+  case 'new':finishPen(false);commitText();return newDocDialog();
+  case 'clear':pushUndo();art.innerHTML='';defs.innerHTML='';setSel([]);return toast('Artboard cleared. Ctrl/Cmd+Z brings the artwork back.');
+  case 'artboardopts':finishPen(false);commitText();return artboardDialog('Artboard Options');
+  case 'donew':return doNewDoc();case 'doab':return doArtboard();
+  case 'save':return S.docName?saveSVG(S.docName):saveAsDialog();
+  case 'saveas':return saveAsDialog();
+  case 'dosave':{const n=cleanName($('#fName').value);closeModal();return saveSVG(n);}
+  case 'open':finishPen(false);commitText();return $('#fileIn').click();
+  case 'exportpng':return exportDialog();
+  case 'doexport':{const n=cleanName($('#eName').value),sc=+(document.querySelector('input[name=eScale]:checked')||{value:1}).value,tr=$('#eTrans').checked;closeModal();return exportPNG(n,sc,tr);}
+  case 'docsetup':finishPen(false);commitText();return artboardDialog('Document Setup');
+  case 'prefs':return toast('<b>Preferences</b> (Ctrl/Cmd+K) — set units, keyboard increment, guides and grid, and more.',5000);
+  case 'resetws':document.body.classList.remove('nopanels');tb.classList.remove('single');renderToolbar();showTab('props');fit();return toast('Essentials workspace reset.');
+  case 'tbtoggle':tb.classList.toggle('single');return renderToolbar();
+  case 'edittb':return toast('<b>Edit Toolbar</b> — in Illustrator this lists every tool so you can drag favorites onto the toolbar. Window › Toolbars › Advanced shows them all.',5000);
+  case 'actfill':return setActive('fill');case 'actstroke':return setActive('stroke');
+  case 'pick-fill':setActive('fill');return showTab('swatches');case 'pick-stroke':setActive('stroke');return showTab('swatches');
+  case 'swap':{const f=S.fill;S.fill=S.stroke;S.stroke=f;if(S.sel.length){pushUndo();S.sel.forEach(el=>{el.setAttribute('fill',S.fill);el.setAttribute('stroke',S.stroke);});}return refresh();}
+  case 'defaults':S.fill='#FFFFFF';S.stroke='#000000';S.sw=1;if(S.sel.length){pushUndo();S.sel.forEach(el=>{el.setAttribute('fill','#FFFFFF');el.setAttribute('stroke','#000000');el.setAttribute('stroke-width',1);});}refresh();return toast('Default Fill (white) and Stroke (black, 1 pt).');
+  case 'modecolor':if(isNone(S[S.active])||S[S.active].startsWith('url('))setColor(S.active,'#000000');return;
+  case 'modenone':return setColor(S.active,'none');
+  case 'applygrad':if(!need())return;pushUndo();S.sel.forEach(gradFill);return setSel([...S.sel]);
+  case 'custom':return openPicker(S.active);
+  case 'labels':document.body.classList.toggle('labels');return $('#bLabels').classList.toggle('on',document.body.classList.contains('labels'));
+  case 'mac':S.mac=!S.mac;$('#bMac').textContent=S.mac?'Mac shortcuts':'Win shortcuts';renderProps();return toast(S.mac?'Menus now show Mac shortcuts (⌘ Cmd, ⌥ Option, ⇧ Shift).':'Menus now show Windows shortcuts (Ctrl, Alt, Shift).');
+  case 'theme':{const r=document.documentElement,dark=r.dataset.theme?r.dataset.theme==='dark':matchMedia('(prefers-color-scheme: dark)').matches;r.dataset.theme=dark?'light':'dark';return;}
+  case 'proj':document.documentElement.classList.toggle('proj');$('#bProj').classList.toggle('on',document.documentElement.classList.contains('proj'));renderToolbar();return;
+  case 'welcome':return welcome();case 'shortcutref':return shortcutRef();case 'closemodal':return closeModal();
+  case 'qskip':if(Q.on&&!Q.locked){Q.missed.push(Q.list[Q.i]);Q.locked=true;fb(`Skipped — it was the <b>${esc(Q.list[Q.i].name)}</b>${Q.list[Q.i].key?' ('+esc(Q.list[Q.i].key)+')':''}.`,'bad');hintSlot(Q.list[Q.i]);setTimeout(nextQ,2200);}return;
+  case 'qend':return endQuiz();case 'qagain':closeModal();return startQuiz(Q.type);
+  }}
+
+/* ---------- Canvas interaction ---------- */
+function penPaint(){const a={...paint(),fill:'none'};if(isNone(S.stroke)||S.stroke.startsWith('url(')){a.stroke='#000000';if(!S.warnedStroke){S.warnedStroke=1;toast('Your stroke was set to None, so this path is drawn with a black stroke to keep it visible.');}}if(!(+a['stroke-width']>0))a['stroke-width']=1;return a;}
+function penClick(p,curve){
+  if(curve){const pts=S.pen?S.pen.pts:null;
+    if(!S.pen){pushUndo();const el=newObj('path',penPaint(),'Path');S.pen={el,pts:[p],curve:true};}
+    else{const f=pts[0],l=pts[pts.length-1];if(pts.length>=2&&Math.hypot(p.x-f.x,p.y-f.y)<9/zoom)return finishPen(true);
+      if(Math.hypot(p.x-l.x,p.y-l.y)<3/zoom)return finishPen(false);pts.push(p);}
+    S.pen.el.setAttribute('d',smoothD(S.pen.pts,false));return penPreview(p);}
+  const node=(x,y)=>({x:f1(x),y:f1(y),i:null,o:null,s:false});
+  if(!S.pen){pushUndo();const el=newObj('path',penPaint(),'Path');const n=node(p.x,p.y);S.pen={el,N:[n],curve:false};D={type:'penDrag',node:n};}
+  else{const N=S.pen.N,f=N[0],l=N[N.length-1];
+    if(N.length>=2&&Math.hypot(p.x-f.x,p.y-f.y)<9/zoom){D={type:'penClose',moved:false};return;}
+    if(Math.hypot(p.x-l.x,p.y-l.y)<5/zoom){if(l.o){l.o=null;l.s=false;S.pen.el.setAttribute('d',nodesD(N,false));penPreview(p);return toast('Removed the forward handle — the next segment starts from a corner.');}return finishPen(false);}
+    const n=node(p.x,p.y);N.push(n);D={type:'penDrag',node:n};}
+  S.pen.el.setAttribute('d',nodesD(S.pen.N,false));penPreview(p,true);}
+function penPreview(p,dragging){if(!S.pen)return;temp.innerHTML='';const a=4/zoom;
+  if(S.pen.curve){const pts=S.pen.pts;mk('path',{d:smoothD([...pts,p],false),fill:'none',class:'rubber'},temp);
+    pts.forEach((q,i)=>mk('rect',{x:q.x-a,y:q.y-a,width:2*a,height:2*a,class:'anc'+(i===0&&pts.length>1&&Math.hypot(p.x-q.x,p.y-q.y)<9/zoom?' first':'')},temp));return;}
+  const N=S.pen.N,l=N[N.length-1],f=N[0];
+  if(!dragging){const o=l.o||[l.x,l.y];mk('path',{d:`M${l.x} ${l.y} C${o[0]} ${o[1]} ${p.x} ${p.y} ${p.x} ${p.y}`,fill:'none',class:'rubber'},temp);}
+  const H=nd=>['i','o'].forEach(w=>{if(!nd[w])return;mk('line',{x1:nd.x,y1:nd.y,x2:nd[w][0],y2:nd[w][1],class:'hline'},temp);mk('circle',{cx:nd[w][0],cy:nd[w][1],r:4.5/zoom,class:'hnd ghost'},temp);});
+  H(l);if(N.length>1&&D&&D.type==='penClose')H(f);
+  N.forEach((q,i)=>mk('rect',{x:q.x-a,y:q.y-a,width:2*a,height:2*a,class:'anc'+(i===N.length-1?' on':'')+(i===0&&N.length>1&&Math.hypot(p.x-q.x,p.y-q.y)<9/zoom?' first':'')},temp));}
+function finishPen(close){if(!S.pen)return;const P=S.pen;S.pen=null;temp.innerHTML='';if(D&&(D.type==='penDrag'||D.type==='penClose'))D=null;
+  if((P.curve?P.pts.length:P.N.length)<2){P.el.remove();S.undo.pop();refresh();return;}
+  if(P.curve){P.el.setAttribute('d',smoothD(P.pts,close));P.el.dataset.pts=JSON.stringify(P.pts.map(q=>[f1(q.x),f1(q.y)]));P.el.dataset.smooth=1;}
+  else saveNodes(P.el,P.N,close);
+  if(close)P.el.setAttribute('fill',S.fill);setSel([P.el]);
+  toast(close?'Path closed — a closed path gets the Fill color. Press A and click an anchor to adjust its handles.':'Open path finished. Press A (Direct Selection) and click an anchor to adjust its handles.',4500);}
+
+/* Direct Selection / anchor tools */
+function editDown(e,p,fn){const ah=e.target.closest&&e.target.closest('[data-anc]'),hh=e.target.closest&&e.target.closest('[data-hnd]');
+  if(hh){const el=document.getElementById(hh.dataset.el);if(!el)return false;const i=+hh.dataset.i;S.anc={el,i};
+    D={type:'handle',el,i,w:hh.dataset.hnd,snap:snap(),moved:false,brk:e.altKey||fn==='convert',p0:p};return true;}
+  if(ah){const el=document.getElementById(ah.dataset.el),i=+ah.dataset.anc;if(!el)return false;
+    if(fn==='delpt'){deleteNode(el,i);return true;}
+    if(fn==='addpt'){addNodeAt(p);return true;}
+    S.anc={el,i};
+    if(fn==='convert'){const nd=nodesOf(el).n[i];
+      if(nd.i||nd.o){pushUndo();const ed=toEditable(el),r=nodesOf(ed);r.n[i].i=r.n[i].o=null;r.n[i].s=false;reT(ed,()=>saveNodes(ed,r.n,r.c));refresh();
+        toast('Converted to a corner point. Drag from it to pull out smooth handles again.');return true;}
+      D={type:'pull',el,i,snap:snap(),moved:false,p0:p};drawOverlay();return true;}
+    D={type:'anchor',el,i,snap:snap(),moved:false,p0:p};drawOverlay();return true;}
+  if(fn==='addpt'&&S.sel.length&&addNodeAt(p))return true;
+  return false;}
+function editStart(){if(D.moved)return;D.moved=true;S.undo.push(D.snap);S.redo=[];markDirty();const old=D.el,el=toEditable(old);if(S.anc&&S.anc.el===old)S.anc.el=el;D.el=el;
+  const r=nodesOf(el);D.N=r.n;D.c=r.c;D.l0=toLocal(el,D.p0);const nd=D.N[D.i];D.orig={x:nd.x,y:nd.y,i:nd.i&&[...nd.i],o:nd.o&&[...nd.o]};}
+function editMove(p,e){if(!D.moved){if(Math.hypot(p.x-D.p0.x,p.y-D.p0.y)*zoom<2)return;editStart();}
+  const l=toLocal(D.el,p),nd=D.N[D.i];
+  if(D.type==='anchor'){let dx=l.x-D.l0.x,dy=l.y-D.l0.y;if(e.shiftKey){if(Math.abs(dx)>Math.abs(dy))dy=0;else dx=0;}const o=D.orig;
+    nd.x=o.x+dx;nd.y=o.y+dy;nd.i=o.i&&[o.i[0]+dx,o.i[1]+dy];nd.o=o.o&&[o.o[0]+dx,o.o[1]+dy];}
+  else if(D.type==='handle'){let [hx,hy]=e.shiftKey?snap45(nd.x,nd.y,l.x,l.y):[l.x,l.y];nd[D.w]=[hx,hy];const other=D.w==='i'?'o':'i';
+    if(D.brk||e.altKey)nd.s=false;
+    else if(nd.s){const vx=nd.x-hx,vy=nd.y-hy,len=Math.hypot(vx,vy)||1,ol=nd[other]?Math.hypot(nd[other][0]-nd.x,nd[other][1]-nd.y):len;nd[other]=[nd.x+vx/len*ol,nd.y+vy/len*ol];}}
+  else if(D.type==='pull'){let [hx,hy]=e.shiftKey?snap45(nd.x,nd.y,l.x,l.y):[l.x,l.y];nd.o=[hx,hy];nd.i=[2*nd.x-hx,2*nd.y-hy];nd.s=true;}
+  reT(D.el,()=>saveNodes(D.el,D.N,D.c));drawOverlay();}
+function deleteNode(el,i){const r=nodesOf(el),min=r.c?3:2;
+  if(r.n.length<=min)return toast(`A ${r.c?'closed':'open'} path needs at least ${min} anchor points. To remove it, select it and press Delete.`);
+  pushUndo();const ed=toEditable(el),q=nodesOf(ed);q.n.splice(i,1);reT(ed,()=>saveNodes(ed,q.n,q.c));S.anc=null;refresh();toast('Anchor point deleted — the path stays connected.');}
+function addNodeAt(p){let best=null;
+  S.sel.forEach(el=>{const r=nodesOf(el);if(!r)return;const m=mat(el);if(!m)return;const N=r.n,L=N.length,segs=r.c?L:L-1;
+    for(let k=0;k<segs;k++){const a=N[k],b=N[(k+1)%L];for(let s=1;s<48;s++){const t=s/48,q=bez(a,b,t),A=tpt(q[0],q[1],m),d=Math.hypot(A.x-p.x,A.y-p.y);if(!best||d<best.d)best={d,el,k,t};}}});
+  if(!best||best.d*zoom>9)return false;pushUndo();const ed=toEditable(best.el),r=nodesOf(ed),L=r.n.length;
+  r.n.splice(best.k+1,0,splitSeg(r.n[best.k],r.n[(best.k+1)%L],best.t));reT(ed,()=>saveNodes(ed,r.n,r.c));S.anc={el:ed,i:best.k+1};refresh();toast('Anchor point added.');return true;}
+
+function openText(p,e,pathEl,editEl){commitText();const wrap=$('#canvasWrap'),r=wrap.getBoundingClientRect();const inp=document.createElement('input');inp.className='txtin';
+  const fs=Math.max(12,Math.min(80,S.fsize*zoom));let left=e.clientX-r.left,top=e.clientY-r.top-fs;
+  if(editEl){const br=editEl.getBoundingClientRect();left=br.left-r.left;top=br.top-r.top;inp.value=editEl.textContent;}
+  inp.placeholder=pathEl?'Type text for the path, then Enter':'Type, then press Enter';
+  inp.style.cssText=`left:${left}px;top:${top}px;font-family:${S.font},sans-serif;font-size:${fs}px`;wrap.appendChild(inp);txt={inp,p,pathEl,editEl};
+  setTimeout(()=>{inp.focus();if(editEl)inp.select();},0);
+  inp.addEventListener('keydown',ev=>{ev.stopPropagation();if(ev.key==='Enter')commitText();else if(ev.key==='Escape'){inp.remove();txt=null;}});
+  inp.addEventListener('blur',()=>setTimeout(commitText,0));}
+function commitText(){if(!txt)return;const {inp,p,pathEl,editEl}=txt;txt=null;const v=inp.value;inp.remove();if(!v.trim())return;pushUndo();
+  const fill=(isNone(S.fill)||S.fill.toUpperCase()==='#FFFFFF')?'#000000':S.fill;let el;
+  if(editEl&&editEl.isConnected){editEl.textContent=v;applyT(editEl);el=editEl;}
+  else if(pathEl&&pathEl.isConnected){const id='tp'+(++uid);mk('path',{id,d:toPathD(pathEl)},defs);
+    el=newObj('text',{'font-family':S.font,'font-size':S.fsize,fill,stroke:'none'},'Type');const tp=mk('textPath',{href:'#'+id},el);
+    tp.setAttributeNS('http://www.w3.org/1999/xlink','xlink:href','#'+id);tp.textContent=v;
+    ['tx','ty','rot','sx','sy'].forEach(k=>el.dataset[k]=pathEl.dataset[k]);art.insertBefore(el,pathEl);pathEl.remove();applyT(el);
+    toast('Type on a Path: the path becomes the baseline for the text (and loses its fill and stroke).');}
+  else{el=newObj('text',{x:f1(p.x),y:f1(p.y),'font-family':S.font,'font-size':S.fsize,fill,stroke:'none'},'Type');el.textContent=v;}
+  setSel([el]);}
+
+function updateShape(d,p,e){const x0=d.start.x,y0=d.start.y,el=d.el,k=d.k;
+  if(k==='rect'||k==='rrect'||k==='ellipse'){let w=p.x-x0,h=p.y-y0;if(e.shiftKey){const m=Math.max(Math.abs(w),Math.abs(h));w=Math.sign(w||1)*m;h=Math.sign(h||1)*m;}
+    let L,Tp,W,H;if(e.altKey){W=2*Math.abs(w);H=2*Math.abs(h);L=x0-W/2;Tp=y0-H/2;}else{L=Math.min(x0,x0+w);Tp=Math.min(y0,y0+h);W=Math.abs(w);H=Math.abs(h);}
+    if(k==='ellipse'){el.setAttribute('cx',f1(L+W/2));el.setAttribute('cy',f1(Tp+H/2));el.setAttribute('rx',f1(W/2));el.setAttribute('ry',f1(H/2));}
+    else{el.setAttribute('x',f1(L));el.setAttribute('y',f1(Tp));el.setAttribute('width',f1(W));el.setAttribute('height',f1(H));if(k==='rrect')el.setAttribute('rx',f1(Math.min(14,W/2,H/2)));}}
+  else if(k==='polygon'||k==='star'){const r=Math.hypot(p.x-x0,p.y-y0),a=e.shiftKey?-Math.PI/2:Math.atan2(p.y-y0,p.x-x0);el.setAttribute('points',polyPts(d.start,r,a,k));}
+  else if(k==='line'){let x1=p.x,y1=p.y;if(e.shiftKey){const ang=Math.round(Math.atan2(y1-y0,x1-x0)/(Math.PI/4))*(Math.PI/4),r=Math.hypot(x1-x0,y1-y0);x1=x0+r*Math.cos(ang);y1=y0+r*Math.sin(ang);}
+    Object.entries({x1:x0,y1:y0,x2:x1,y2:y1}).forEach(([a,v])=>el.setAttribute(a,f1(v)));}
+  else if(k==='arc'){el.dataset.arc=1;el.setAttribute('d',`M${f1(x0)} ${f1(y0)} C${f1(x0)} ${f1(y0+(p.y-y0)*.55)} ${f1(p.x-(p.x-x0)*.55)} ${f1(p.y)} ${f1(p.x)} ${f1(p.y)}`);el.dataset.pts=JSON.stringify([[f1(x0),f1(y0)],[f1(p.x),f1(p.y)]]);}}
+function finishShape(d){const b=union([d.el]);
+  if(b.w<2&&b.h<2){if(d.k==='line'||d.k==='arc'){d.el.remove();S.undo.pop();return refresh();}const q=d.start,el=d.el;
+    if(d.k==='ellipse'){el.setAttribute('cx',f1(q.x+50));el.setAttribute('cy',f1(q.y+50));el.setAttribute('rx',50);el.setAttribute('ry',50);}
+    else if(d.k==='polygon'||d.k==='star')el.setAttribute('points',polyPts(q,50,-Math.PI/2,d.k));
+    else{el.setAttribute('x',f1(q.x));el.setAttribute('y',f1(q.y));el.setAttribute('width',100);el.setAttribute('height',100);if(d.k==='rrect')el.setAttribute('rx',14);}
+    toast('Single click: Illustrator opens a dialog here so you can type an exact Width and Height. The trainer made a 100 × 100 px shape.',5000);}
+  setSel([d.el]);}
+
+svg.addEventListener('pointerdown',e=>{if(e.button===2)return;closeMenus();fly.hidden=true;if(txt)commitText();
+  const p=pt(e),tool=T[S.tool],fn=(S.spaceHand||e.button===1)?'hand':tool.fn,hEl=e.target.closest&&e.target.closest('[data-h]'),target=objFrom(e.target);
+  try{svg.setPointerCapture(e.pointerId);}catch(_){}
+  switch(fn){
+  case 'hand':D={type:'pan',cx:e.clientX,cy:e.clientY,vx:vb.x,vy:vb.y};svg.style.cursor='grabbing';break;
+  case 'zoom':zoomAt(zoom*(e.altKey?1/1.5:1.5),p);break;
+  case 'direct':case 'convert':case 'addpt':case 'delpt':
+    if(editDown(e,p,fn))break;
+    if(fn!=='direct'){if(target){setSel([target]);toast(fn==='addpt'?'Now click on the path between two anchor points.':'Now click one of its anchor points (the small squares).');}else setSel([]);break;}
+    if(target&&S.anc&&S.anc.el===target)S.anc=null;
+    // falls through to normal selection behaviour
+  case 'select':
+    if(hEl&&fn==='select'&&S.sel.length===1){D={type:'resize',h:+hEl.dataset.h,el:S.sel[0],box:union(S.sel),snap:snap(),moved:false};break;}
+    if(target){if(e.shiftKey)setSel(S.sel.includes(target)?S.sel.filter(x=>x!==target):[...S.sel,target]);else if(!S.sel.includes(target))setSel([target]);
+      D={type:'move',start:p,orig:S.sel.map(el=>[+el.dataset.tx,+el.dataset.ty]),snap:snap(),moved:false,alt:e.altKey};}
+    else{if(!e.shiftKey)setSel([]);D={type:'marquee',start:p,add:e.shiftKey};}break;
+  case 'lasso':if(!e.shiftKey)setSel([]);D={type:'marquee',start:p,add:e.shiftKey};break;
+  case 'magic':if(target){const f=target.getAttribute('fill');setSel(objs().filter(o=>selectable(o)&&o.getAttribute('fill')===f));toast(`Magic Wand selected ${S.sel.length} object${S.sel.length>1?'s':''} with the same fill color.`);}else setSel([]);break;
+  case 'shape':{pushUndo();const k=tool.shape,tag={rect:'rect',rrect:'rect',ellipse:'ellipse',polygon:'polygon',star:'polygon',line:'line',arc:'path'}[k],at=paint();
+    if(k==='line'||k==='arc'){at.fill='none';if(isNone(at.stroke))at.stroke='#000000';}
+    D={type:'shape',k,el:newObj(tag,at,KIND[k]),start:p};updateShape(D,p,e);break;}
+  case 'free':{pushUndo();const k=tool.free;let st=solid(S.stroke)||solid(S.fill)||'#000000';if(k==='blob')st=solid(S.stroke)||solid(S.fill)||'#000000';
+    const el=newObj('path',{fill:'none',stroke:st,'stroke-width':k==='blob'?Math.max(14,S.sw):k==='brush'?Math.max(3,S.sw):Math.max(1,S.sw),'stroke-linecap':'round','stroke-linejoin':'round',d:`M${f1(p.x)} ${f1(p.y)}`},'Path');
+    D={type:'free',el,pts:[p]};break;}
+  case 'pen':penClick(p,false);break;case 'curve':penClick(p,true);break;
+  case 'type':if(target&&target.tagName==='text'&&!target.querySelector('textPath'))openText(p,e,null,target);else openText(p,e,null,null);break;
+  case 'typePath':if(target&&target.tagName!=='text')openText(p,e,target,null);else toast('Type on a Path: click right on the edge of a shape or path — try the circle or a pencil line.');break;
+  case 'rotate':case 'scale':{if(!need())break;const b=union(S.sel),c={x:b.x+b.w/2,y:b.y+b.h/2};
+    D={type:fn,c,start:p,a0:Math.atan2(p.y-c.y,p.x-c.x),d0:Math.max(Math.hypot(p.x-c.x,p.y-c.y),1),orig:S.sel.map(el=>({rot:+el.dataset.rot,sx:+el.dataset.sx,sy:+el.dataset.sy})),snap:snap(),moved:false};break;}
+  case 'reflect':if(!need())break;pushUndo();S.sel.forEach(el=>{if(e.altKey)el.dataset.sy=-el.dataset.sy;else el.dataset.sx=-el.dataset.sx;applyT(el);});refresh();
+    toast(e.altKey?'Reflected top-to-bottom (horizontal axis).':'Reflected left-to-right (vertical axis) — a mirror image.');break;
+  case 'bucket':if(target){pushUndo();target.setAttribute('fill',S.fill);refresh();}else toast('Click a shape to fill it with the current Fill color.');break;
+  case 'gradient':if(target){pushUndo();gradFill(target);setSel([target]);}else toast('Click a shape to apply a gradient.');break;
+  case 'eyedrop':if(target){const fa=target.getAttribute('fill')||'none',st=target.getAttribute('stroke')||'none',sw=target.getAttribute('stroke-width');
+    if(S.sel.length&&!S.sel.includes(target)){pushUndo();S.sel.forEach(el=>{el.setAttribute('fill',fa);if(el.tagName!=='text'){el.setAttribute('stroke',st);if(sw)el.setAttribute('stroke-width',sw);}});toast('Eyedropper copied that appearance onto your selection.');}
+    else toast('Colors picked up. Select an object first to copy the look onto it.');S.fill=fa;S.stroke=st;renderControl();updateFS();renderSwatches();renderProps();}break;
+  default:toast(`<b>${esc(tool.name)}</b> is demo only in this trainer. ${esc(tool.d)}`,5000);}});
+svg.addEventListener('pointermove',e=>{const p=pt(e);$('#stXY').textContent=`X ${toU(p.x)}   Y ${toU(p.y)} ${UNITS[S.units].a}`;if(S.pen&&!D)penPreview(p);if(!D)return;
+  const first=()=>{if(!D.moved){D.moved=true;S.undo.push(D.snap);S.redo=[];markDirty();return true;}return false;};
+  switch(D.type){
+  case 'anchor':case 'handle':case 'pull':editMove(p,e);break;
+  case 'penDrag':{const nd=D.node;if(!nd.o&&Math.hypot(p.x-nd.x,p.y-nd.y)*zoom<3)return;let [hx,hy]=e.shiftKey?snap45(nd.x,nd.y,p.x,p.y):[p.x,p.y];
+    nd.o=[hx,hy];if(e.altKey)nd.s=false;else{nd.i=[2*nd.x-hx,2*nd.y-hy];nd.s=true;}S.pen.el.setAttribute('d',nodesD(S.pen.N,false));penPreview(p,true);break;}
+  case 'penClose':{const nd=S.pen.N[0];if(!D.moved&&Math.hypot(p.x-nd.x,p.y-nd.y)*zoom<3)return;D.moved=true;let [hx,hy]=e.shiftKey?snap45(nd.x,nd.y,p.x,p.y):[p.x,p.y];
+    nd.o=[hx,hy];nd.i=[2*nd.x-hx,2*nd.y-hy];nd.s=true;S.pen.el.setAttribute('d',nodesD(S.pen.N,true));penPreview(p,true);break;}
+  case 'pan':vb.x=D.vx-(e.clientX-D.cx)/zoom;vb.y=D.vy-(e.clientY-D.cy)/zoom;setVB();break;
+  case 'move':{let dx=p.x-D.start.x,dy=p.y-D.start.y;if(!D.moved){if(Math.hypot(dx,dy)*zoom<2)return;first();if(D.alt){setSel(S.sel.map(dupEl));}}
+    if(e.shiftKey){if(Math.abs(dx)>Math.abs(dy))dy=0;else dx=0;}S.sel.forEach((el,i)=>{el.dataset.tx=D.orig[i][0]+dx;el.dataset.ty=D.orig[i][1]+dy;applyT(el);});drawOverlay();break;}
+  case 'resize':{first();const o=D.box,h=D.h;let L=o.x,Tp=o.y,R=o.x+o.w,B=o.y+o.h;
+    if([0,6,7].includes(h))L=Math.min(p.x,R-1);if([2,3,4].includes(h))R=Math.max(p.x,L+1);if([0,1,2].includes(h))Tp=Math.min(p.y,B-1);if([4,5,6].includes(h))B=Math.max(p.y,Tp+1);
+    if(e.shiftKey&&[0,2,4,6].includes(h)&&o.w&&o.h){const r=Math.max((R-L)/o.w,(B-Tp)/o.h),nw=o.w*r,nh=o.h*r;if(h===0||h===6)L=R-nw;else R=L+nw;if(h===0||h===2)Tp=B-nh;else B=Tp+nh;}
+    setBox(D.el,L,Tp,R-L,B-Tp);drawOverlay();break;}
+  case 'rotate':{first();let ang=(Math.atan2(p.y-D.c.y,p.x-D.c.x)-D.a0)*180/Math.PI;if(e.shiftKey)ang=Math.round(ang/45)*45;S.sel.forEach((el,i)=>{el.dataset.rot=f1(D.orig[i].rot+ang);applyT(el);});drawOverlay();$('#stHint').textContent=`Angle: ${Math.round(ang)}°`;break;}
+  case 'scale':{first();const f=Math.max(.02,Math.hypot(p.x-D.c.x,p.y-D.c.y)/D.d0);S.sel.forEach((el,i)=>{el.dataset.sx=D.orig[i].sx*f;el.dataset.sy=D.orig[i].sy*f;applyT(el);});drawOverlay();$('#stHint').textContent=`Scale: ${Math.round(f*100)}%`;break;}
+  case 'marquee':{temp.innerHTML='';mk('rect',{x:Math.min(D.start.x,p.x),y:Math.min(D.start.y,p.y),width:Math.abs(p.x-D.start.x),height:Math.abs(p.y-D.start.y),class:'marq'},temp);break;}
+  case 'shape':updateShape(D,p,e);break;
+  case 'free':{const l=D.pts[D.pts.length-1];if(Math.hypot(p.x-l.x,p.y-l.y)>2/zoom){D.pts.push(p);D.el.setAttribute('d',linD(D.pts,false));}break;}}});
+function endDrag(e){if(!D)return;const d=D;D=null;const p=pt(e);
+  switch(d.type){
+  case 'pan':setCursor();break;
+  case 'penDrag':penPreview(p);break;
+  case 'penClose':D=d;finishPen(true);break;
+  case 'marquee':{temp.innerHTML='';const r={x:Math.min(d.start.x,p.x),y:Math.min(d.start.y,p.y),w:Math.abs(p.x-d.start.x),h:Math.abs(p.y-d.start.y)};
+    if(r.w*zoom>3||r.h*zoom>3){const hit=objs().filter(o=>{if(!selectable(o))return false;const b=union([o]);return b.x<r.x+r.w&&b.x+b.w>r.x&&b.y<r.y+r.h&&b.y+b.h>r.y;});setSel(d.add?[...new Set([...S.sel,...hit])]:hit);}break;}
+  case 'shape':finishShape(d);break;
+  case 'free':{if(d.pts.length<2){d.el.remove();S.undo.pop();refresh();break;}const out=[d.pts[0]];d.pts.forEach(q=>{const l=out[out.length-1];if(Math.hypot(q.x-l.x,q.y-l.y)>5/zoom)out.push(q);});
+    const end=d.pts[d.pts.length-1];if(out[out.length-1]!==end)out.push(end);d.el.dataset.smooth=1;d.el.setAttribute('d',smoothD(out,false));d.el.dataset.pts=JSON.stringify(out.map(q=>[f1(q.x),f1(q.y)]));setSel([d.el]);break;}
+  default:refresh();if(T[S.tool].fn)$('#stHint').textContent=T[S.tool].h;}}
+svg.addEventListener('pointerup',endDrag);svg.addEventListener('pointercancel',endDrag);
+svg.addEventListener('wheel',e=>{e.preventDefault();if(e.ctrlKey||e.metaKey||e.altKey)zoomAt(zoom*(e.deltaY<0?1.1:1/1.1),pt(e));else{vb.x+=e.deltaX/zoom;vb.y+=e.deltaY/zoom;setVB();}},{passive:false});
+svg.addEventListener('contextmenu',e=>e.preventDefault());
+
+/* ---------- Keyboard ---------- */
+function toolCombo(e){if(e.ctrlKey||e.metaKey||e.altKey)return null;const c=e.code;
+  if(/^Key[A-Z]$/.test(c))return (e.shiftKey?'Shift+':'')+c.slice(3);
+  if(c==='Backquote')return e.shiftKey?'Shift+~':null;if(c==='Equal'||c==='NumpadAdd')return '+';if(c==='Minus'||c==='NumpadSubtract')return '-';if(c==='Backslash')return '\\';return null;}
+document.addEventListener('keydown',e=>{if(e.target.closest&&e.target.closest('input,select,textarea'))return;
+  const mod=e.ctrlKey||e.metaKey;
+  if(e.code==='Space'&&!mod){e.preventDefault();if(!S.spaceHand){S.spaceHand=true;setCursor();}return;}
+  const combo=`${mod?'C':''}${e.altKey?'A':''}${e.shiftKey?'S':''}-${e.code}`;
+  if(mod||/^F\d+$/.test(e.code)){const hit=KB[combo];if(hit){e.preventDefault();closeMenus();runAct(hit.l,hit.act);}return;}
+  if(e.key==='Escape'){if(!$('#modal').hidden)return closeModal();if(S.pen)return finishPen(false);if(!dd.hidden||!fly.hidden){closeMenus();fly.hidden=true;return;}return setSel([]);}
+  if(e.key==='Enter'){if(S.pen){e.preventDefault();finishPen(false);}return;}
+  if(!$('#modal').hidden)return;
+  if(e.key==='Delete'||e.key==='Backspace'){if(S.sel.length){e.preventDefault();doAct('del');}return;}
+  if(e.key==='Tab'){e.preventDefault();document.body.classList.toggle('nopanels');toast(document.body.classList.contains('nopanels')?'Panels hidden. Press Tab again to show them.':'Panels shown.');return;}
+  if(e.key.startsWith('Arrow')&&S.sel.length&&!e.altKey){e.preventDefault();const n=e.shiftKey?10:1,dx={ArrowLeft:-n,ArrowRight:n}[e.key]||0,dy={ArrowUp:-n,ArrowDown:n}[e.key]||0;
+    pushUndo();S.sel.forEach(el=>{el.dataset.tx=+el.dataset.tx+dx;el.dataset.ty=+el.dataset.ty+dy;applyT(el);});return refresh();}
+  const tc=toolCombo(e);
+  if(Q.on&&Q.type==='keys'&&tc){e.preventDefault();if(KEYMAP[tc])selectTool(KEYMAP[tc],'key');answerKey(tc);return;}
+  if(tc==='D')return doAct('defaults');if(tc==='X')return setActive(S.active==='fill'?'stroke':'fill');if(tc==='Shift+X')return doAct('swap');
+  if(e.code==='Slash'&&!e.shiftKey)return doAct('modenone');if(e.code==='Period')return doAct('applygrad');if(e.code==='Comma')return doAct('modecolor');
+  if(tc&&KEYMAP[tc]){e.preventDefault();selectTool(KEYMAP[tc],'key');}});
+document.addEventListener('keyup',e=>{if(e.code==='Space'&&S.spaceHand){S.spaceHand=false;setCursor();}});
+document.addEventListener('click',e=>{const a=e.target.closest('[data-act]');if(a&&!dd.contains(a))doAct(a.dataset.act);});
+
+/* ---------- Quiz ---------- */
+const Q={on:false,type:'find',list:[],i:0,score:0,locked:false,missed:[]};
+const shuffle=a=>{a=[...a];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function setMode(m){['explore','find','keys'].forEach(k=>$('#m'+k[0].toUpperCase()+k.slice(1)).classList.toggle('on',k===m));
+  if(m==='explore'){Q.on=false;$('#quizBar').hidden=true;closeModal();return;}startQuiz(m);}
+function startQuiz(type){closeModal();Q.type=type;Q.list=shuffle(TOOLS.filter(t=>type==='find'?t.q:t.key)).slice(0,10);Q.i=0;Q.score=0;Q.missed=[];Q.on=true;Q.locked=false;
+  ['explore','find','keys'].forEach(k=>$('#m'+k[0].toUpperCase()+k.slice(1)).classList.toggle('on',k===type));
+  if(type==='find')selectTool('selection');showQ();}
+function showQ(){const t=Q.list[Q.i],bar=$('#quizBar');bar.hidden=false;
+  bar.innerHTML=`<div class="qtop"><b>${Q.type==='find'?'Find the Tool':'Shortcut Challenge'}</b><span>Question ${Q.i+1} of ${Q.list.length}</span><span>Score ${Q.score}</span></div>
+  <div class="qtext">${Q.type==='find'?`Which tool would you use to ${esc(t.q)}?`:`Press the shortcut for the ${esc(t.name)}.`}</div>
+  <div class="qfb" id="qfb">${Q.type==='find'?'Click it in the toolbar. Some tools are hidden — press and hold a slot with a small triangle.':'Use the keyboard. Include Shift if the shortcut needs it.'}</div>
+  <div class="qbtns"><button data-act="qskip">Skip</button><button data-act="qend">End round</button></div>`;}
+function fb(msg,cls){const el=$('#qfb');if(el){el.innerHTML=msg;el.className='qfb '+cls;}}
+function hintSlot(t){const b=tb.querySelector(`.tool[data-g="${t.g}"]`);if(b){b.classList.remove('hint');void b.offsetWidth;b.classList.add('hint');}}
+function answerFind(id){if(Q.locked)return;const t=Q.list[Q.i];Q.locked=true;
+  if(id===t.id){Q.score++;fb(`Correct — the ${esc(t.name)}${t.key?' ('+esc(t.key)+')':''}.`,'ok');setTimeout(nextQ,1300);}
+  else{Q.missed.push(t);const g=groups[t.g];fb(`That's the ${esc(T[id].name)}. The answer is the <b>${esc(t.name)}</b>${g[0].id!==t.id?`, hidden under the ${esc(g[0].name)} slot`:''}.`,'bad');hintSlot(t);setTimeout(nextQ,2800);}}
+function answerKey(c){if(Q.locked)return;const t=Q.list[Q.i];Q.locked=true;
+  if(c===t.key){Q.score++;fb(`Correct — <kbd>${esc(t.key)}</kbd> selects the ${esc(t.name)}.`,'ok');setTimeout(nextQ,1200);}
+  else{Q.missed.push(t);fb(`You pressed <kbd>${esc(c)}</kbd>${KEYMAP[c]?` (${esc(T[KEYMAP[c]].name)})`:''}. The ${esc(t.name)} is <kbd>${esc(t.key)}</kbd>.`,'bad');hintSlot(t);setTimeout(nextQ,2600);}}
+function nextQ(){if(!Q.on)return;Q.i++;if(Q.i>=Q.list.length)return endQuiz();Q.locked=false;showQ();}
+function endQuiz(){if(!Q.on)return;Q.on=false;$('#quizBar').hidden=true;const n=Math.max(1,Math.min(Q.i+1,Q.list.length)),total=Q.i>=Q.list.length?Q.list.length:n,pct=Q.score/total;
+  const msg=pct>=.9?'Outstanding — you know this toolbar.':pct>=.7?'Solid work. Review the tools below, then play again.':'Keep practicing. Explore the tools below in Explore mode, then try again.';
+  showModal(`<h2>${Q.type==='find'?'Find the Tool':'Shortcut Challenge'} results</h2><div class="bigscore">${Q.score} / ${total}</div><p>${msg}</p>
+  ${Q.missed.length?`<h4>Review these</h4><div class="tblwrap"><table class="reftable">${Q.missed.map(t=>`<tr><td>${ic(t.id)}</td><td><b>${esc(t.name)}</b></td><td><kbd>${esc(t.key||'—')}</kbd></td><td>${esc(t.d)}</td></tr>`).join('')}</table></div>`:''}
+  <div class="qa" style="margin-top:1rem"><button class="primary" data-act="qagain">Play again</button><button data-act="mode-explore">Back to Explore</button></div>`);}
+
+/* ---------- Modals ---------- */
+function showModal(h){const m=$('#modal');m.innerHTML=`<div class="card" role="dialog" aria-modal="true">${h}</div>`;m.hidden=false;}
+function closeModal(){$('#modal').hidden=true;}
+$('#modal').addEventListener('click',e=>{if(e.target.id==='modal')closeModal();});
+function welcome(){showModal(`<h2>Illustrator Workspace Trainer</h2><p class="sub">Learn where everything lives in Adobe Illustrator before you sit down at the real software.</p>
+  <div class="areas">
+  <div><b>Menu Bar</b>Every command, sorted by category — File, Edit, Object, Type, Select, Effect, View, Window.</div>
+  <div><b>Control Bar</b>Options for whatever tool or object is active: fill, stroke, opacity, fonts.</div>
+  <div><b>Toolbar</b>All drawing and editing tools. A small triangle means more tools are hidden underneath — press and hold.</div>
+  <div><b>Artboard</b>The white page. Only what's on the artboard prints or exports.</div>
+  <div><b>Canvas (pasteboard)</b>The gray scratch area around the artboard.</div>
+  <div><b>Panels</b>Properties, Layers, and Swatches — settings you adjust while you work.</div></div>
+  <p><b>Explore</b> — click any tool to read what it does, its shortcut, and an ACP tip. Tools marked "Try it" really draw on the artboard.<br>
+  <b>Find the Tool</b> — read a task and click the right tool, even the hidden ones.<br>
+  <b>Shortcut Challenge</b> — press the correct keyboard shortcut for each tool.</p>
+  <p><b>Document size</b> — File › New picks a size (Letter, Postcard, Instagram post, and more), and File › Document Setup or the Artboard Tool changes it later.</p>
+  <p><b>Saving your work</b> — File › Save downloads an SVG file. File › Open loads it back so you can keep working — and it also opens Adobe Illustrator <b>.ai</b> and <b>.eps</b> files, so you can explore real artwork — and File › Export › Export As PNG makes a picture to print or turn in.</p>
+  <div class="qa"><button class="primary" data-act="closemodal">Start exploring</button><button data-act="labels">Label the workspace</button><button data-act="shortcutref">Shortcut reference</button></div>
+  <p class="foot">A classroom practice simulator for Madison County High School Digital Design. Not affiliated with or endorsed by Adobe; the real Illustrator has far more options than shown here.</p>`);}
+function shortcutRef(){const cmds=[['Undo / Redo','Ctrl+Z / Shift+Ctrl+Z'],['Copy / Paste','Ctrl+C / Ctrl+V'],['Paste in Front / in Back','Ctrl+F / Ctrl+B'],['Group / Ungroup','Ctrl+G / Shift+Ctrl+G'],['Select All / Deselect','Ctrl+A / Shift+Ctrl+A'],['Bring to Front / Send to Back','Shift+Ctrl+] / Shift+Ctrl+['],['Lock / Unlock All','Ctrl+2 / Alt+Ctrl+2'],['Outline / Preview','Ctrl+Y'],['Zoom In / Out','Ctrl++ / Ctrl+-'],['Fit Artboard in Window','Ctrl+0'],['Create Outlines','Shift+Ctrl+O'],['Character panel','Ctrl+T'],['Temporary Hand Tool','Hold Spacebar'],['Default Fill & Stroke','D'],['Toggle Fill / Stroke','X'],['Swap Fill & Stroke','Shift+X'],['Color / Gradient / None',', / . / /'],['Hide or show panels','Tab']];
+  showModal(`<h2>Keyboard shortcut reference</h2><p class="sub">${S.mac?'Mac: ⌘ = Command, ⌥ = Option, ⇧ = Shift':'Windows: on a Mac use Cmd for Ctrl and Option for Alt'}</p>
+  <div class="refcols"><div class="tblwrap"><h4>Tools</h4><table class="reftable">${TOOLS.filter(t=>t.key).map(t=>`<tr><td>${ic(t.id)}</td><td>${esc(t.name)}</td><td><kbd>${esc(t.key)}</kbd></td></tr>`).join('')}</table></div>
+  <div class="tblwrap"><h4>Commands</h4><table class="reftable">${cmds.map(([a,b])=>`<tr><td>${esc(a)}</td><td><kbd>${esc(fmt(b))}</kbd></td></tr>`).join('')}</table></div></div>
+  <div class="qa" style="margin-top:1rem"><button class="primary" data-act="closemodal">Close</button></div>`);}
+
+/* ---------- Files: save, open, export ---------- */
+S.docName=null;S.dirty=false;
+function markDirty(){if(!S.dirty){S.dirty=true;updateDoc();}}
+function updateDoc(){const el=$('#stDoc');if(el)el.textContent=(S.docName||'Untitled-1')+'.svg'+(S.dirty?' (unsaved changes)':'');document.title=(S.docName||'Untitled-1')+(S.dirty?'*':'')+' — Illustrator Workspace Trainer';}
+function cleanName(v){v=String(v||'').replace(/\.(svg|ai|eps|ps)$/i,'').replace(/[\\/:*?"<>|]+/g,'').replace(/\s+/g,' ').trim();return v.slice(0,80)||'Untitled-1';}
+let dlP=null;
+function getDL(){if(!window.claude||typeof window.claude.use!=='function')return Promise.resolve('local');return dlP||(dlP=window.claude.use('downloads').catch(()=>null));}
+async function offer(filename,data){const dl=await getDL();
+  if(dl==='local'){const blob=data instanceof Blob?data:new Blob([data],{type:'image/svg+xml'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=filename;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),5000);return true;}
+  if(!dl){toast('Saving files isn\'t available in this view. Open the trainer from its own link, then try again.',5000);return false;}
+  try{await dl.save({filename,data});return true;}
+  catch(err){const c=err&&err.code;toast(c==='declined'?'Save canceled — nothing was saved.':c==='rate_limited'?'A save prompt is already open. Answer that one first.':c==='too_large'?'That file is too large. Try a smaller PNG size.':'This file couldn\'t be saved here.',5000);return false;}}
+function buildSVG(name){const out=document.createElementNS(NS,'svg');
+  Object.entries({xmlns:NS,'xmlns:xlink':'http://www.w3.org/1999/xlink',width:f1(S.docW),height:f1(S.docH),viewBox:`0 0 ${f1(S.docW)} ${f1(S.docH)}`,'data-trainer':'1','data-units':S.units}).forEach(([k,v])=>out.setAttribute(k,v));
+  const t=mk('title',{},out);t.textContent=name;const d=mk('defs',{},out);
+  ['#ds','#blur'].forEach(id=>d.appendChild($(id).cloneNode(true)));[...defs.children].forEach(n=>d.appendChild(n.cloneNode(true)));
+  const g=mk('g',{id:'Layer_1'},out);objs().forEach(o=>g.appendChild(o.cloneNode(true)));
+  return '<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(out);}
+function saveAsDialog(){finishPen(false);commitText();
+  showModal(`<h2>Save As</h2><p class="sub">Saves your artwork as an SVG file on this device.</p>
+  <label class="fld">File name<span class="fnrow"><input type="text" id="fName" value="${esc(S.docName||'Untitled-1')}" maxlength="80" autocomplete="off"><span>.svg</span></span></label>
+  <p class="note">To keep working later, use File › Open and choose this file. It also opens in Adobe Illustrator with the shapes, paths, and text still editable. Each save downloads a new copy, so use the same name to keep track of your latest version.</p>
+  <div class="qa"><button class="primary" data-act="dosave">Save</button><button data-act="closemodal">Cancel</button></div>`);
+  setTimeout(()=>{const i=$('#fName');if(i){i.focus();i.select();}},0);}
+async function saveSVG(name){finishPen(false);commitText();if(!objs().length)return toast('The artboard is empty — draw something before saving.');
+  const ok=await offer(name+'.svg',buildSVG(name));if(ok){S.docName=name;S.dirty=false;updateDoc();toast(`Saved ${esc(name)}.svg`);}}
+function exportDialog(){finishPen(false);commitText();
+  showModal(`<h2>Export As PNG</h2><p class="sub">A flat picture of the artboard — good for printing, slides, or turning in. Save the SVG too if you want to keep editing.</p>
+  <label class="fld">File name<span class="fnrow"><input type="text" id="eName" value="${esc(S.docName||'Untitled-1')}" maxlength="80" autocomplete="off"><span>.png</span></span></label>
+  <b>Resolution</b><div class="opts">${exportScaleOpts()}</div>
+  <b>Background</b><div class="opts"><label><input type="checkbox" id="eTrans"> Transparent (no white artboard)</label></div>
+  <div class="qa"><button class="primary" data-act="doexport">Export</button><button data-act="closemodal">Cancel</button></div>`);
+  setTimeout(()=>{const i=$('#eName');if(i){i.focus();i.select();}},0);}
+async function exportPNG(name,scale,transparent){if(!objs().length)return toast('The artboard is empty — draw something before exporting.');
+  try{const img=new Image();img.src='data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(buildSVG(name))));await img.decode();
+    const c=document.createElement('canvas');c.width=Math.round(S.docW*scale);c.height=Math.round(S.docH*scale);const x=c.getContext('2d');
+    if(!transparent){x.fillStyle='#ffffff';x.fillRect(0,0,c.width,c.height);}x.drawImage(img,0,0,c.width,c.height);
+    const blob=await new Promise((res,rej)=>c.toBlob(b=>b?res(b):rej(new Error('png')),'image/png'));
+    if(await offer(name+'.png',blob))toast(`Exported ${esc(name)}.png`);}
+  catch(e){toast('The PNG couldn\'t be created in this browser. Save as SVG instead.',5000);}}
+function scrub(root){root.querySelectorAll('script,style,foreignObject,iframe,object,embed,audio,video,link,meta').forEach(n=>n.remove());
+  root.querySelectorAll('image').forEach(n=>{const h=n.getAttribute('href')||n.getAttribute('xlink:href')||'';if(!/^data:image\/(png|jpe?g|gif|webp);/i.test(h))n.remove();});
+  [root,...root.querySelectorAll('*')].forEach(n=>[...n.attributes].forEach(a=>{const k=a.name.toLowerCase(),v=a.value.trim();
+    if(k.startsWith('on'))n.removeAttribute(a.name);
+    else if((k==='href'||k==='xlink:href')&&!v.startsWith('#')&&!(n.tagName==='image'&&v.startsWith('data:image/')))n.removeAttribute(a.name);
+    else if(/url\(\s*['"]?(?!#)/i.test(v))n.removeAttribute(a.name);}));}
+function importSVG(text,fname){let doc;try{doc=new DOMParser().parseFromString(text,'image/svg+xml');}catch(e){doc=null;}
+  const root=doc&&doc.documentElement;if(!root||root.nodeName!=='svg'||doc.querySelector('parsererror'))return toast('That file isn\'t a readable SVG. Choose an .svg file saved from this trainer or another drawing app.',5500);
+  scrub(root);pushUndo();finishPen(false);art.innerHTML='';defs.innerHTML='';setSel([]);
+  const ours=root.getAttribute('data-trainer')==='1',layer=root.querySelector('#Layer_1');
+  if(ours){const vbx=(root.getAttribute('viewBox')||'').trim().split(/[\s,]+/).map(Number),w=vbx.length===4?vbx[2]:+root.getAttribute('width'),h=vbx.length===4?vbx[3]:+root.getAttribute('height'),u=root.getAttribute('data-units');
+    if(u&&UNITS[u])S.units=u;applyBoard(w>=1?w:800,h>=1?h:600);}
+  root.querySelectorAll('defs > *').forEach(n=>{if(ours&&(n.id==='ds'||n.id==='blur'))return;defs.appendChild(document.importNode(n,true));});
+  if(ours&&layer){[...layer.children].forEach(n=>{const el=document.importNode(n,true);el.classList.add('obj');
+      ['tx','ty','rot','sx','sy'].forEach((k,i)=>{if(el.dataset[k]===undefined)el.dataset[k]=i>2?1:0;});if(!el.dataset.kind)el.dataset.kind=el.tagName==='text'?'Type':'Path';art.appendChild(el);});}
+  else{const g=newObj('g',{},'Group');[...root.children].forEach(n=>{if(!['defs','title','desc','metadata'].includes(n.nodeName))g.appendChild(document.importNode(n,true));});
+    const bb=g.getBBox();if(bb.width&&bb.height){const s=Math.min(1,S.docW*.9/bb.width,S.docH*.87/bb.height);g.dataset.sx=g.dataset.sy=s;applyT(g);const b=union([g]);
+      g.dataset.tx=S.docW/2-(b.x+b.w/2);g.dataset.ty=S.docH/2-(b.y+b.h/2);applyT(g);}}
+  let mx=uid;[...art.querySelectorAll('[id]'),...defs.querySelectorAll('[id]')].forEach(n=>{const m=/^(?:o|g|tp)(\d+)$/.exec(n.id);if(m)mx=Math.max(mx,+m[1]);});uid=mx+1;
+  S.docName=cleanName(fname);S.dirty=false;updateDoc();refresh();fit();
+  toast(ours?`Opened ${esc(S.docName)}.svg — keep working where you left off.`:`Opened ${esc(S.docName)}.svg as one group. It came from another app, so some features may look different.`,5000);}
+/* ---------- Open .ai / .eps: converters (output = y-down page units) ---------- */
+const VX=(()=>{
+const mul=(m,n)=>[m[0]*n[0]+m[1]*n[2],m[0]*n[1]+m[1]*n[3],m[2]*n[0]+m[3]*n[2],m[2]*n[1]+m[3]*n[3],m[4]*n[0]+m[5]*n[2]+n[4],m[4]*n[1]+m[5]*n[3]+n[5]];
+const ap=(m,x,y)=>[m[0]*x+m[2]*y+m[4],m[1]*x+m[3]*y+m[5]];
+const msc=m=>Math.sqrt(Math.abs(m[0]*m[3]-m[1]*m[2]))||1;
+const h2=v=>Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,'0');
+const rgb=(r,g,b)=>'#'+h2(r*255)+h2(g*255)+h2(b*255);
+const cmyk=(c,m,y,k)=>rgb((1-c)*(1-k),(1-m)*(1-k),(1-y)*(1-k));
+/* collects paths + text in any coordinate space; points arrive already transformed */
+function collector(){
+  const R={shapes:[],texts:[],skip:{img:0,grad:0,clip:0}};let subs=[],cur=null,last=null;
+  R.move=(x,y)=>{cur={n:[{x,y,i:null,o:null}],c:false};subs.push(cur);last=[x,y];};
+  R.line=(x,y)=>{if(!cur)R.move(...(last||[x,y]));cur.n.push({x,y,i:null,o:null});last=[x,y];};
+  R.curve=(x1,y1,x2,y2,x,y)=>{if(!cur)R.move(...(last||[x1,y1]));const p=cur.n[cur.n.length-1];p.o=[x1,y1];cur.n.push({x,y,i:[x2,y2],o:null});last=[x,y];};
+  const shut=q=>{const N=q.n;if(N.length>2){const a=N[0],b=N[N.length-1];if(Math.abs(a.x-b.x)<.01&&Math.abs(a.y-b.y)<.01){a.i=b.i;N.pop();}}q.c=true;};
+  R.close=()=>{if(!cur)return;shut(cur);last=[cur.n[0].x,cur.n[0].y];cur=null;};
+  R.cur=()=>last;R.hasPath=()=>subs.some(s=>s.n.length>1);
+  R.clear=()=>{subs=[];cur=null;};
+  R.rect=(pts)=>{R.move(...pts[0]);R.line(...pts[1]);R.line(...pts[2]);R.line(...pts[3]);R.close();};
+  R.paint=(o)=>{const S=subs.filter(s=>s.n.length>1);subs=[];cur=null;if(!S.length||(!o.fill&&!o.stroke))return;
+    if(o.fill)S.forEach(q=>{if(!q.c)shut(q);});
+    const key=JSON.stringify(S),p=R.shapes[R.shapes.length-1];
+    /* Illustrator writes fill+stroke as two passes of the same path: merge them */
+    if(p&&p.key===key&&p.fill&&!p.stroke&&!o.fill&&o.stroke){p.stroke=o.stroke;p.sw=o.sw;return;}
+    R.shapes.push({key,subs:S,fill:o.fill||null,stroke:o.stroke||null,sw:o.sw||1,eo:!!o.eo,op:o.op==null?1:o.op});};
+  return R;}
+
+/* ---------- PDF-compatible .ai via pdf.js operator list ---------- */
+function fontInfo(f){let n=String((f&&(f.name||f.loadedName))||'').replace(/^[A-Z]{6}\+/,'');
+  const weight=/bold|black|heavy|semibold|demi/i.test(n)?'bold':null,style=/italic|oblique/i.test(n)?'italic':null;
+  let fam=n.split(/[-,]/)[0].replace(/(MT|PS|Std|LT)$/,'').replace(/([a-z])([A-Z])/g,'$1 $2').trim();
+  if(!fam||/^g_d|^f\d|^Type3/i.test(fam))fam=(f&&f.fallbackName)||'sans-serif';
+  const map={'Arial':'Arial','Helvetica':'Arial','Times':'Times New Roman','Times Roman':'Times New Roman','Times New Roman':'Times New Roman','Courier':'Courier New'};
+  return {font:map[fam]||fam,weight,style};}
+async function fromPDF(lib,bytes){
+  const OPS=lib.OPS,doc=await lib.getDocument({data:bytes,isEvalSupported:false,disableFontFace:true,useSystemFonts:false,verbosity:0}).promise;
+  const page=await doc.getPage(1),vp=page.getViewport({scale:1}),ol=await page.getOperatorList(),R=collector();
+  const fn=ol.fnArray,aa=ol.argsArray,O={};for(const k in OPS)O[OPS[k]]=k;
+  let st={ctm:vp.transform.slice(),fill:'#000000',stroke:'#000000',lw:1,fa:1,sa:1,ga:1,font:null,fs:12,fm:.001,tc:0,tw:0,th:1,tl:0,rise:0,mode:0,fpat:false};
+  const stack=[];let tm=[1,0,0,1,0,0],tlm=tm.slice();
+  const col=a=>typeof a[0]==='string'?a[0]:rgb(a[0]/255,a[1]/255,a[2]/255);
+  const pat=a=>{if(a[0]==='RadialAxial'&&Array.isArray(a[3])&&a[3].length){R.skip.grad++;return a[3][Math.floor(a[3].length/2)][1];}R.skip.grad++;return null;};
+  const paint=(f,s,eo)=>R.paint({fill:f?st.fill:null,stroke:s?st.stroke:null,sw:st.lw*msc(st.ctm),eo,op:(f?st.fa:st.sa)*st.ga});
+  const moveT=(x,y)=>{tlm=mul([1,0,0,1,x,y],tlm);tm=tlm.slice();};
+  const show=(glyphs)=>{if(!st.font||st.mode===3||st.mode===7)return;
+    const trm=mul(mul([st.fs*st.th,0,0,st.fs,0,st.rise],tm),st.ctm),o=ap(trm,0,0);
+    let s='',tx=0;for(const g of glyphs){if(typeof g==='number'){tx-=g/1000*st.fs*st.th;if(g<-250&&s&&!s.endsWith(' '))s+=' ';continue;}
+      if(!g)continue;s+=g.unicode||'';tx+=((g.width||0)*st.fs*st.fm+st.tc+(g.isSpace?st.tw:0))*st.th;}
+    const e=ap(mul(mul([1,0,0,1,tx,0],tm),st.ctm),0,0);tm=mul([1,0,0,1,tx,0],tm);
+    s=s.replace(/[\u0000-\u001f]/g,'');if(!s.trim())return;
+    const fi=fontInfo(st.font),size=Math.hypot(trm[2],trm[3]),rot=Math.atan2(trm[1],trm[0])*180/Math.PI,p=R.texts[R.texts.length-1];
+    if(p&&p.font===fi.font&&p.weight===fi.weight&&Math.abs(p.size-size)<.5&&p.fill===st.fill&&Math.abs(p.rot-rot)<.5&&Math.abs(p.ey-o[1])<.6&&Math.abs(p.ex-o[0])<size*.6){p.str+=(o[0]-p.ex>size*.2&&!p.str.endsWith(' ')?' ':'')+s;p.ex=e[0];p.ey=e[1];return;}
+    R.texts.push({x:o[0],y:o[1],ex:e[0],ey:e[1],size,rot,str:s,fill:st.fill,op:st.fa*st.ga,...fi});};
+  for(let i=0;i<fn.length;i++){const a=aa[i]||[];switch(O[fn[i]]){
+    case 'save':stack.push({...st,ctm:st.ctm.slice()});break;
+    case 'restore':if(stack.length)st=stack.pop();break;
+    case 'transform':st.ctm=mul(a,st.ctm);break;
+    case 'paintFormXObjectBegin':stack.push({...st,ctm:st.ctm.slice()});if(Array.isArray(a[0])&&a[0].length===6)st.ctm=mul(a[0],st.ctm);break;
+    case 'paintFormXObjectEnd':if(stack.length)st=stack.pop();break;
+    case 'beginGroup':stack.push({...st,ctm:st.ctm.slice()});st.ga*=st.fa;st.fa=st.sa=1;break;
+    case 'endGroup':if(stack.length)st=stack.pop();break;
+    case 'constructPath':{const ops=a[0],c=a[1];let j=0;const P=(x,y)=>ap(st.ctm,x,y);
+      for(const op of ops){switch(O[op]){
+        case 'moveTo':R.move(...P(c[j],c[j+1]));j+=2;break;
+        case 'lineTo':R.line(...P(c[j],c[j+1]));j+=2;break;
+        case 'curveTo':R.curve(...P(c[j],c[j+1]),...P(c[j+2],c[j+3]),...P(c[j+4],c[j+5]));j+=6;break;
+        case 'curveTo2':{const cp=R.cur()||[0,0];R.curve(cp[0],cp[1],...P(c[j],c[j+1]),...P(c[j+2],c[j+3]));j+=4;break;}
+        case 'curveTo3':{const e=P(c[j+2],c[j+3]);R.curve(...P(c[j],c[j+1]),e[0],e[1],e[0],e[1]);j+=4;break;}
+        case 'closePath':R.close();break;
+        case 'rectangle':{const x=c[j],y=c[j+1],w=c[j+2],h=c[j+3];R.rect([P(x,y),P(x+w,y),P(x+w,y+h),P(x,y+h)]);j+=4;break;}}}
+      break;}
+    case 'fill':paint(1,0,0);break;case 'eoFill':paint(1,0,1);break;
+    case 'stroke':paint(0,1,0);break;case 'closeStroke':R.close();paint(0,1,0);break;
+    case 'fillStroke':paint(1,1,0);break;case 'eoFillStroke':paint(1,1,1);break;
+    case 'closeFillStroke':R.close();paint(1,1,0);break;case 'closeEOFillStroke':R.close();paint(1,1,1);break;
+    case 'clip':case 'eoClip':R.skip.clip++;break;
+    case 'endPath':R.clear();break;
+    case 'setLineWidth':st.lw=a[0];break;
+    case 'setGState':for(const [k,v] of (a[0]||[])){if(k==='LW')st.lw=v;else if(k==='ca')st.fa=v;else if(k==='CA')st.sa=v;else if(k==='Font'&&Array.isArray(v)){try{st.font=page.commonObjs.get(v[0]);}catch(e){}st.fs=v[1];}}break;
+    case 'setFillRGBColor':st.fill=col(a);break;case 'setStrokeRGBColor':st.stroke=col(a);break;
+    case 'setFillGray':st.fill=rgb(a[0],a[0],a[0]);break;case 'setStrokeGray':st.stroke=rgb(a[0],a[0],a[0]);break;
+    case 'setFillCMYKColor':st.fill=cmyk(...a);break;case 'setStrokeCMYKColor':st.stroke=cmyk(...a);break;
+    case 'setFillColorN':if(typeof a[0]==='string'){const c=pat(a);if(c)st.fill=c;}break;
+    case 'setStrokeColorN':if(typeof a[0]==='string'){const c=pat(a);if(c)st.stroke=c;}break;
+    case 'shadingFill':R.skip.grad++;break;
+    case 'paintImageXObject':case 'paintInlineImageXObject':case 'paintImageMaskXObject':case 'paintImageXObjectRepeat':case 'paintImageMaskXObjectGroup':case 'paintSolidColorImageMask':R.skip.img++;break;
+    case 'beginText':tm=[1,0,0,1,0,0];tlm=tm.slice();break;
+    case 'setFont':{try{st.font=page.commonObjs.get(a[0]);}catch(e){st.font={name:'sans-serif'};}const s=a[1];st.fs=s;st.fm=(st.font&&st.font.fontMatrix&&st.font.fontMatrix[0])||.001;break;}
+    case 'setTextMatrix':tm=(Array.isArray(a[0])?a[0]:a).slice(0,6);tlm=tm.slice();break;
+    case 'moveText':moveT(a[0],a[1]);break;
+    case 'setLeadingMoveText':st.tl=-a[1];moveT(a[0],a[1]);break;
+    case 'nextLine':moveT(0,-st.tl);break;
+    case 'setLeading':st.tl=a[0];break;case 'setCharSpacing':st.tc=a[0];break;case 'setWordSpacing':st.tw=a[0];break;
+    case 'setHScale':st.th=a[0]/100;break;case 'setTextRise':st.rise=a[0];break;case 'setTextRenderingMode':st.mode=a[0];break;
+    case 'showText':case 'showSpacedText':show(a[0]||[]);break;
+    case 'nextLineShowText':moveT(0,-st.tl);show(a[0]||[]);break;
+    case 'nextLineSetSpacingShowText':st.tw=a[0];st.tc=a[1];moveT(0,-st.tl);show(a[2]||[]);break;}}
+  const noPDF=R.texts.map(t=>t.str).join(' ');
+  await doc.destroy();
+  if(/saved without PDF Content|without PDF Content/i.test(noPDF))throw Object.assign(new Error('nopdf'),{code:'nopdf'});
+  return {w:vp.width,h:vp.height,pages:doc.numPages||1,...R};}
+
+/* ---------- EPS / legacy AI: small PostScript + Illustrator-operator interpreter ---------- */
+function tokenize(src){const T=[],L=src.length;let i=0;
+  const ws=c=>c===32||c===9||c===10||c===13||c===12||c===0,delim='()<>[]{}/%';
+  while(i<L){const c=src.charCodeAt(i),ch=src[i];
+    if(ws(c)){i++;continue;}
+    if(ch==='%'){const e=src.indexOf('\n',i),e2=src.indexOf('\r',i);let end=Math.min(e<0?L:e,e2<0?L:e2);T.push({t:'c',v:src.slice(i,end)});i=end;continue;}
+    if(ch==='('){let d=1,s='';i++;while(i<L&&d){const k=src[i];if(k==='\\'){const n=src[i+1];const m={n:'\n',r:'\r',t:'\t',b:'\b',f:'\f'};
+        if(/[0-7]/.test(n)){const oc=/^[0-7]{1,3}/.exec(src.slice(i+1,i+4))[0];s+=String.fromCharCode(parseInt(oc,8));i+=1+oc.length;continue;}
+        if(n==='\r'||n==='\n'){i+=2;if(n==='\r'&&src[i]==='\n')i++;continue;}s+=m[n]||n;i+=2;continue;}
+      if(k==='(')d++;else if(k===')'){d--;if(!d){i++;break;}}s+=k;i++;}T.push({t:'s',v:s});continue;}
+    if(ch==='<'&&src[i+1]==='<'){T.push({t:'o',v:'<<'});i+=2;continue;}
+    if(ch==='>'&&src[i+1]==='>'){T.push({t:'o',v:'>>'});i+=2;continue;}
+    if(ch==='<'){if(src[i+1]==='~'){const e=src.indexOf('~>',i);i=e<0?L:e+2;T.push({t:'s',v:''});continue;}
+      const e=src.indexOf('>',i);const hx=src.slice(i+1,e<0?L:e).replace(/[^0-9a-f]/gi,'');let s='';for(let k=0;k<hx.length;k+=2)s+=String.fromCharCode(parseInt((hx[k]+(hx[k+1]||'0')),16));T.push({t:'s',v:s});i=e<0?L:e+1;continue;}
+    if(ch==='{'){let d=1;i++;while(i<L&&d){const k=src[i];if(k==='('){let dd=1;i++;while(i<L&&dd){if(src[i]==='\\')i++;else if(src[i]==='(')dd++;else if(src[i]===')')dd--;i++;}continue;}
+        if(k==='%'){while(i<L&&src[i]!=='\n'&&src[i]!=='\r')i++;continue;}if(k==='{')d++;else if(k==='}')d--;i++;}T.push({t:'p'});continue;}
+    if(ch==='['||ch===']'||ch==='}'){T.push({t:'o',v:ch});i++;continue;}
+    let j=i+(ch==='/'?1:0);if(src[j]==='/')j++;while(j<L&&!ws(src.charCodeAt(j))&&!delim.includes(src[j]))j++;
+    const w=src.slice(i,j);i=j===i?i+1:j;
+    if(w[0]==='/'){T.push({t:'l',v:w.replace(/^\/+/,'')});continue;}
+    if(/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(w)){T.push({t:'n',v:parseFloat(w)});continue;}
+    const rx=/^(\d+)#([0-9a-z]+)$/i.exec(w);if(rx){T.push({t:'n',v:parseInt(rx[2],+rx[1])});continue;}
+    T.push({t:'x',v:w});}
+  return T;}
+function fromEPS(src){
+  const bb=/%%HiResBoundingBox:\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)/.exec(src)||/%%BoundingBox:\s*([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)\s+([-\d.]+)/.exec(src);
+  const B=bb?bb.slice(1,5).map(Number):null;
+  /* skip the procset/prolog: start at the end of setup (or prolog), stop before private data / trailer */
+  let s0=0;for(const m of ['%%EndSetup','%%EndProlog']){const k=src.indexOf(m);if(k>=0){s0=k;break;}}
+  let s1=src.length;for(const m of ['%AI9_PrivateDataBegin','%%Trailer','%%EOF']){const k=src.indexOf(m,s0);if(k>=0){s1=k;break;}}
+  const T=tokenize(src.slice(s0,s1)),R=collector();
+  const top=B?B[3]:792,left=B?B[0]:0;
+  let st={ctm:[1,0,0,-1,-left,top],fill:'#000000',stroke:'#000000',lw:1,cs:'gray',font:'Arial',fs:12,op:1};
+  const gstack=[];let S=[],comp=0,compStyle=null,txt=null,layer=null,skipData=false;
+  const P=(x,y)=>ap(st.ctm,x,y);
+  const nums=n=>{if(S.length<n)return null;const a=S.slice(-n);if(a.some(v=>typeof v!=='number'))return null;S.length-=n;return a;};
+  const both=c=>{st.fill=st.stroke=c;};
+  const setc=(a,target)=>{let c=null;if(a.length>=4)c=cmyk(a[0],a[1],a[2],a[3]);else if(a.length===3)c=rgb(a[0],a[1],a[2]);else if(a.length===1)c=rgb(a[0],a[0],a[0]);if(!c)return;if(target==='f')st.fill=c;else if(target==='s')st.stroke=c;else both(c);};
+  const custom=(target)=>{/* c m y k (name) tint x  |  r g b (name) tint 1 Xk etc. */
+    let k=S.length-1;while(k>=0&&typeof S[k]!=='string')k--;if(k<0){S=[];return;}const before=S.slice(0,k).filter(v=>typeof v==='number'),after=S.slice(k+1).filter(v=>typeof v==='number');
+    const tint=after.length?after[0]:0,rgbT=after.length>1&&after[1]===1,base=rgbT?before.slice(-3):before.slice(-4);S=[];
+    const f=1-tint;if(base.length===3)(target==='f'?(st.fill=rgb(...base.map(v=>1-(1-v)*f))):(st.stroke=rgb(...base.map(v=>1-(1-v)*f))));
+    else if(base.length===4){const c=cmyk(...base.map(v=>v*f));target==='f'?st.fill=c:st.stroke=c;}};
+  const paint=(f,s,close,eo)=>{if(close)R.close();if(comp>0){compStyle={f,s,eo,fill:st.fill,stroke:st.stroke,lw:st.lw,op:st.op};return;}
+    R.paint({fill:f?st.fill:null,stroke:s?st.stroke:null,sw:st.lw*msc(st.ctm),eo,op:st.op});};
+  const endText=()=>{if(txt&&txt.str.trim()){R.texts.push(txt);}txt=null;};
+  const addText=(str)=>{str=String(str).replace(/[\u0000-\u0008\u000b-\u001f]/g,'');if(!str)return;
+    const lines=str.split(/\r|\n/);lines.forEach((ln,ix)=>{if(ix>0){endText();}
+      if(!txt){const m=st.tm||st.ctm, o=ap(mul(st.tp||[1,0,0,1,0,0],st.ctm),0,0);const lead=(st.fs*1.2)*(st.lineNo||0);
+        txt={x:o[0],y:o[1]+lead*msc(st.ctm),size:st.fs*msc(mul(st.tp||[1,0,0,1,0,0],st.ctm)),rot:0,str:'',fill:st.fill,op:st.op,font:st.font,weight:/bold|black|heavy/i.test(st.fontRaw||'')?'bold':null,style:/italic|oblique/i.test(st.fontRaw||'')?'italic':null};}
+      txt.str+=ln;if(ix<lines.length-1)st.lineNo=(st.lineNo||0)+1;});};
+  const setFont=(nm,sz)=>{st.fontRaw=nm;const fi=fontInfo({name:String(nm).replace(/^_/,'')});st.font=fi.font;if(sz)st.fs=sz;};
+  let cp=[0,0];
+  const mv=(x,y)=>{const p=P(x,y);R.move(...p);cp=[x,y];},ln=(x,y)=>{R.line(...P(x,y));cp=[x,y];},
+    cv=(a,b,c,d,e,f)=>{R.curve(...P(a,b),...P(c,d),...P(e,f));cp=[e,f];};
+  for(let ti=0;ti<T.length;ti++){const t=T[ti];
+    if(t.t==='c'){const v=t.v;
+      if(/^%%Begin(Data|Binary)/.test(v)){skipData=true;continue;}if(/^%%End(Data|Binary)/.test(v)){skipData=false;continue;}
+      if(/^%AI5_BeginLayer/.test(v)){layer=true;}continue;}
+    if(skipData)continue;
+    if(t.t==='n'||t.t==='s'||t.t==='l'){S.push(t.t==='l'?{lit:t.v}:t.v);continue;}
+    if(t.t==='p'){S.push({proc:1});continue;}
+    if(t.t==='o'){if(t.v==='['||t.v==='<<')S.push({mark:t.v});else if(t.v===']'){let k=S.length-1;while(k>=0&&!(S[k]&&S[k].mark))k--;const arr=S.slice(k+1);S.length=Math.max(0,k);S.push(arr);}
+      else if(t.v==='>>'){let k=S.length-1;while(k>=0&&!(S[k]&&S[k].mark))k--;S.length=Math.max(0,k);S.push({dict:1});}continue;}
+    const op=t.v;let a;
+    switch(op){
+    /* paths (AI format, PDF-style and AGM names) */
+    case 'm':case 'moveto':case 'mo':if(a=nums(2))mv(...a);else S=[];break;
+    case 'rmoveto':if(a=nums(2))mv(cp[0]+a[0],cp[1]+a[1]);break;
+    case 'l':case 'L':case 'lineto':case 'li':if(a=nums(2))ln(...a);else S=[];break;
+    case 'rlineto':if(a=nums(2))ln(cp[0]+a[0],cp[1]+a[1]);break;
+    case 'c':case 'C':case 'curveto':case 'cv':if(a=nums(6))cv(...a);else S=[];break;
+    case 'rcurveto':if(a=nums(6)){const [x,y]=cp;cv(x+a[0],y+a[1],x+a[2],y+a[3],x+a[4],y+a[5]);}break;
+    case 'v':case 'V':if(a=nums(4))cv(cp[0],cp[1],...a);break;
+    case 'y':case 'Y':if(a=nums(4))cv(a[0],a[1],a[2],a[3],a[2],a[3]);break;
+    case 're':if(a=nums(4)){const [x,y,w,h]=a;R.rect([P(x,y),P(x+w,y),P(x+w,y+h),P(x,y+h)]);}break;
+    case 'h':case 'H':case 'closepath':case 'cp':R.close();break;
+    case 'np':case 'newpath':R.clear();break;
+    /* painting: AI  f=close+fill F=fill s=close+stroke S=stroke b=close+both B=both n/N=none */
+    case 'f':case 'fill':case 'F':paint(1,0,1,0);break;
+    case 'ef':case 'eofill':case 'f*':paint(1,0,0,1);break;
+    case 's':paint(0,1,1,0);break;case 'S':case 'stroke':case '@':paint(0,1,0,0);break;
+    case 'b':paint(1,1,1,0);break;case 'B':paint(1,1,0,0);break;
+    case 'n':case 'N':if(comp>0)compStyle=compStyle||null;R.clear();break;
+    case 'clip':case 'eoclip':case 'W':case 'W*':R.skip.clip++;break;
+    case '*u':comp++;break;
+    case '*U':if(comp>0)comp--;if(!comp&&compStyle){const c=compStyle;compStyle=null;R.paint({fill:c.f?c.fill:null,stroke:c.s?c.stroke:null,sw:c.lw*msc(st.ctm),eo:c.eo,op:c.op});}else R.clear();break;
+    /* colour */
+    case 'k':if(a=nums(4))st.fill=cmyk(...a);break;case 'K':if(a=nums(4))st.stroke=cmyk(...a);break;
+    case 'g':if(a=nums(1))st.fill=rgb(a[0],a[0],a[0]);break;case 'G':if(a=nums(1))st.stroke=rgb(a[0],a[0],a[0]);break;
+    case 'Xa':case 'rg':if(a=nums(3))st.fill=rgb(...a);break;case 'XA':case 'RG':if(a=nums(3))st.stroke=rgb(...a);break;
+    case 'x':case 'Xk':case 'Xx':custom('f');break;case 'X':case 'XK':case 'XX':custom('s');break;
+    case 'setrgbcolor':case 'rgb':if(a=nums(3))both(rgb(...a));break;
+    case 'setcmykcolor':case 'cmyk':if(a=nums(4))both(cmyk(...a));break;
+    case 'setgray':case 'gry':if(a=nums(1))both(rgb(a[0],a[0],a[0]));break;
+    case 'sethsbcolor':if(a=nums(3)){const [h,s,v]=a,i=Math.floor(h*6),f=h*6-i,p=v*(1-s),q=v*(1-f*s),u=v*(1-(1-f)*s);both(rgb(...[[v,u,p],[q,v,p],[p,v,u],[p,q,v],[u,p,v],[v,p,q]][i%6]));}break;
+    case 'setcolorspace':case 'cs':case 'CS':{const v=S.pop();const n=v&&(v.lit||(Array.isArray(v)&&v[0]&&v[0].lit));st.cs=/CMYK/i.test(n)?'cmyk':/RGB/i.test(n)?'rgb':/Gray/i.test(n)?'gray':st.cs;S=[];break;}
+    case 'setcolor':case 'sc':case 'scn':case 'SC':case 'SCN':{let v=S.filter(x=>typeof x==='number');if(Array.isArray(S[S.length-1]))v=S[S.length-1].filter(x=>typeof x==='number');S=[];
+      const need={cmyk:4,rgb:3,gray:1}[st.cs]||v.length;v=v.slice(-need);if(v.length===need)setc(v,op==='SC'||op==='SCN'?'s':op==='sc'||op==='scn'?'f':'b');break;}
+    case 'w':case 'setlinewidth':case 'slw':if(a=nums(1))st.lw=a[0];else S=[];break;
+    /* graphics state */
+    case 'q':case 'gsave':case 'gs':gstack.push({...st,ctm:st.ctm.slice()});S=[];break;
+    case 'Q':case 'grestore':case 'gr':if(gstack.length)st=gstack.pop();S=[];break;
+    case 'cm':if(a=nums(6))st.ctm=mul(a,st.ctm);break;
+    case 'concat':{const v=S.pop();if(Array.isArray(v)&&v.length===6)st.ctm=mul(v,st.ctm);break;}
+    case 'translate':if(a=nums(2))st.ctm=mul([1,0,0,1,a[0],a[1]],st.ctm);break;
+    case 'scale':if(a=nums(2))st.ctm=mul([a[0],0,0,a[1],0,0],st.ctm);break;
+    case 'rotate':if(a=nums(1)){const r=a[0]*Math.PI/180;st.ctm=mul([Math.cos(r),Math.sin(r),-Math.sin(r),Math.cos(r),0,0],st.ctm);}break;
+    case 'Xy':S=[];break;
+    /* stack helpers */
+    case 'pop':S.pop();break;case 'exch':if(S.length>1){const z=S.pop(),y2=S.pop();S.push(z,y2);}break;case 'dup':if(S.length)S.push(S[S.length-1]);break;
+    /* text — AI format (To/Tp/Tf/Tx/TO) and plain PostScript */
+    case 'To':endText();st.lineNo=0;st.tp=null;S=[];break;
+    case 'Tp':{const v=S.filter(x=>typeof x==='number');if(v.length>=6){const m=v.slice(0,6);st.tp=[m[0],m[1],m[2],m[3],m[4],m[5]];}endText();st.lineNo=0;S=[];break;}
+    case 'Tf':{const lit=S.find(x=>x&&x.lit),n=S.filter(x=>typeof x==='number');if(lit)setFont(lit.lit,n[0]);S=[];break;}
+    case 'Tl':{const n=S.filter(x=>typeof x==='number');if(n.length)st.lead=n[0];S=[];break;}
+    case 'Tx':case 'TX':case 'Tj':case 'Tk':{const s=S.find(x=>typeof x==='string');if(s!=null)addText(s);S=[];break;}
+    case 'T*':endText();st.lineNo=(st.lineNo||0)+1;break;
+    case 'TO':endText();st.tp=null;S=[];break;
+    case 'findfont':{const v=S.pop();S.push({font:(v&&v.lit)||'Arial',size:1});break;}
+    case 'scalefont':{const n=S.pop(),f=S.pop();if(f&&f.font)S.push({font:f.font,size:n});break;}
+    case 'setfont':{const f=S.pop();if(f&&f.font)setFont(f.font,f.size);S=[];break;}
+    case 'selectfont':{const n=S.pop(),f=S.pop();if(f&&f.lit)setFont(f.lit,n);S=[];break;}
+    case 'show':case 'ashow':case 'widthshow':{const s=S.find(x=>typeof x==='string');if(s!=null&&/^[\x20-\x7e\u00a0-\u00ff]+$/.test(s)){st.tp=[1,0,0,1,cp[0],cp[1]];endText();addText(s);endText();}S=[];break;}
+    case 'image':case 'colorimage':case 'imagemask':case 'XI':R.skip.img++;S=[];break;
+    case 'shfill':R.skip.grad++;S=[];break;
+    case 'Bb':case 'Bg':R.skip.grad++;S=[];break;
+    default:S=[];}
+    if(S.length>2000)S=S.slice(-50);}
+  endText();
+  return {w:B?B[2]-B[0]:0,h:B?B[3]-B[1]:0,pages:1,...R};}
+
+/* read a DOS-binary EPS (C5 D0 D3 C6 header) and return its PostScript section */
+function epsText(u8){if(u8[0]===0xC5&&u8[1]===0xD0&&u8[2]===0xD3&&u8[3]===0xC6){const dv=new DataView(u8.buffer,u8.byteOffset,u8.byteLength),o=dv.getUint32(4,true),n=dv.getUint32(8,true);u8=u8.subarray(o,o+n);}
+  let s='';for(let i=0;i<u8.length;i+=32768)s+=String.fromCharCode.apply(null,u8.subarray(i,i+32768));return s;}
+function kind(u8){const head=String.fromCharCode.apply(null,u8.subarray(0,Math.min(1024,u8.length)));
+  if(u8[0]===0xC5&&u8[1]===0xD0)return 'eps';if(head.includes('%PDF-'))return 'pdf';if(/^\s*%!/.test(head))return 'eps';if(/<svg|<\?xml/i.test(head))return 'svg';return 'unknown';}
+return {fromPDF,fromEPS,epsText,kind,tokenize};})();
+
+/* ---------- Open .ai / .eps: place converted artwork as editable trainer objects ---------- */
+const PDFJS='https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+function loadJS(src){return new Promise((res,rej)=>{const sc=document.createElement('script');sc.src=src;sc.onload=res;sc.onerror=()=>rej(new Error('load'));document.head.appendChild(sc);});}
+let pdfP=null;
+function getPDFJS(){return pdfP||(pdfP=loadJS(PDFJS+'pdf.min.js').then(()=>loadJS(PDFJS+'pdf.worker.min.js')).then(()=>{if(!window.pdfjsLib)throw new Error('lib');return window.pdfjsLib;}).catch(e=>{pdfP=null;throw e;}));}
+const MAXOBJ=3000;
+async function importVector(u8,fname,k){const ext=(/\.(\w+)$/.exec(fname)||[,'ai'])[1].toLowerCase();
+  toast(`Opening ${esc(fname)}…`,30000);let r;
+  try{if(k==='pdf'){let lib;try{lib=await getPDFJS();}catch(e){return toast('Opening .ai files needs an internet connection the first time (to load the file reader). Check the connection and try again.',6500);}
+      r=await VX.fromPDF(lib,u8);}
+    else r=VX.fromEPS(VX.epsText(u8));}
+  catch(e){if(e&&e.code==='nopdf')return toast(`${esc(fname)} was saved without <b>PDF compatibility</b>, so only Illustrator can read it. In Illustrator, choose File › Save As, pick Adobe Illustrator (ai), and check <b>Create PDF Compatible File</b> — or save as EPS or SVG.`,9000);
+    if(e&&/password/i.test(e.name||e.message||''))return toast('That file is password-protected, so it can\'t be opened here.',6000);
+    return toast(`${esc(fname)} couldn't be read. It may be damaged, or saved in a format this trainer doesn't understand. Try saving it from Illustrator as SVG.`,7000);}
+  if(!r.shapes.length&&!r.texts.length)return toast(`No vector artwork was found in ${esc(fname)}.${r.skip.img?' It only holds pixel images, which this trainer can\'t edit.':''} Try saving it from Illustrator as SVG.`,7500);
+  /* use the source page (artboard) size when it is sensible; otherwise fit onto the current artboard */
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;const acc=(x,y)=>{if(isFinite(x)&&isFinite(y)){x0=Math.min(x0,x);y0=Math.min(y0,y);x1=Math.max(x1,x);y1=Math.max(y1,y);}};
+  r.shapes.forEach(sh=>sh.subs.forEach(q=>q.n.forEach(n=>acc(n.x,n.y))));r.texts.forEach(t=>{acc(t.x,t.y);acc(t.x+t.size*t.str.length*.5,t.y-t.size);});
+  let bx=0,by=0,bw=r.w,bh=r.h;
+  if(!(bw>1&&bh>1)||x1<0||y1<0||x0>bw||y0>bh){const pad=Math.max(x1-x0,y1-y0)*.04||10;bx=x0-pad;by=y0-pad;bw=x1-x0+pad*2;bh=y1-y0+pad*2;}
+  const usePage=bx===0&&by===0&&bw>=9&&bh>=9&&bw<=MAXPT&&bh<=MAXPT,DW=usePage?bw:S.docW,DH=usePage?bh:S.docH;
+  const sc=usePage?1:Math.min(DW/bw,DH/bh),dx=(DW-bw*sc)/2-bx*sc,dy=(DH-bh*sc)/2-by*sc,X=v=>v*sc+dx,Y=v=>v*sc+dy,H=h=>h&&[X(h[0]),Y(h[1])];
+  pushUndo();finishPen(false);art.innerHTML='';defs.innerHTML='';setSel([]);
+  if(usePage){S.units=guessUnits(bw,bh);applyBoard(bw,bh);}
+  let nP=0,nC=0,nT=0,cut=0;
+  r.shapes.forEach(sh=>{if(nP+nC>=MAXOBJ){cut++;return;}
+    const subs=sh.subs.map(q=>({c:q.c,n:q.n.map(n=>({x:X(n.x),y:Y(n.y),i:H(n.i),o:H(n.o),s:false}))}));
+    subs.forEach(q=>q.n.forEach(n=>{if(n.i&&n.o){const a=Math.atan2(n.y-n.i[1],n.x-n.i[0]),b=Math.atan2(n.o[1]-n.y,n.o[0]-n.x);n.s=Math.abs(Math.atan2(Math.sin(a-b),Math.cos(a-b)))<.05;}}));
+    const at={fill:sh.fill||'none',stroke:sh.stroke||'none','stroke-width':sh.stroke?Math.max(.25,f1(sh.sw*sc)):0};
+    if(sh.eo||subs.length>1)at['fill-rule']='evenodd';if(sh.op<.995)at.opacity=f1(sh.op*100)/100;
+    if(subs.length===1){const el=newObj('path',at,'Path');saveNodes(el,subs[0].n,subs[0].c);nP++;}
+    else{at.d=subs.map(q=>nodesD(q.n,q.c)).join(' ');newObj('path',at,'Compound Path');nC++;}});
+  r.texts.forEach(t=>{const at={x:f1(X(t.x)),y:f1(Y(t.y)),'font-family':t.font,'font-size':Math.max(1,f1(t.size*sc)),fill:t.fill||'#000000',stroke:'none'};
+    if(t.weight)at['font-weight']=t.weight;if(t.style)at['font-style']=t.style;if(t.op<.995)at.opacity=f1(t.op*100)/100;
+    const el=newObj('text',at,'Type');el.textContent=t.str;if(Math.abs(t.rot)>.5){el.dataset.rot=f1(t.rot);applyT(el);}nT++;});
+  S.docName=cleanName(fname);S.dirty=false;updateDoc();refresh();fit();
+  const parts=[];if(nP)parts.push(`${nP} path${nP>1?'s':''}`);if(nC)parts.push(`${nC} compound path${nC>1?'s':''}`);if(nT)parts.push(`${nT} text object${nT>1?'s':''}`);
+  const notes=[];if(r.skip.grad)notes.push('gradients became solid colors');if(r.skip.img)notes.push('placed/pixel images were left out');if(r.skip.clip)notes.push('clipping masks were released');
+  if(r.pages>1)notes.push(`only Artboard 1 of ${r.pages} was opened`);if(cut)notes.push(`the file was very large, so ${cut} more shapes were left out`);if(nT)notes.push('fonts you don\'t have are swapped for similar ones');
+  toast(`Opened ${esc(fname)}: ${parts.join(', ')}. Every shape is its own object — press A to edit anchor points.${notes.length?'<br><small>Heads up: '+notes.join('; ')+'.</small>':''}<br><small>File › Save keeps your changes as an SVG.</small>`,9000);}
+$('#fileIn').addEventListener('change',e=>{const f=e.target.files&&e.target.files[0];e.target.value='';if(!f)return;
+  const vec=/\.(ai|eps|ps)$/i.test(f.name);if(f.size>(vec?60e6:8e6))return toast('That file is too large to open here.');
+  const r=new FileReader();r.onerror=()=>toast('That file couldn\'t be read.');
+  r.onload=()=>{const u8=new Uint8Array(r.result),k=VX.kind(u8);
+    if(k==='pdf'||k==='eps')return importVector(u8,f.name,k);
+    if(k==='svg'||/\.svg$/i.test(f.name))return importSVG(new TextDecoder().decode(u8),f.name);
+    toast('That file type can\'t be opened here. Choose an .svg, .ai, or .eps file.',5500);};
+  r.readAsArrayBuffer(f);});
+$('#modal').addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.matches('input[type=text],input[type=number]')){e.preventDefault();const b=$('#modal .primary');if(b)b.click();}else if(e.key==='Escape')closeModal();});
+getDL();
+
+/* ---------- Document size (New Document, Document Setup, Artboard Options) ---------- */
+/* Like Illustrator, 1 px = 1 pt and there are 72 pt in an inch. */
+const UNITS={px:{n:'Pixels',a:'px',f:1,d:1},pt:{n:'Points',a:'pt',f:1,d:1},in:{n:'Inches',a:'in',f:72,d:3},cm:{n:'Centimeters',a:'cm',f:72/2.54,d:2},mm:{n:'Millimeters',a:'mm',f:72/25.4,d:1}};
+const MAXPT=16383;
+const rnd=(v,d)=>{const m=10**d;return Math.round(v*m)/m;};
+const toU=(v,u=S.units)=>rnd(v/UNITS[u].f,UNITS[u].d);
+const fromU=(v,u=S.units)=>v*UNITS[u].f;
+const isPrint=u=>['in','cm','mm'].includes(u);
+const docSizeText=()=>`${toU(S.docW)} × ${toU(S.docH)} ${UNITS[S.units].a}`;
+const DOC_PRESETS=[
+  ['Print',[['Letter',8.5,11,'in'],['Postcard',6,4,'in'],['Business Card',3.5,2,'in'],['Flyer (Half Letter)',5.5,8.5,'in'],['Tabloid',11,17,'in'],['Poster',18,24,'in']]],
+  ['Web & Social',[['Trainer Default',800,600,'px'],['Web (HD)',1920,1080,'px'],['Instagram Post',1080,1080,'px'],['Instagram Story',1080,1920,'px'],['Facebook Cover',820,312,'px'],['YouTube Thumbnail',1280,720,'px']]]];
+function guessUnits(w,h){const e=v=>Math.abs(v/9-Math.round(v/9))<.02;return e(w)&&e(h)?'in':'px';}
+function applyBoard(w,h){S.docW=Math.max(1,Math.min(MAXPT,w));S.docH=Math.max(1,Math.min(MAXPT,h));
+  ['#abShadow','#abPage','#gridR'].forEach(id=>{const r=$(id);if(r){r.setAttribute('width',S.docW);r.setAttribute('height',S.docH);}});
+  const st=$('#stAB');if(st)st.textContent='Artboard 1 · '+docSizeText();}
+/* resize the artboard; ref = reference point [0|.5|1, 0|.5|1] that stays put */
+function resizeBoard(w,h,ref){const dx=(w-S.docW)*ref[0],dy=(h-S.docH)*ref[1];
+  if(dx||dy)objs().forEach(o=>{o.dataset.tx=+o.dataset.tx+dx;o.dataset.ty=+o.dataset.ty+dy;applyT(o);});
+  applyBoard(w,h);}
+function setUnits(u){if(!UNITS[u])return;S.units=u;applyBoard(S.docW,S.docH);refresh();toast(`Units are now <b>${UNITS[u].n}</b>. Rulers, the Properties panel, and the status bar all use ${UNITS[u].n.toLowerCase()}.`);}
+function unitSel(id,u){return `<select id="${id}">${Object.keys(UNITS).map(k=>`<option value="${k}" ${k===u?'selected':''}>${UNITS[k].n}</option>`).join('')}</select>`;}
+const ORI=`<div class="orient" role="group" aria-label="Orientation"><button type="button" data-ori="p" title="Portrait"><i style="width:.85rem;height:1.2rem"></i></button><button type="button" data-ori="l" title="Landscape"><i style="width:1.2rem;height:.85rem"></i></button></div>`;
+function dimFields(w,h,u){return `<div class="dimrow"><label>Width<input type="number" id="dW" min="0" step="any" value="${toU(w,u)}"></label><label>Height<input type="number" id="dH" min="0" step="any" value="${toU(h,u)}"></label>
+  <label>Units${unitSel('dU',u)}</label><div><div style="font-weight:600;margin-bottom:.2rem">Orientation</div>${ORI}</div></div><p class="abprev" id="dPrev"></p>`;}
+let DLG=null;
+function dlgRead(){const u=$('#dU').value,w=fromU(+$('#dW').value,u),h=fromU(+$('#dH').value,u);return {u,w,h,ok:w>=1&&h>=1&&w<=MAXPT&&h<=MAXPT};}
+function dlgSync(){const r=dlgRead();document.querySelectorAll('[data-ori]').forEach(b=>b.classList.toggle('on',r.ok&&(b.dataset.ori==='p'?r.h>r.w:r.w>r.h)));
+  document.querySelectorAll('.presets [data-pre]').forEach(b=>{const p=DOC_PRESETS.flatMap(g=>g[1])[+b.dataset.pre],pw=fromU(p[1],p[3]),ph=fromU(p[2],p[3]);
+    b.classList.toggle('on',r.ok&&((Math.abs(pw-r.w)<.5&&Math.abs(ph-r.h)<.5)||(Math.abs(pw-r.h)<.5&&Math.abs(ph-r.w)<.5)));});
+  const pv=$('#dPrev');if(!pv)return;
+  if(!r.ok){pv.innerHTML=`<span style="color:var(--bad)">Enter a width and height between ${toU(1,r.u)} and ${toU(MAXPT,r.u)} ${UNITS[r.u].a}.</span>`;return;}
+  const inch=`${rnd(r.w/72,2)} × ${rnd(r.h/72,2)} in`,px=`${Math.round(r.w)} × ${Math.round(r.h)} px`;
+  pv.textContent=r.u==='in'?`= ${px} (Illustrator counts 72 points per inch)`:r.u==='px'||r.u==='pt'?`= ${inch} when printed`:`= ${inch}`;}
+function dlgWire(){const m=$('#modal');
+  m.oninput=e=>{if(['dW','dH'].includes(e.target.id))dlgSync();};
+  m.onchange=e=>{if(e.target.id==='dU'){const old=DLG.u,w=fromU(+$('#dW').value,old),h=fromU(+$('#dH').value,old);DLG.u=e.target.value;$('#dW').value=toU(w,DLG.u);$('#dH').value=toU(h,DLG.u);dlgSync();}};
+  m.onclick=e=>{const o=e.target.closest('[data-ori]');if(o){const W=$('#dW'),H=$('#dH'),a=+W.value,b=+H.value;if((o.dataset.ori==='p')!==(b>a)&&a!==b){W.value=b;H.value=a;}return dlgSync();}
+    const p=e.target.closest('[data-pre]');if(p){const q=DOC_PRESETS.flatMap(g=>g[1])[+p.dataset.pre];DLG.u=q[3];$('#dU').value=q[3];$('#dW').value=q[1];$('#dH').value=q[2];
+      const nm=$('#nName');if(nm&&(!nm.dataset.typed))nm.value=q[0]==='Trainer Default'?'Untitled-1':q[0];return dlgSync();}
+    const rp=e.target.closest('[data-ref]');if(rp){DLG.ref=rp.dataset.ref.split(',').map(Number);document.querySelectorAll('[data-ref]').forEach(b=>b.classList.toggle('on',b===rp));}};
+  const nm=$('#nName');if(nm)nm.addEventListener('input',()=>nm.dataset.typed='1');
+  dlgSync();}
+function newDocDialog(){DLG={u:S.units};let i=0;
+  const pre=DOC_PRESETS.map(([g,list])=>`<h5>${g}</h5>`+list.map(p=>`<button type="button" data-pre="${i++}"><b>${esc(p[0])}</b><small>${p[1]} × ${p[2]} ${p[3]}</small></button>`).join('')).join('');
+  showModal(`<h2>New Document</h2><p class="sub">Pick a preset or type your own size. In Illustrator, choose File › New (${fmt('Ctrl+N')}) and pick a category: Print, Web, Mobile, Film &amp; Video…</p>
+  <label class="fld">Name<span class="fnrow"><input type="text" id="nName" value="Untitled-1" maxlength="80" autocomplete="off"></span></label>
+  <div class="presets">${pre}</div>${dimFields(S.docW,S.docH,S.units)}
+  <p class="note">Print work is usually measured in <b>inches</b> and should be CMYK at 300 ppi; screen work uses <b>pixels</b> and RGB. Creating a new document clears the artboard — save first if you want to keep your artwork (Ctrl/Cmd+Z also brings it back).</p>
+  <div class="qa"><button class="primary" data-act="donew">Create</button><button data-act="closemodal">Cancel</button></div>`);dlgWire();}
+function doNewDoc(){const r=dlgRead();if(!r.ok)return dlgSync();const name=cleanName($('#nName').value);closeModal();
+  pushUndo();art.innerHTML='';defs.innerHTML='';setSel([]);S.units=r.u;applyBoard(r.w,r.h);S.docName=name==='Untitled-1'?null:name;S.dirty=false;updateDoc();refresh();fit();
+  toast(`New document: <b>${docSizeText()}</b>. Ctrl/Cmd+Z brings the previous artwork back.`,5000);}
+function artboardDialog(title){DLG={u:S.units,ref:[.5,.5]};const ds=title==='Document Setup';
+  const refs=[0,.5,1].flatMap(y=>[0,.5,1].map(x=>`<button type="button" data-ref="${x},${y}" class="${x===.5&&y===.5?'on':''}" title="Reference point"></button>`)).join('');
+  showModal(`<h2>${title}</h2><p class="sub">${ds?`Set the document's units and artboard size. In Illustrator: File › Document Setup (${fmt('Alt+Ctrl+P')}), then <b>Edit Artboards</b> to resize.`:'Type an exact size for Artboard 1. In Illustrator, double-click the Artboard Tool (Shift+O) to open this dialog.'}</p>
+  ${dimFields(S.docW,S.docH,S.units)}
+  <div class="dimrow"><div><div style="font-weight:600;margin-bottom:.2rem">Reference point</div><div class="refpt">${refs}</div></div>
+  <p class="note" style="flex:1;min-width:14rem;margin:0">The reference point is the part of the artboard that stays still. The center keeps your artwork centered; the top-left keeps it where it is. Resizing the artboard does <b>not</b> scale your artwork — anything outside the artboard won't print or export.</p></div>
+  ${ds?'<p class="note"><b>Bleed</b> — for printed pieces that run to the edge, Illustrator adds a bleed (usually 0.125 in) in Document Setup. This trainer shows the trim size only.</p>':''}
+  <div class="qa"><button class="primary" data-act="doab">OK</button><button data-act="closemodal">Cancel</button></div>`);dlgWire();}
+function doArtboard(){const r=dlgRead();if(!r.ok)return dlgSync();const ref=DLG.ref;closeModal();
+  const same=Math.abs(r.w-S.docW)<.01&&Math.abs(r.h-S.docH)<.01;
+  if(same&&r.u===S.units)return;pushUndo();S.units=r.u;resizeBoard(r.w,r.h,ref);refresh();fit();
+  toast(same?`Units are now <b>${UNITS[r.u].n}</b>.`:`Artboard 1 is now <b>${docSizeText()}</b>. Ctrl/Cmd+Z undoes it.`,4500);}
+const MAXPX=16e6;
+function exportScaleOpts(){const opts=[[1,'1x'],[2,'2x'],[3,'3x']];if(isPrint(S.units))opts.push([150/72,'150 ppi'],[300/72,'300 ppi (print)']);
+  const fits=s=>S.docW*s*S.docH*s<=MAXPX&&Math.max(S.docW,S.docH)*s<=16384;
+  let def=isPrint(S.units)?300/72:2;if(!fits(def))def=[...opts].reverse().map(o=>o[0]).find(fits)||opts[0][0];
+  return opts.map(([s,l])=>{const ok=fits(s)||s===1;return `<label title="${ok?'':'Too large for a browser to draw — choose a smaller size'}"><input type="radio" name="eScale" value="${s}" ${s===def?'checked':''} ${ok?'':'disabled'}> ${l} (${Math.round(S.docW*s)} × ${Math.round(S.docH*s)})</label>`;}).join('');}
+
+/* ---------- Start ---------- */
+function sample(){
+  const r=newObj('rect',{x:70,y:80,width:280,height:170,fill:'#8A0635',stroke:'none','stroke-width':0},'Rectangle');
+  const c=newObj('ellipse',{cx:560,cy:180,rx:100,ry:100,fill:'#9E9FA3',stroke:'#0A0A0A','stroke-width':4},'Ellipse');
+  const s=newObj('polygon',{points:polyPts({x:210,y:430},95,-Math.PI/2,'star'),fill:'#FFFFFF',stroke:'#8A0635','stroke-width':6},'Star');
+  const t=newObj('text',{x:380,y:450,'font-family':'Cambria','font-size':54,fill:'#0A0A0A',stroke:'none'},'Type');t.textContent='Cowboys Design';
+  [r,c,s,t].forEach(x=>x.dataset.sample=1);}
+if(S.mac)$('#bMac').textContent='Mac shortcuts';
+applyBoard(S.docW,S.docH);sample();S.dirty=false;updateDoc();renderToolbar();renderInfo();showTab('props');refresh();setCursor();
+$('#stTool').textContent=T[S.tool].name;$('#stHint').textContent=T[S.tool].h;
+welcome();
+})();
+</script>
+</body>
+</html>
