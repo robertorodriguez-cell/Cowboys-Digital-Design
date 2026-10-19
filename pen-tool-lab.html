@@ -170,7 +170,7 @@ var DIAMOND=poly([[300,70],[430,200],[300,330],[170,200]],true);
 var TRI=poly([[300,80],[470,320],[130,320]],true);
 
 var DAYS={
- tue:{label:"Tue",title:"Straight lines",date:"Oct 20",exit:"What is the difference between an open path and a closed path?",
+ tue:{open:"2026-10-20",label:"Tue",title:"Straight lines",date:"Oct 20",exit:"What is the difference between an open path and a closed path?",
   stations:[
    {title:"Zigzag",mins:3,tools:["pen","direct"],hints:{dots:1,nums:1,snap:1},target:poly([[80,300],[180,120],[280,300],[380,120],[480,300]],false),
     text:"Make an <b>open path</b>. With the Pen tool, <b>click</b> (don&rsquo;t drag) each dot in order from 1 to 5. Press <kbd>Enter</kbd> or click <b>End path</b> when you reach dot 5."},
@@ -194,7 +194,7 @@ var DAYS={
    {q:"Which key ends an open path so you can start a new one?",o:["Shift","Esc (or Enter)","Tab","Spacebar"],a:1},
    {q:"Holding Shift while clicking with the Pen tool\u2026",o:["makes a curve","deletes the last point","keeps lines at 45\u00b0 or 90\u00b0 angles","closes the path"],a:2}
   ]},
- wed:{label:"Wed",title:"Curves",date:"Oct 21",exit:"Which direction should you drag the handle when starting a curve?",
+ wed:{open:"2026-10-21",label:"Wed",title:"Curves",date:"Oct 21",exit:"Which direction should you drag the handle when starting a curve?",
   stations:[
    {title:"Arch",mins:4,tools:["pen","direct"],hints:{dots:1,nums:1,arrows:1,snap:1},target:{anchors:[A(120,300,null,[0,-160]),A(480,300,[0,-160],null)],closed:false},
     text:"Curves come from <b>click-dragging</b>. At dot 1, press down and drag straight <b>up</b> to the arrow tip, then let go. At dot 2, drag straight <b>down</b>. Press <kbd>Enter</kbd> to end the path."},
@@ -216,7 +216,7 @@ var DAYS={
    {q:"When you click-drag with the Pen tool, which way should you drag?",o:["Always straight up","Toward the first point","In the direction you want the path to go next","Away from the artboard"],a:2},
    {q:"On a smooth point, the two handles\u2026",o:["point the same way","form one straight line through the anchor","are always the same color","can\u2019t be moved"],a:1}
   ]},
- thu:{label:"Thu",title:"Corners & smooth points",date:"Oct 22",exit:"Sketch a path and label one corner point and one smooth point. (Describe it here in words.)",
+ thu:{open:"2026-10-22",label:"Thu",title:"Corners & smooth points",date:"Oct 22",exit:"Sketch a path and label one corner point and one smooth point. (Describe it here in words.)",
   stations:[
    {title:"Horseshoe",mins:4,tools:["pen","direct","convert"],hints:{dots:1,nums:1,snap:1},target:{anchors:[A(200,330),A(200,180,null,[0,-110]),A(400,180,[0,-110],null),A(400,330)],closed:false},
     text:"Straight legs, curved top. <b>Click</b> dot 1. <b>Drag up</b> at dot 2. <b>Drag down</b> at dot 3. <b>Click</b> dot 4, then press <kbd>Enter</kbd>."},
@@ -242,7 +242,7 @@ var DAYS={
    {q:"Why use the Delete Anchor Point tool instead of selecting a point and pressing Delete?",o:["It\u2019s faster","It removes the point but keeps the path connected","It changes the color","It adds a handle"],a:1},
    {q:"The Curvature tool\u2026",o:["only draws straight lines","makes smooth curves through the points you click","erases paths","fills shapes with color"],a:1}
   ]},
- fri:{label:"Fri",title:"Skills check",date:"Oct 23",exit:"Rate your Pen tool confidence 1\u20135 and name one thing you still find tricky.",
+ fri:{open:"2026-10-23",label:"Fri",title:"Skills check",date:"Oct 23",exit:"Rate your Pen tool confidence 1\u20135 and name one thing you still find tricky.",
   stations:[
    {title:"Lightning bolt",mins:5,tools:["pen","direct","convert","add","delete"],hints:{dots:0,snap:0},efficiency:1,
     target:poly([[330,40],[190,220],[290,220],[240,360],[410,160],[305,160],[360,40]],true),
@@ -264,8 +264,11 @@ var S={sid:"",name:"",period:"",day:"",days:{}};
 try{var sv=JSON.parse(localStorage.getItem(KEY)||"null");if(sv)S=Object.assign(S,sv);}catch(e){}
 if(!S.sid)S.sid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 var today=new Date(),iso=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+/* Each day unlocks on its date (school-day clock on the Chromebook). Teacher preview: add ?preview=cowboys to the link. */
+var PREVIEW=/[?&]preview=cowboys\b/i.test(location.search);
+function isOpen(k){return PREVIEW||iso>=DAYS[k].open;}
 if(DATE_DAY[iso])S.day=DATE_DAY[iso];
-if(!DAYS[S.day])S.day="tue";
+else if(!DAYS[S.day]||!isOpen(S.day)){var od=DAY_ORDER.filter(isOpen);S.day=od.length?od[od.length-1]:"tue";}
 function D(){var k=S.day;if(!S.days[k])S.days[k]={cur:0,start:Date.now(),st:{},quiz:{},exit:""};return S.days[k];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
 
@@ -299,7 +302,7 @@ var syncT=null;function autoSync(){if(!HAS_URL)return;clearTimeout(syncT);syncT=
 function renderDays(){
   var box=$("#days");box.innerHTML="";
   DAY_ORDER.forEach(function(k){var d=DAYS[k],b=document.createElement("button");b.setAttribute("aria-pressed",k===S.day);
-    b.innerHTML=d.label+" "+d.date+"<small>"+d.title+"</small>";b.onclick=function(){S.day=k;save();render();};box.appendChild(b);});
+    b.innerHTML=(isOpen(k)?"":"\uD83D\uDD12 ")+d.label+" "+d.date+"<small>"+(isOpen(k)?d.title:"Opens "+d.label+" "+d.date)+"</small>";b.onclick=function(){S.day=k;save();render();};box.appendChild(b);});
 }
 function isDone(p){if(p.kind==="draw")return stState(p.i).passed;if(p.kind==="quiz")return quizScore().done;return false;}
 function renderNav(){
@@ -313,7 +316,15 @@ function renderNav(){
   $("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-d.start)/60000)+" min";
 }
 function go(i){D().cur=i;save();render();$("#stage").focus({preventScroll:true});window.scrollTo(0,0);}
-function render(){renderDays();var d=D(),pg=pages();if(d.cur>=pg.length)d.cur=0;renderNav();var p=pg[d.cur],st=$("#stage");
+function lockedPage(){
+  activeKey=null;var day=DAYS[S.day];
+  $("#nav").innerHTML="";$("#timer").textContent="";
+  var od=DAY_ORDER.filter(isOpen);
+  $("#stage").innerHTML='<h2>\uD83D\uDD12 '+esc(day.label+" "+day.date)+': '+esc(day.title)+'</h2><p class="lede">This day unlocks on <b>'+esc(day.label+" "+day.date)+'</b>. Come back then!</p>'+
+    (od.length?'<div class="row-actions"><button class="btn" id="gotoday">Go to '+esc(DAYS[od[od.length-1]].label)+'\u2019s stations</button></div>':'<p class="note">The first Pen Tool day opens Tuesday, Oct 20. Today, finish the Print Shop Lab.</p>');
+  var g=$("#gotoday");if(g)g.onclick=function(){S.day=od[od.length-1];save();render();};
+}
+function render(){renderDays();if(!isOpen(S.day)){lockedPage();return;}var d=D(),pg=pages();if(d.cur>=pg.length)d.cur=0;renderNav();var p=pg[d.cur],st=$("#stage");
   if(p.kind==="draw")drawStation(st,p.i);else if(p.kind==="quiz")quizPage(st);else reportPage(st);}
 function nextBtn(){var d=D();return d.cur<pages().length-1?'<button class="btn ghost" data-next>Next</button>':'';}
 
