@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pen Tool Lab — Week 11 | Digital Design 1</title>
+<style>
+:root{
+  --maroon:#8A0635; --maroon-dk:#5C0423; --ink:#0A0A0A; --silver:#9E9FA3;
+  --paper:#FFFFFF; --wash:#F4F1F2; --line:#D9D6D8;
+  --ok:#2E7D32; --ok-bg:#E8F3E9; --bad:#B3261E; --bad-bg:#FBE9E7;
+  --blue:#1F7AE0; --cyan:#00A0DC; --magenta:#E5007E; --yellow:#FFE500;
+  --serif:Cambria, Caladea, Georgia, serif;
+  --sans:Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+  --mono:"Courier New", Courier, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--wash);font-size:17px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+
+.sheet-head{background:var(--maroon);color:#fff;padding:22px 24px 0}
+.head-inner{max-width:1180px;margin:0 auto;display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-end;justify-content:space-between}
+.head-inner h1{font-family:var(--serif);font-size:2.6rem;line-height:1;margin:0 0 6px}
+.head-inner p{margin:0 0 4px;color:#F1D3DD;max-width:50ch}
+.who{display:flex;gap:12px;flex-wrap:wrap}
+.who label{display:flex;flex-direction:column;font-size:.85rem;color:#F1D3DD}
+.who input{margin-top:3px;padding:7px 10px;border:2px solid transparent;border-radius:6px;width:210px;background:#fff;color:var(--ink)}
+.who input.short{width:110px}
+.who input.need{border-color:var(--yellow)}
+.days{max-width:1180px;margin:16px auto 0;display:flex;gap:6px;flex-wrap:wrap}
+.days button{border:0;border-radius:8px 8px 0 0;padding:9px 16px;background:var(--maroon-dk);color:#F1D3DD;font-weight:700}
+.days button small{display:block;font-weight:400;font-size:.78rem}
+.days button[aria-pressed="true"]{background:var(--wash);color:var(--maroon)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:22px 24px 60px;display:grid;grid-template-columns:230px 1fr;gap:28px}
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;position:sticky;top:12px}
+nav button{width:100%;text-align:left;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:center}
+nav button .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--wash);font-weight:700;color:var(--maroon)}
+nav button .t{flex:1;line-height:1.2}
+nav button .t small{display:block;color:#666;font-size:.8rem}
+nav button[aria-current="step"]{border-color:var(--maroon);box-shadow:inset 0 0 0 1px var(--maroon)}
+nav button.done .n{background:var(--ok);color:#fff}
+.timer{margin-top:10px;padding:6px 12px;font-size:.9rem;color:#555}
+
+.station{position:relative;background:var(--paper);padding:28px 30px 32px;border-radius:2px}
+.station::before,.station::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.station::before{top:-10px;left:-10px;border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
+.station::after{bottom:-10px;right:-10px;border-bottom:1.5px solid var(--ink);border-right:1.5px solid var(--ink)}
+.station h2{font-family:var(--serif);color:var(--maroon);font-size:1.9rem;margin:0 0 4px;line-height:1.15}
+.station h3{font-family:var(--serif);font-size:1.2rem;margin:24px 0 8px}
+.time{color:#666;font-size:.9rem;margin:0 0 10px}
+.lede{margin:0 0 14px;max-width:75ch}
+.how{margin:0 0 14px;padding-left:22px;max-width:75ch}
+.how li{margin-bottom:3px}
+kbd{font-family:var(--mono);background:var(--wash);border:1px solid #ccc;border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:.88em}
+
+.btn{padding:9px 16px;border-radius:8px;border:2px solid var(--maroon);background:var(--maroon);color:#fff;font-weight:700}
+.btn.ghost{background:transparent;color:var(--maroon)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:16px}
+.fb{margin-top:10px;padding:10px 14px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-bg);color:#1B5E20}
+.fb.bad{background:var(--bad-bg);color:#8C1D18}
+.fb.info{background:var(--wash);color:#333}
+
+/* Editor */
+.editor{display:grid;grid-template-columns:56px 1fr;gap:10px;align-items:start}
+.tools{display:flex;flex-direction:column;gap:6px;background:#2b2b2b;padding:6px;border-radius:6px}
+.tools button{width:44px;height:44px;border-radius:6px;border:0;background:#3c3c3c;color:#eee;display:grid;place-items:center;position:relative}
+.tools button svg{width:24px;height:24px}
+.tools button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.tools button:disabled{display:none}
+.board{background:#E6E6E6;border-radius:6px;padding:10px}
+.board svg{display:block;width:100%;height:auto;background:#fff;touch-action:none;user-select:none;-webkit-user-select:none}
+.statusbar{display:flex;gap:16px;flex-wrap:wrap;font-size:.88rem;color:#444;padding:6px 2px 0}
+.statusbar b{color:var(--ink)}
+.result{display:flex;gap:14px;align-items:center}
+.meter{font-family:var(--serif);font-size:1.6rem;color:var(--maroon);font-weight:700}
+
+/* Quiz + report */
+.mc label{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}
+.mc label:hover{background:var(--wash)}
+.mc label.ok{border-color:var(--ok);background:var(--ok-bg)}
+.mc label.bad{border-color:var(--bad);background:var(--bad-bg)}
+.q{border-top:1px solid var(--line);padding:14px 0}
+.q p{margin:0 0 8px;font-weight:700}
+.report table{border-collapse:collapse;width:100%;margin:10px 0 18px}
+.report th,.report td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+.report td.num{text-align:right;font-variant-numeric:tabular-nums}
+.report tfoot td{font-weight:700;border-top:2px solid var(--ink)}
+.report textarea{width:100%;min-height:100px;padding:10px;border:1px solid #bbb;border-radius:8px}
+.stamp{display:inline-block;border:3px solid var(--maroon);color:var(--maroon);font-family:var(--serif);font-weight:700;padding:6px 14px;transform:rotate(-3deg);font-size:1.2rem}
+.note{color:#555;font-size:.92rem}
+
+@media (max-width:900px){
+  .wrap{grid-template-columns:1fr}
+  nav ol{position:static;flex-direction:row;overflow-x:auto}
+  nav button{min-width:160px}
+  .station{padding:22px 16px}
+  .editor{grid-template-columns:1fr}
+  .tools{flex-direction:row;flex-wrap:wrap}
+}
+@media print{ nav,.row-actions,.no-print,.days{display:none!important} .wrap{display:block} body{background:#fff} }
+</style>
+</head>
+<body>
+<header class="sheet-head">
+  <div class="head-inner">
+    <div>
+      <h1>Pen Tool Lab</h1>
+      <p>Week 11: draw paths with anchor points, segments, and direction handles. Pick today&rsquo;s day, then work through every station.</p>
+    </div>
+    <div class="who">
+      <label>Your name<input id="sname" autocomplete="name" placeholder="First and last name"></label>
+      <label>Class period<input id="speriod" class="short" placeholder="e.g. 3"></label>
+    </div>
+  </div>
+  <div class="days" id="days" role="group" aria-label="Choose the day"></div>
+</header>
+<div class="wrap">
+  <nav aria-label="Stations"><ol id="nav"></ol><div class="timer" id="timer"></div></nav>
+  <main id="stage" class="station" tabindex="-1"></main>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ===== TEACHER SETUP: same web app URL as the Print Shop Lab ===== */
+var RESULTS_URL="https://script.google.com/macros/s/AKfycbwYTkQW5toOW2JMFNbcd6PK9_RF6B60FeaHafwCDVS78go92jg_DyBQzb4aK9QTZOVj/exec";
+/* ================================================================= */
+var HAS_URL=/^https:\/\/script\.google\.com\//.test(RESULTS_URL);
+var KEY="dd1-pen-tool-lab-w11";
+
+/* ---------- geometry ---------- */
+function P(x,y){return {x:x,y:y};}
+function A(x,y,hi,ho){return {x:x,y:y,hi:hi?P(hi[0],hi[1]):null,ho:ho?P(ho[0],ho[1]):null};}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function bez(p0,p1,p2,p3,t){var u=1-t;return P(u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x,u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y);}
+function ctrl(a,b){return [P(a.x,a.y),P(a.x+(a.ho?a.ho.x:0),a.y+(a.ho?a.ho.y:0)),P(b.x+(b.hi?b.hi.x:0),b.y+(b.hi?b.hi.y:0)),P(b.x,b.y)];}
+function segs(path){var s=[],a=path.anchors;for(var i=0;i<a.length-1;i++)s.push(ctrl(a[i],a[i+1]));if(path.closed&&a.length>1)s.push(ctrl(a[a.length-1],a[0]));return s;}
+function pathD(path){var a=path.anchors;if(!a.length)return "";var d="M"+a[0].x.toFixed(1)+" "+a[0].y.toFixed(1);segs(path).forEach(function(c){d+=" C"+[c[1],c[2],c[3]].map(function(p){return p.x.toFixed(1)+" "+p.y.toFixed(1);}).join(" ");});if(path.closed)d+=" Z";return d;}
+function sample(path,n){var out=[];segs(path).forEach(function(c,i){for(var k=(i?1:0);k<=n;k++)out.push(bez(c[0],c[1],c[2],c[3],k/n));});if(!out.length&&path.anchors.length)out.push(P(path.anchors[0].x,path.anchors[0].y));return out;}
+function pseg(p,a,b){var dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;if(!l)return dist(p,a);var t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
+function directed(A_,B_){var sum=0,mx=0;A_.forEach(function(p){var m=Infinity;for(var i=0;i<B_.length-1;i++){var d=pseg(p,B_[i],B_[i+1]);if(d<m)m=d;}if(B_.length===1)m=dist(p,B_[0]);sum+=m;if(m>mx)mx=m;});return {mean:sum/A_.length,max:mx};}
+function compare(student,target){
+  if(student.anchors.length<2)return {acc:0,mean:99,max:99};
+  var sT=sample(target,40),sS=sample(student,40);
+  var a=directed(sT,sS),b=directed(sS,sT);
+  var mean=(a.mean+b.mean)/2,mx=Math.max(a.max,b.max);
+  var acc=Math.round(Math.max(0,Math.min(100,100-Math.max(0,mean-1.5)*7)));
+  if(mx>30)acc=Math.min(acc,69);
+  return {acc:acc,mean:mean,max:mx};
+}
+function splitAt(a,b,t){var c=ctrl(a,b);function L(p,q){return P(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t);}
+  var p01=L(c[0],c[1]),p12=L(c[1],c[2]),p23=L(c[2],c[3]),p012=L(p01,p12),p123=L(p12,p23),m=L(p012,p123);
+  return {m:m,aho:P(p01.x-a.x,p01.y-a.y),mhi:P(p012.x-m.x,p012.y-m.y),mho:P(p123.x-m.x,p123.y-m.y),bhi:P(p23.x-b.x,p23.y-b.y)};}
+function snap45(o,p){var dx=p.x-o.x,dy=p.y-o.y,r=Math.hypot(dx,dy),ang=Math.round(Math.atan2(dy,dx)/(Math.PI/4))*(Math.PI/4);return P(o.x+r*Math.cos(ang),o.y+r*Math.sin(ang));}
+
+/* ---------- shapes ---------- */
+function poly(pts,closed){return {anchors:pts.map(function(p){return A(p[0],p[1]);}),closed:!!closed};}
+function star(){var pts=[];for(var i=0;i<10;i++){var r=i%2?62:150,ang=-Math.PI/2+i*Math.PI/5;pts.push([Math.round(300+r*Math.cos(ang)),Math.round(210+r*Math.sin(ang))]);}return poly(pts,true);}
+var K=71.8;
+var CIRCLE={anchors:[A(300,70,[-K,0],[K,0]),A(430,200,[0,-K],[0,K]),A(300,330,[K,0],[-K,0]),A(170,200,[0,K],[0,-K])],closed:true};
+var DIAMOND=poly([[300,70],[430,200],[300,330],[170,200]],true);
+var TRI=poly([[300,80],[470,320],[130,320]],true);
+
+var DAYS={
+ tue:{label:"Tue",title:"Straight lines",date:"Oct 20",exit:"What is the difference between an open path and a closed path?",
+  stations:[
+   {title:"Zigzag",mins:3,tools:["pen","direct"],hints:{dots:1,nums:1,snap:1},target:poly([[80,300],[180,120],[280,300],[380,120],[480,300]],false),
+    text:"Make an <b>open path</b>. With the Pen tool, <b>click</b> (don&rsquo;t drag) each dot in order from 1 to 5. Press <kbd>Enter</kbd> or click <b>End path</b> when you reach dot 5."},
+   {title:"Triangle",mins:3,tools:["pen","direct"],hints:{dots:1,nums:1,snap:1},target:TRI,
+    text:"Make a <b>closed path</b>. Click dots 1, 2, and 3, then click <b>dot 1 again</b> to close the shape. A small circle appears next to the cursor when you&rsquo;re over the starting point."},
+   {title:"Star",mins:5,tools:["pen","direct"],hints:{dots:1,nums:1,snap:1},target:star(),
+    text:"Click all 10 points in order, then close the path on dot 1. If you misclick, press <kbd>Ctrl</kbd>+<kbd>Z</kbd> to undo the last point."},
+   {title:"Letter M",mins:5,tools:["pen","direct"],hints:{dots:1,nums:1,snap:1},target:poly([[150,320],[150,90],[220,90],[300,200],[380,90],[450,90],[450,320],[390,320],[390,180],[300,300],[210,180],[210,320]],true),
+    text:"Trace the M for Madison as one closed path, 12 points in order. Close it on dot 1."},
+   {title:"Shift staircase",mins:5,tools:["pen","direct"],hints:{dots:1,nums:0,snap:0},target:poly([[100,340],[180,340],[180,270],[260,270],[260,200],[340,200],[340,130],[420,130],[420,60],[500,60]],false),
+    text:"No snapping on this one. Start at the bottom-left dot and <b>hold <kbd>Shift</kbd></b> as you click each corner. Shift keeps every line perfectly straight. End the path at the top right."},
+   {title:"Fix the house",mins:4,tools:["direct"],hints:{dots:1,nums:0,snap:0},mode:"edit",
+    target:poly([[200,330],[200,180],[300,90],[400,180],[400,330]],true),
+    preset:poly([[170,350],[200,180],[300,140],[430,210],[400,330]],true),
+    text:"Three anchor points are in the wrong spot. Use the <b>Direct Selection tool</b> <kbd>A</kbd> to drag each point onto its dot."}
+  ],
+  quiz:[
+   {q:"An anchor point is\u2026",o:["a point that marks where a path starts, ends, or changes direction","the color inside a shape","the thickness of a line","a type of brush"],a:0},
+   {q:"The line between two anchor points is called a\u2026",o:["handle","segment","stroke","layer"],a:1},
+   {q:"How do you close a path with the Pen tool?",o:["Press Delete","Double-click anywhere","Click the first anchor point again","Switch to the Selection tool"],a:2},
+   {q:"Which key ends an open path so you can start a new one?",o:["Shift","Esc (or Enter)","Tab","Spacebar"],a:1},
+   {q:"Holding Shift while clicking with the Pen tool\u2026",o:["makes a curve","deletes the last point","keeps lines at 45\u00b0 or 90\u00b0 angles","closes the path"],a:2}
+  ]},
+ wed:{label:"Wed",title:"Curves",date:"Oct 21",exit:"Which direction should you drag the handle when starting a curve?",
+  stations:[
+   {title:"Arch",mins:4,tools:["pen","direct"],hints:{dots:1,nums:1,arrows:1,snap:1},target:{anchors:[A(120,300,null,[0,-160]),A(480,300,[0,-160],null)],closed:false},
+    text:"Curves come from <b>click-dragging</b>. At dot 1, press down and drag straight <b>up</b> to the arrow tip, then let go. At dot 2, drag straight <b>down</b>. Press <kbd>Enter</kbd> to end the path."},
+   {title:"Wave",mins:5,tools:["pen","direct"],hints:{dots:1,nums:1,arrows:1,snap:1},target:{anchors:[A(90,200,null,[45,-110]),A(230,200,[-45,-110],[45,110]),A(370,200,[45,110],[45,-110]),A(510,200,[-45,-110],null)],closed:false},
+    text:"Click-drag at each dot in the direction of its arrow. Notice the pattern: you always drag the way the path is <b>heading next</b>."},
+   {title:"Circle (4 points)",mins:5,tools:["pen","direct"],hints:{dots:1,nums:1,arrows:1,snap:1},target:CIRCLE,
+    text:"A circle needs only 4 smooth points. Drag at each dot along its arrow, then <b>click</b> (don&rsquo;t drag) dot 1 to close."},
+   {title:"S-curve",mins:4,tools:["pen","direct"],hints:{dots:1,nums:1,arrows:0,snap:1},target:{anchors:[A(130,320,null,[220,0]),A(470,80,[-220,0],null)],closed:false},
+    text:"No arrows this time. Two points make this whole S. Hint: drag both handles <b>sideways</b>. Which way does the path head at each end?"},
+   {title:"Fix the rainbow",mins:5,tools:["direct"],hints:{dots:1,nums:0,arrows:1,snap:0},mode:"edit",
+    target:{anchors:[A(100,320,null,[0,-130]),A(300,100,[-130,0],[130,0]),A(500,320,[0,-130],null)],closed:false},
+    preset:{anchors:[A(100,320,null,[30,-40]),A(300,100,[-40,40],[40,-40]),A(500,320,[-30,-40],null)],closed:false},
+    text:"The points are right but the <b>handles</b> are wrong. With Direct Selection <kbd>A</kbd>, drag the round handle ends to match the arrows. On a smooth point, moving one handle swings the other one too."}
+  ],
+  quiz:[
+   {q:"Pierre B\u00e9zier developed these curves in the 1960s to design\u2026",o:["video games","car bodies at Renault","airplane wings at Boeing","fonts at Adobe"],a:1},
+   {q:"What controls the shape of a curve between two anchor points?",o:["The stroke weight","The direction handles","The layer order","The fill color"],a:1},
+   {q:"Dragging a handle farther away from its anchor point makes the curve\u2026",o:["bulge more","disappear","turn into a straight line","change color"],a:0},
+   {q:"When you click-drag with the Pen tool, which way should you drag?",o:["Always straight up","Toward the first point","In the direction you want the path to go next","Away from the artboard"],a:2},
+   {q:"On a smooth point, the two handles\u2026",o:["point the same way","form one straight line through the anchor","are always the same color","can\u2019t be moved"],a:1}
+  ]},
+ thu:{label:"Thu",title:"Corners & smooth points",date:"Oct 22",exit:"Sketch a path and label one corner point and one smooth point. (Describe it here in words.)",
+  stations:[
+   {title:"Horseshoe",mins:4,tools:["pen","direct","convert"],hints:{dots:1,nums:1,snap:1},target:{anchors:[A(200,330),A(200,180,null,[0,-110]),A(400,180,[0,-110],null),A(400,330)],closed:false},
+    text:"Straight legs, curved top. <b>Click</b> dot 1. <b>Drag up</b> at dot 2. <b>Drag down</b> at dot 3. <b>Click</b> dot 4, then press <kbd>Enter</kbd>."},
+   {title:"Leaf",mins:6,tools:["pen","direct","convert"],hints:{dots:1,nums:1,snap:1},target:{anchors:[A(140,290,[156,15],[68,-141]),A(460,110,[-156,-15],[-68,141])],closed:true},
+    text:"Both tips are <b>corner points</b> with handles that bend. Draw the top curve first. At dot 2, drag, then <b>drag from dot 2 again</b> to aim the next curve down. Close on dot 1. Fix any handle with the <b>Anchor Point tool</b> <kbd>Shift</kbd>+<kbd>C</kbd>: dragging one handle with it moves that handle alone."},
+   {title:"Heart",mins:7,tools:["pen","direct","convert","add","delete"],hints:{dots:1,nums:1,snap:1},target:{anchors:[A(300,150,[-160,-130],[160,-130]),A(300,330,[110,-70],[-110,-70])],closed:true},
+    text:"A heart has two corner points: the dip at the top and the tip at the bottom. Any method that matches the guide counts. Tips: <b>click the last point</b> to cut its handle, <b>drag from the last point</b> to aim a new one, or hold <kbd>Alt</kbd> and drag a handle to bend it."},
+   {title:"Corners to curves",mins:4,tools:["convert","direct"],hints:{dots:1,nums:0,arrows:1,snap:0},mode:"edit",target:CIRCLE,preset:DIAMOND,
+    text:"Turn this diamond into a circle. With the <b>Anchor Point tool</b> <kbd>Shift</kbd>+<kbd>C</kbd>, press on each corner and <b>drag</b> along its arrow to pull out smooth handles."},
+   {title:"Curves to corners",mins:2,tools:["convert"],hints:{dots:1,nums:0,snap:0},mode:"edit",target:DIAMOND,preset:CIRCLE,
+    text:"Now go back. With the Anchor Point tool, simply <b>click</b> each smooth point to turn it into a corner."},
+   {title:"Delete extra points",mins:3,tools:["delete","direct"],hints:{dots:1,nums:0,snap:0},mode:"edit",maxAnchors:3,target:TRI,
+    preset:poly([[300,80],[425,175],[470,320],[300,348],[130,320],[175,175]],true),
+    text:"This triangle has 3 extra anchor points making it lumpy. Use the <b>Delete Anchor Point tool</b> <kbd>-</kbd> to click them away. The path stays closed."},
+   {title:"Add a roof point",mins:3,tools:["add","direct","convert"],hints:{dots:1,nums:0,snap:0},mode:"edit",minAnchors:5,
+    target:poly([[200,120],[300,40],[400,120],[400,320],[200,320]],true),preset:poly([[200,120],[400,120],[400,320],[200,320]],true),
+    text:"Turn the box into a house. Use the <b>Add Anchor Point tool</b> <kbd>+</kbd> to click the middle of the top edge, then drag that new point up to the dot with Direct Selection <kbd>A</kbd>."}
+  ],
+  quiz:[
+   {q:"A corner point is where a path\u2026",o:["changes direction sharply","is the thickest","has a gradient","is locked"],a:0},
+   {q:"What is the keyboard shortcut for the Anchor Point tool?",o:["Shift + C","Ctrl + A","P","Shift + M"],a:0},
+   {q:"Which tool lets you drag ONE handle without moving the other, breaking a smooth point into a corner?",o:["Selection tool","Anchor Point tool","Eyedropper tool","Hand tool"],a:1},
+   {q:"Why use the Delete Anchor Point tool instead of selecting a point and pressing Delete?",o:["It\u2019s faster","It removes the point but keeps the path connected","It changes the color","It adds a handle"],a:1},
+   {q:"The Curvature tool\u2026",o:["only draws straight lines","makes smooth curves through the points you click","erases paths","fills shapes with color"],a:1}
+  ]},
+ fri:{label:"Fri",title:"Skills check",date:"Oct 23",exit:"Rate your Pen tool confidence 1\u20135 and name one thing you still find tricky.",
+  stations:[
+   {title:"Lightning bolt",mins:5,tools:["pen","direct","convert","add","delete"],hints:{dots:0,snap:0},efficiency:1,
+    target:poly([[330,40],[190,220],[290,220],[240,360],[410,160],[305,160],[360,40]],true),
+    text:"No dots, no snapping. Trace the bolt as one closed path with as few anchor points as you can."},
+   {title:"Raindrop",mins:7,tools:["pen","direct","convert","add","delete"],hints:{dots:0,snap:0},efficiency:1,
+    target:{anchors:[A(300,60,[-20,60],[20,60]),A(400,250,[0,-80],[0,60]),A(300,345,[60,0],[-60,0]),A(200,250,[0,60],[0,-80])],closed:true},
+    text:"One sharp tip, the rest smooth curves. Plan where your anchor points go before you start."},
+   {title:"Cowboy boot",mins:10,tools:["pen","direct","convert","add","delete"],hints:{dots:0,snap:0},efficiency:1,
+    target:{anchors:[A(240,60),A(340,60),A(345,220,null,[60,10]),A(505,305,[-50,-55],[5,30]),A(470,340,[30,0],null),A(230,340),A(230,300)],closed:true},
+    text:"Straight shaft, curved toe, flat sole. Use every tool you&rsquo;ve learned. Corners where the boot turns sharply, smooth points on the toe."}
+  ],
+  quiz:[]}
+};
+var DAY_ORDER=["tue","wed","thu","fri"];
+var DATE_DAY={"2026-10-20":"tue","2026-10-21":"wed","2026-10-22":"thu","2026-10-23":"fri"};
+
+/* ---------- state ---------- */
+var S={sid:"",name:"",period:"",day:"",days:{}};
+try{var sv=JSON.parse(localStorage.getItem(KEY)||"null");if(sv)S=Object.assign(S,sv);}catch(e){}
+if(!S.sid)S.sid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+var today=new Date(),iso=today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+if(DATE_DAY[iso])S.day=DATE_DAY[iso];
+if(!DAYS[S.day])S.day="tue";
+function D(){var k=S.day;if(!S.days[k])S.days[k]={cur:0,start:Date.now(),st:{},quiz:{},exit:""};return S.days[k];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+var $=function(s,r){return (r||document).querySelector(s);},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function fb(el,cls,html){el.className="fb show "+cls;el.innerHTML=html;}
+
+function pages(){var d=DAYS[S.day],p=d.stations.map(function(s,i){return {kind:"draw",i:i,title:s.title,mins:s.mins};});if(d.quiz.length)p.push({kind:"quiz",title:"Quick check",mins:4});p.push({kind:"report",title:"Lab report"});return p;}
+function stState(i){var d=D();if(!d.st[i])d.st[i]={best:0,passed:false,checks:0,anchors:0,path:null};return d.st[i];}
+function quizScore(){var d=D(),q=DAYS[S.day].quiz,g=0,done=0;q.forEach(function(x,i){var r=d.quiz[i];if(r&&r.ok){done++;if(r.tries===1)g++;}});return {got:g,of:q.length,done:done===q.length};}
+
+/* ---------- send to teacher ---------- */
+function payload(status){
+  var day=DAYS[S.day],d=D(),acc=[],passed=0,details=[];
+  day.stations.forEach(function(s,i){var r=d.st[i];var b=r&&r.checks?r.best:"";acc.push(b);if(r&&r.passed)passed++;
+    details.push(s.title+": "+(r&&r.checks?(r.best+"%"+(r.passed?" \u2713":"")+", "+r.anchors+" pts, "+r.checks+" checks"):"not tried"));});
+  var tried=acc.filter(function(v){return v!=="";});
+  var q=quizScore();
+  return {lab:"pen",sid:S.sid,day:day.label+" "+day.date+" \u2013 "+day.title,name:S.name,period:S.period,status:status,
+    minutes:Math.floor((Date.now()-d.start)/60000),passed:passed,stations:day.stations.length,
+    avgAcc:tried.length?Math.round(tried.reduce(function(a,b){return a+b;},0)/tried.length):"",
+    quiz:q.of?q.got:"",quizOf:q.of||"",acc:acc,details:details.join("; "),exit:d.exit||""};
+}
+function send(status,cb){
+  if(!HAS_URL||!S.name){if(cb)cb(false);return;}
+  try{fetch(RESULTS_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload(status))}).then(function(){cb&&cb(true);}).catch(function(){cb&&cb(false);});}catch(e){cb&&cb(false);}
+}
+var syncT=null;function autoSync(){if(!HAS_URL)return;clearTimeout(syncT);syncT=setTimeout(function(){send(D().submittedAt?"Submitted (updated)":"In progress");},4000);}
+
+/* ---------- chrome ---------- */
+function renderDays(){
+  var box=$("#days");box.innerHTML="";
+  DAY_ORDER.forEach(function(k){var d=DAYS[k],b=document.createElement("button");b.setAttribute("aria-pressed",k===S.day);
+    b.innerHTML=d.label+" "+d.date+"<small>"+d.title+"</small>";b.onclick=function(){S.day=k;save();render();};box.appendChild(b);});
+}
+function isDone(p){if(p.kind==="draw")return stState(p.i).passed;if(p.kind==="quiz")return quizScore().done;return false;}
+function renderNav(){
+  autoSync();
+  var nav=$("#nav");nav.innerHTML="";var d=D();
+  pages().forEach(function(p,i){var li=document.createElement("li"),b=document.createElement("button");
+    if(isDone(p))b.className="done";if(i===d.cur)b.setAttribute("aria-current","step");
+    var sub=p.kind==="report"?"Turn in":(isDone(p)?"Complete":"About "+p.mins+" min");
+    b.innerHTML='<span class="n">'+(p.kind==="report"?"\u2713":(i+1))+'</span><span class="t">'+esc(p.title)+'<small>'+sub+'</small></span>';
+    b.onclick=function(){go(i);};li.appendChild(b);nav.appendChild(li);});
+  $("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-d.start)/60000)+" min";
+}
+function go(i){D().cur=i;save();render();$("#stage").focus({preventScroll:true});window.scrollTo(0,0);}
+function render(){renderDays();var d=D(),pg=pages();if(d.cur>=pg.length)d.cur=0;renderNav();var p=pg[d.cur],st=$("#stage");
+  if(p.kind==="draw")drawStation(st,p.i);else if(p.kind==="quiz")quizPage(st);else reportPage(st);}
+function nextBtn(){var d=D();return d.cur<pages().length-1?'<button class="btn ghost" data-next>Next</button>':'';}
+
+/* ---------- tool icons ---------- */
+var ICON={
+ pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l6 9-6 9-6-9z"/><path d="M12 12v9"/><circle cx="12" cy="11" r="1.4" fill="currentColor"/></svg>',
+ direct:'<svg viewBox="0 0 24 24" fill="#fff" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 3l12 9-5.5 1 3 6-2.5 1.2-3-6L6 18z"/></svg>',
+ convert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20L12 6l8 14"/><path d="M12 6l5-3"/><circle cx="17.5" cy="2.8" r="1.6" fill="currentColor"/></svg>',
+ add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 3l5 8-5 8-5-8z"/><path d="M18 14v7M14.5 17.5h7"/></svg>',
+ delete:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M10 3l5 8-5 8-5-8z"/><path d="M14.5 17.5h7"/></svg>'
+};
+var TNAME={pen:"Pen tool (P)",direct:"Direct Selection (A)",convert:"Anchor Point tool (Shift+C)",add:"Add Anchor Point (+)",delete:"Delete Anchor Point (\u2013)"};
+
+/* ---------- drawing station ---------- */
+var activeKey=null;
+function drawStation(stage,idx){
+  var day=DAYS[S.day],sd=day.stations[idx],st=stState(idx),edit=sd.mode==="edit";
+  var path=st.path?clone(st.path):(edit?clone(sd.preset):{anchors:[],closed:false});
+  var drawing=!edit&&st.drawing&&!path.closed&&path.anchors.length>0;
+  var tool=sd.tools[0],undo=[],drag=null,hover=null,sel=-1;
+  stage.innerHTML='<h2>'+esc(day.label)+' station '+(idx+1)+': '+esc(sd.title)+'</h2><p class="time">About '+sd.mins+' minutes</p><p class="lede">'+sd.text+'</p>'+
+   '<div class="editor"><div class="tools" role="toolbar" aria-label="Tools">'+["pen","direct","convert","add","delete"].map(function(t){return '<button data-tool="'+t+'" title="'+TNAME[t]+'" aria-label="'+TNAME[t]+'"'+(sd.tools.indexOf(t)<0?" disabled":"")+'>'+ICON[t]+'</button>';}).join("")+'</div>'+
+   '<div class="board"><svg id="cv" viewBox="0 0 600 400" role="img" aria-label="Drawing area"></svg>'+
+   '<div class="statusbar"><span>Tool: <b id="tn"></b></span><span>Anchor points: <b id="ac"></b>'+(sd.efficiency?' (target '+sd.target.anchors.length+')':'')+'</span><span>Path: <b id="pc"></b></span></div></div></div>'+
+   '<div class="row-actions"><button class="btn" id="chk">Check my path</button>'+(edit?'':'<button class="btn ghost" id="end">End path</button>')+'<button class="btn ghost" id="und">Undo</button><button class="btn ghost" id="clr">'+(edit?'Reset':'Clear')+'</button>'+nextBtn()+'</div>'+
+   '<div class="fb" id="sfb"></div>';
+  var svg=$("#cv",stage);
+  if(st.passed)fb($("#sfb",stage),"ok","Station passed with "+st.best+"% accuracy. You can keep practicing; your best score is saved.");
+
+  function persist(){st.path=clone(path);st.drawing=drawing;save();}
+  function snapshot(){undo.push(JSON.stringify({p:path,d:drawing}));if(undo.length>60)undo.shift();}
+  function setTool(t){if(sd.tools.indexOf(t)<0)return;tool=t;$$(".tools button",stage).forEach(function(b){b.setAttribute("aria-pressed",b.dataset.tool===t);});
+    svg.style.cursor=t==="pen"?"crosshair":(t==="direct"?"default":"pointer");$("#tn",stage).textContent=TNAME[t];draw();}
+  function pt(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;var m=svg.getScreenCTM();if(!m)return P(0,0);var r=p.matrixTransform(m.inverse());return P(r.x,r.y);}
+  function hitAnchor(p){for(var i=path.anchors.length-1;i>=0;i--)if(dist(p,path.anchors[i])<=10)return i;return -1;}
+  function handlesShown(i){if(tool==="direct"||tool==="convert")return true;if(tool==="pen"&&drawing&&i===path.anchors.length-1)return true;return i===sel;}
+  function hitHandle(p){for(var i=path.anchors.length-1;i>=0;i--){if(!handlesShown(i))continue;var a=path.anchors[i];
+    var hs=["hi","ho"];for(var k=0;k<2;k++){var h=a[hs[k]];if(h&&dist(p,P(a.x+h.x,a.y+h.y))<=9)return {i:i,which:hs[k]};}}return null;}
+  function hitSeg(p){var a=path.anchors,n=path.closed?a.length:a.length-1,best=null;for(var i=0;i<n;i++){var b=a[(i+1)%a.length],c=ctrl(a[i],b);
+    for(var k=0;k<=60;k++){var q=bez(c[0],c[1],c[2],c[3],k/60),d=dist(p,q);if(d<=8&&(!best||d<best.d))best={i:i,t:k/60,d:d};}}return best;}
+  function snapDot(p){if(!sd.hints.snap)return p;var best=null;sd.target.anchors.forEach(function(a){var d=dist(p,a);if(d<=12&&(!best||d<best.d))best={a:a,d:d};});return best?P(best.a.x,best.a.y):p;}
+
+  svg.addEventListener("pointerdown",function(e){
+    e.preventDefault();svg.setPointerCapture(e.pointerId);
+    var p=pt(e),t=tool;
+    if(t==="pen"&&e.altKey&&!drawing)t="convert";
+    if(t==="pen"&&e.altKey&&drawing){var hh=hitHandle(p);if(hh){snapshot();drag={type:"handle",i:hh.i,which:hh.which,brk:true,start:p};return;}}
+    if(t==="pen"){
+      if(path.closed){fb($("#sfb",stage),"info","This path is closed. Click <b>Clear</b> to start over, or switch to Direct Selection to adjust it.");return;}
+      var n=path.anchors.length;
+      if(drawing&&n>=2&&dist(p,path.anchors[0])<=10){snapshot();drag={type:"close",start:p};return;}
+      if(drawing&&n>=1&&dist(p,path.anchors[n-1])<=10){snapshot();drag={type:"last",start:p,moved:false};return;}
+      snapshot();
+      var q=snapDot(p);if(e.shiftKey&&drawing&&n)q=snap45(path.anchors[n-1],q);
+      if(!drawing){path={anchors:[],closed:false};drawing=true;}
+      path.anchors.push({x:q.x,y:q.y,hi:null,ho:null});
+      drag={type:"new",i:path.anchors.length-1,start:q};draw();return;
+    }
+    if(t==="direct"){
+      var h=hitHandle(p);if(h){snapshot();drag={type:"handle",i:h.i,which:h.which,brk:false,start:p};sel=h.i;return;}
+      var ai=hitAnchor(p);if(ai>-1){snapshot();sel=ai;drag={type:"move",i:ai,start:p,orig:P(path.anchors[ai].x,path.anchors[ai].y)};draw();return;}
+      sel=-1;draw();return;
+    }
+    if(t==="convert"){
+      var h2=hitHandle(p);if(h2){snapshot();drag={type:"handle",i:h2.i,which:h2.which,brk:true,start:p};return;}
+      var ci=hitAnchor(p);if(ci>-1){snapshot();sel=ci;drag={type:"convert",i:ci,start:p,moved:false};return;}
+      return;
+    }
+    if(t==="add"){
+      var s=hitSeg(p);if(!s){fb($("#sfb",stage),"info","Click right on the path to add a point.");return;}
+      snapshot();var a=path.anchors,b=a[(s.i+1)%a.length],A0=a[s.i];
+      if(!A0.ho&&!b.hi){var c=ctrl(A0,b),m=bez(c[0],c[1],c[2],c[3],s.t);a.splice(s.i+1,0,{x:m.x,y:m.y,hi:null,ho:null});}
+      else{var sp=splitAt(A0,b,s.t);A0.ho=sp.aho;b.hi=sp.bhi;a.splice(s.i+1,0,{x:sp.m.x,y:sp.m.y,hi:sp.mhi,ho:sp.mho});}
+      sel=s.i+1;persist();draw();return;
+    }
+    if(t==="delete"){
+      var di=hitAnchor(p);if(di<0){fb($("#sfb",stage),"info","Click right on an anchor point to delete it.");return;}
+      if(path.anchors.length<=2){fb($("#sfb",stage),"info","A path needs at least 2 points.");return;}
+      snapshot();path.anchors.splice(di,1);sel=-1;persist();draw();return;
+    }
+  });
+  svg.addEventListener("pointermove",function(e){
+    var p=pt(e);hover=p;
+    if(!drag){draw();return;}
+    var a,d;
+    if(drag.type==="new"){a=path.anchors[drag.i];d=P(p.x-a.x,p.y-a.y);if(e.shiftKey)d=(function(q){return P(q.x-a.x,q.y-a.y);})(snap45(a,p));
+      if(Math.hypot(d.x,d.y)>3){a.ho=d;a.hi=P(-d.x,-d.y);}else{a.ho=null;a.hi=null;}}
+    else if(drag.type==="close"){a=path.anchors[0];d=P(p.x-a.x,p.y-a.y);if(Math.hypot(d.x,d.y)>3){drag.moved=true;a.ho=d;a.hi=P(-d.x,-d.y);}}
+    else if(drag.type==="last"){a=path.anchors[path.anchors.length-1];d=P(p.x-a.x,p.y-a.y);if(Math.hypot(d.x,d.y)>3){drag.moved=true;a.ho=d;}}
+    else if(drag.type==="move"){a=path.anchors[drag.i];a.x=drag.orig.x+(p.x-drag.start.x);a.y=drag.orig.y+(p.y-drag.start.y);}
+    else if(drag.type==="handle"){a=path.anchors[drag.i];d=P(p.x-a.x,p.y-a.y);if(e.shiftKey)d=(function(q){return P(q.x-a.x,q.y-a.y);})(snap45(a,p));
+      a[drag.which]=d;var other=drag.which==="hi"?"ho":"hi";
+      if(drag.brk)a.broken=true;
+      else if(!a.broken&&a[other]){var L=Math.hypot(a[other].x,a[other].y),l=Math.hypot(d.x,d.y)||1;a[other]=P(-d.x/l*L,-d.y/l*L);}}
+    else if(drag.type==="convert"){a=path.anchors[drag.i];d=P(p.x-a.x,p.y-a.y);if(Math.hypot(d.x,d.y)>3){drag.moved=true;a.ho=d;a.hi=P(-d.x,-d.y);a.broken=false;}}
+    draw();
+  });
+  function endDrag(){
+    if(!drag)return;
+    if(drag.type==="close"){path.closed=true;drawing=false;}
+    if(drag.type==="last"&&!drag.moved){path.anchors[path.anchors.length-1].ho=null;}
+    if(drag.type==="convert"&&!drag.moved){var a=path.anchors[drag.i];a.hi=null;a.ho=null;a.broken=false;}
+    drag=null;persist();draw();
+  }
+  svg.addEventListener("pointerup",endDrag);svg.addEventListener("pointercancel",endDrag);
+  svg.addEventListener("pointerleave",function(){hover=null;if(!drag)draw();});
+
+  function endPath(){if(drawing){drawing=false;persist();draw();}}
+  function doUndo(){var u=undo.pop();if(u){var o=JSON.parse(u);path=o.p;drawing=o.d;}else if(!edit&&drawing&&path.anchors.length){path.anchors.pop();if(!path.anchors.length)drawing=false;}persist();draw();}
+  activeKey=function(e){
+    if(/INPUT|TEXTAREA|SELECT/.test((e.target.tagName||"")))return;
+    var k=e.key;
+    if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==="z"){e.preventDefault();doUndo();return;}
+    if(k==="Enter"||k==="Escape"){endPath();return;}
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(k==="p"||k==="P"&&!e.shiftKey)setTool("pen");
+    else if(k==="a"||k==="A")setTool("direct");
+    else if(k==="C"&&e.shiftKey)setTool("convert");
+    else if(k==="+"||k==="=")setTool("add");
+    else if(k==="-"||k==="_")setTool("delete");
+  };
+  $$(".tools button",stage).forEach(function(b){b.onclick=function(){setTool(b.dataset.tool);};});
+  if($("#end",stage))$("#end",stage).onclick=endPath;
+  $("#und",stage).onclick=doUndo;
+  $("#clr",stage).onclick=function(){snapshot();path=edit?clone(sd.preset):{anchors:[],closed:false};drawing=false;sel=-1;persist();draw();};
+  $("#chk",stage).onclick=function(){
+    if(drawing)endPath();
+    var box=$("#sfb",stage),tgt=sd.target;
+    if(path.anchors.length<2){fb(box,"info","Draw your path first.");return;}
+    var r=compare(path,tgt),n=path.anchors.length,issues=[];
+    if(tgt.closed&&!path.closed)issues.push("This shape must be a <b>closed path</b>. Finish by clicking your first anchor point.");
+    if(!tgt.closed&&path.closed)issues.push("This one is an <b>open path</b>. Clear it and end with <kbd>Enter</kbd> instead of clicking the first point.");
+    if(sd.maxAnchors&&n>sd.maxAnchors)issues.push("Use the Delete Anchor Point tool until only "+sd.maxAnchors+" points are left (you have "+n+").");
+    if(sd.minAnchors&&n<sd.minAnchors)issues.push("You need a new anchor point on the top edge. Use the Add Anchor Point tool.");
+    st.checks++;
+    var pass=!issues.length&&r.acc>=70;
+    if(r.acc>st.best||(pass&&!st.passed)){st.best=r.acc;st.anchors=n;}
+    if(pass)st.passed=true;
+    var eff=sd.efficiency?(" You used <b>"+n+"</b> anchor points; the target is "+tgt.anchors.length+(n<=tgt.anchors.length+2?". Efficient!":". Try again with fewer points.")):"";
+    if(pass)fb(box,"ok",'<div class="result"><span class="meter">'+r.acc+'%</span><span><b>Passed.</b> Your path matches the guide.'+eff+'</span></div>');
+    else fb(box,"bad",'<div class="result"><span class="meter">'+r.acc+'%</span><span>'+(issues.length?issues.join("<br>"):"Your path is off the guide in places (70% passes). Use <b>Undo</b>, or switch to <b>Direct Selection</b> <kbd>A</kbd> to drag points and handles onto the guide.")+'</span></div>');
+    persist();renderNav();
+  };
+  var nb=$("[data-next]",stage);if(nb)nb.onclick=function(){go(D().cur+1);};
+
+  function draw(){
+    var h=[],tg=sd.target;
+    h.push('<defs><pattern id="g" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#EFEFEF" stroke-width="1"/></pattern><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#8A0635"/></marker></defs>');
+    h.push('<rect width="600" height="400" fill="url(#g)"/>');
+    h.push('<path d="'+pathD(tg)+'" fill="none" stroke="#EDB9CB" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>');
+    if(sd.hints.arrows){tg.anchors.forEach(function(a,i){var v=a.ho?a.ho:(a.hi?P(-a.hi.x,-a.hi.y):null);if(i===0&&tg.closed&&!a.ho)v=null;if(!v)return;
+      h.push('<line x1="'+a.x+'" y1="'+a.y+'" x2="'+(a.x+v.x)+'" y2="'+(a.y+v.y)+'" stroke="#8A0635" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#ar)"/>');});}
+    if(sd.hints.dots){tg.anchors.forEach(function(a,i){h.push('<circle cx="'+a.x+'" cy="'+a.y+'" r="6" fill="#8A0635" opacity=".55"/>');
+      if(sd.hints.nums)h.push('<text x="'+(a.x+10)+'" y="'+(a.y-9)+'" font-family="Calibri,Carlito,Arial,sans-serif" font-size="15" font-weight="700" fill="#8A0635">'+(i+1)+'</text>');});}
+    if(path.anchors.length)h.push('<path d="'+pathD(path)+'" fill="none" stroke="#0A0A0A" stroke-width="2.2" stroke-linejoin="round"/>');
+    var n=path.anchors.length;
+    if(tool==="pen"&&drawing&&hover&&!drag&&n){var last=path.anchors[n-1],q=hover;
+      var c1=P(last.x+(last.ho?last.ho.x:0),last.y+(last.ho?last.ho.y:0));
+      h.push('<path d="M'+last.x+' '+last.y+' C'+c1.x+' '+c1.y+' '+q.x+' '+q.y+' '+q.x+' '+q.y+'" fill="none" stroke="#1F7AE0" stroke-width="1.5" stroke-dasharray="4 4"/>');}
+    path.anchors.forEach(function(a,i){if(!handlesShown(i))return;["hi","ho"].forEach(function(w){var v=a[w];if(!v)return;
+      if(w==="hi"&&i===0&&!path.closed&&tool==="pen")return;
+      h.push('<line x1="'+a.x+'" y1="'+a.y+'" x2="'+(a.x+v.x)+'" y2="'+(a.y+v.y)+'" stroke="#1F7AE0" stroke-width="1.3"/><circle cx="'+(a.x+v.x)+'" cy="'+(a.y+v.y)+'" r="4.5" fill="#1F7AE0"/>');});});
+    path.anchors.forEach(function(a,i){var f=(i===sel)?"#1F7AE0":"#fff";h.push('<rect x="'+(a.x-4.5)+'" y="'+(a.y-4.5)+'" width="9" height="9" fill="'+f+'" stroke="#1F7AE0" stroke-width="1.6"/>');});
+    if(tool==="pen"&&drawing&&hover&&n>=2&&dist(hover,path.anchors[0])<=10)h.push('<circle cx="'+(path.anchors[0].x+12)+'" cy="'+(path.anchors[0].y+12)+'" r="5" fill="none" stroke="#1F7AE0" stroke-width="1.6"/>');
+    svg.innerHTML=h.join("");
+    $("#ac",stage).textContent=n;$("#pc",stage).textContent=n<2?"\u2014":(path.closed?"closed":(drawing?"drawing\u2026":"open"));
+  }
+  setTool(tool);
+}
+document.addEventListener("keydown",function(e){if(activeKey)activeKey(e);});
+
+/* ---------- quiz ---------- */
+function quizPage(stage){
+  activeKey=null;var day=DAYS[S.day],d=D();
+  stage.innerHTML='<h2>Quick check</h2><p class="time">About 4 minutes</p><p class="lede">Answer each question. A correct first answer earns the point; if you miss, try again to see the right one.</p>'+
+   day.quiz.map(function(q,i){return '<div class="q" data-i="'+i+'"><p>'+(i+1)+'. '+esc(q.q)+'</p><div class="mc">'+q.o.map(function(o,j){return '<label><input type="radio" name="q'+i+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join("")+'</div><button class="btn">Check</button><div class="fb"></div></div>';}).join("")+
+   '<div class="row-actions">'+nextBtn()+'</div>';
+  $$(".q",stage).forEach(function(el){var i=+el.dataset.i,q=day.quiz[i],r=d.quiz[i]||{tries:0,ok:false},btn=$(".btn",el),box=$(".fb",el);
+    function lock(){btn.disabled=true;$$("input",el).forEach(function(x){x.disabled=true;if(+x.value===q.a){x.checked=true;x.closest("label").classList.add("ok");}});fb(box,"ok",r.tries===1?"Correct on the first try.":"Correct.");}
+    if(r.ok)lock();
+    btn.onclick=function(){var c=$("input:checked",el);if(!c){fb(box,"info","Choose an answer first.");return;}r.tries++;
+      if(+c.value===q.a){r.ok=true;lock();}else{c.closest("label").classList.add("bad");c.checked=false;fb(box,"bad","Not quite. Try another answer.");}
+      d.quiz[i]=r;save();renderNav();};});
+  var nb=$("[data-next]",stage);if(nb)nb.onclick=function(){go(D().cur+1);};
+}
+
+/* ---------- report ---------- */
+function reportPage(stage){
+  activeKey=null;var day=DAYS[S.day],d=D(),q=quizScore(),pl=payload("");
+  var rows=day.stations.map(function(s,i){var r=d.st[i];return '<tr><td>'+esc(s.title)+'</td><td>'+(r&&r.passed?"\u2713 Passed":(r&&r.checks?"Not yet":"Not tried"))+'</td><td class="num">'+(r&&r.checks?r.best+"%":"\u2014")+'</td><td class="num">'+(r&&r.checks?r.anchors:"\u2014")+'</td></tr>';}).join("");
+  var all=pl.passed===day.stations.length&&(!q.of||q.done);
+  stage.innerHTML='<h2>Lab report: '+esc(day.label+" "+day.date)+'</h2><p class="lede">'+esc(day.title)+'. Accuracy is your best check on each station; 70% passes.</p>'+
+   '<p><b>Name:</b> '+(S.name?esc(S.name):'<span style="color:var(--bad)">Type your name at the top of the page</span>')+' &nbsp; <b>Period:</b> '+esc(S.period||"\u2014")+'</p>'+
+   '<div class="report"><table><thead><tr><th>Station</th><th>Status</th><th class="num">Best accuracy</th><th class="num">Anchor points</th></tr></thead><tbody>'+rows+'</tbody>'+
+   '<tfoot><tr><td>Stations passed: '+pl.passed+' / '+day.stations.length+'</td><td>'+(q.of?"Quick check: "+q.got+" / "+q.of:"")+'</td><td class="num">'+(pl.avgAcc!==""?pl.avgAcc+"% avg":"")+'</td><td></td></tr></tfoot></table>'+
+   '<h3>Exit ticket</h3><p>'+esc(day.exit)+'</p><textarea id="ex" aria-label="Exit ticket">'+esc(d.exit||"")+'</textarea>'+
+   (all&&S.name?'<p><span class="stamp">Path complete</span></p>':'')+
+   '</div><p class="no-print">'+(HAS_URL?'Click <b>Submit to teacher</b> when you finish.':'Take a screenshot of this report (<b>Ctrl + Show windows</b>) and attach it in Google Classroom.')+'</p>'+
+   '<div class="row-actions">'+(HAS_URL?'<button class="btn" id="sub">Submit to teacher</button>':'')+'<button class="btn ghost" id="pdf">Save as PDF</button></div><div class="fb" id="subfb"></div>';
+  $("#ex",stage).addEventListener("input",function(e){d.exit=e.target.value;save();});
+  $("#pdf",stage).onclick=function(){window.print();};
+  if(HAS_URL){var sb=$("#sub",stage),sf=$("#subfb",stage);
+    if(d.submittedAt)fb(sf,"ok","Submitted at "+d.submittedAt+". You can submit again if you keep working.");
+    sb.onclick=function(){
+      if(!S.name){fb(sf,"bad","Type your name at the top of the page, then submit.");$("#sname").focus();return;}
+      if(!(d.exit||"").trim()){fb(sf,"bad","Answer the exit ticket before you submit.");$("#ex",stage).focus();return;}
+      sb.disabled=true;fb(sf,"info","Sending\u2026");
+      send("Submitted",function(ok){sb.disabled=false;if(ok){d.submittedAt=new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});save();fb(sf,"ok","Submitted at "+d.submittedAt+". Your teacher can see your results.");}
+        else fb(sf,"bad","Couldn\u2019t reach the results sheet. Try again, or turn in a screenshot instead.");});
+    };}
+}
+
+var nm=$("#sname"),pd=$("#speriod");nm.value=S.name;pd.value=S.period;
+function needName(){nm.classList.toggle("need",!nm.value.trim());}
+nm.addEventListener("input",function(){S.name=nm.value.trim();save();needName();});
+pd.addEventListener("input",function(){S.period=pd.value.trim();save();});
+needName();
+setInterval(function(){$("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-D().start)/60000)+" min";},30000);
+window.__penLab={compare:compare,DAYS:DAYS};
+render();
+})();
+</script>
+</body>
+</html>
