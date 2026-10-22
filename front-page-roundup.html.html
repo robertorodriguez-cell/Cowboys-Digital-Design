@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Front Page Roundup &middot; Chapter 10 Review</title>
+<meta name="description" content="Journalism 1 Chapter 10 review games: writing characteristics, attribution, the inverted pyramid, leads, and features.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@500;600;700&family=Barlow:ital,wght@0,400;0,600;1,400&family=Rye&display=swap" rel="stylesheet">
+<style>
+:root{
+  --oxblood:#36000f; --maroon:#850834; --crimson:#c50045;
+  --parchment:#faf2e7; --sand:#edd2bb; --saddle:#b38b79;
+  --charcoal:#383839; --ink:#1c1215; --muted:#5e4c4f; --white:#fff;
+  --good:#2f6b3a; --goodbg:#e3f0e1; --bad:#9b1c1c; --badbg:#f8e1e1;
+  --display:"Rye","Rockwell Extra Bold",Rockwell,Georgia,serif;
+  --cond:"Barlow Condensed","Arial Narrow",Arial,sans-serif;
+  --body:"Barlow","Segoe UI",Arial,sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--parchment);color:var(--ink);font-family:var(--body);font-size:18px;line-height:1.5;
+  padding-bottom:env(safe-area-inset-bottom,0px)}
+button{font:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--crimson);outline-offset:3px}
+.wrap{max-width:1040px;margin:0 auto;padding:0 20px}
+
+/* Hero */
+.hero{background:var(--oxblood);color:var(--white);padding:calc(28px + env(safe-area-inset-top,0px)) 0 0;overflow:hidden;position:relative}
+.hero .wrap{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:end}
+.brandline{display:flex;align-items:center;gap:10px;font-family:var(--cond);font-weight:600;font-size:18px;color:var(--sand)}
+.brandline .mark{width:34px;height:34px;flex:0 0 auto;display:block}
+.hero h1{font-family:var(--display);font-weight:400;font-size:clamp(40px,7.4vw,80px);line-height:.95;margin:18px 0 14px;letter-spacing:.01em}
+.hero p{max-width:34em;color:#e9dcdc;margin:0 0 32px;font-size:19px}
+.hero .press{width:clamp(140px,22vw,230px);display:block;margin-bottom:-4px}
+.rope{height:14px;background:repeating-linear-gradient(135deg,var(--sand) 0 8px,var(--saddle) 8px 16px)}
+
+/* Buckle board */
+.board{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;padding:18px 0 4px;color:var(--muted);font-family:var(--cond);font-size:19px;font-weight:600}
+.board strong{color:var(--maroon);font-size:22px}
+.rank{font-family:var(--display);color:var(--maroon);font-size:21px}
+.reset{margin-left:auto;background:none;border:0;color:var(--muted);text-decoration:underline;font-family:var(--cond);font-size:17px}
+
+/* Event list */
+.events{display:grid;grid-template-columns:repeat(2,1fr);gap:18px;padding:18px 0 40px}
+.event{position:relative;text-align:left;border:3px solid var(--ink);background:var(--white);border-radius:6px;padding:20px 20px 18px 92px;min-height:136px;color:var(--ink);transition:transform .12s, box-shadow .12s}
+.event:hover{transform:translate(-2px,-2px);box-shadow:4px 4px 0 var(--maroon)}
+.event .num{position:absolute;left:18px;top:20px;width:56px;height:56px;display:grid;place-items:center;background:var(--maroon);color:var(--white);font-family:var(--display);font-size:24px;clip-path:polygon(50% 0,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%)}
+.event h2{font-family:var(--cond);font-weight:700;font-size:28px;line-height:1.05;margin:0 0 4px;color:var(--maroon)}
+.event p{margin:0;color:var(--muted);font-size:16.5px}
+.event .stars{position:absolute;right:16px;top:14px}
+.event.wide{grid-column:1/-1;background:var(--sand)}
+.stars{display:inline-flex;gap:2px}
+.stars svg{width:22px;height:22px}
+.stars .on{fill:var(--crimson)} .stars .off{fill:none;stroke:var(--saddle);stroke-width:1.6}
+
+/* Game panel */
+.panel{display:none;padding:22px 0 60px}
+.panel.active{display:block}
+.home.hidden{display:none}
+.topbar{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:10px}
+.back{background:var(--charcoal);color:var(--white);border:0;border-radius:4px;padding:8px 14px;font-family:var(--cond);font-weight:600;font-size:17px}
+.panel h2{font-family:var(--display);font-weight:400;font-size:clamp(30px,5vw,46px);color:var(--maroon);margin:8px 0 4px;line-height:1}
+.how{color:var(--muted);margin:0 0 18px;max-width:42em}
+.progress{font-family:var(--cond);font-weight:600;font-size:19px;color:var(--muted);margin-left:auto}
+.progress b{color:var(--maroon)}
+.card{background:var(--white);border:3px solid var(--ink);border-radius:6px;padding:22px}
+.scenario{font-size:21px;line-height:1.45;margin:0 0 18px}
+.feedback{min-height:1.5em;margin-top:16px;padding:12px 14px;border-radius:4px;display:none}
+.feedback.show{display:block}
+.feedback.ok{background:var(--goodbg);color:var(--good)}
+.feedback.no{background:var(--badbg);color:var(--bad)}
+.feedback b{font-family:var(--cond);font-size:20px;margin-right:6px}
+.actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.btn{border:0;border-radius:4px;padding:12px 20px;font-family:var(--cond);font-weight:700;font-size:20px;background:var(--maroon);color:var(--white)}
+.btn.alt{background:var(--white);color:var(--maroon);box-shadow:inset 0 0 0 2px var(--maroon)}
+.btn[disabled]{opacity:.45;cursor:default}
+
+/* Choice buttons */
+.choices{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.choice{text-align:left;background:var(--parchment);border:2px solid var(--saddle);border-radius:4px;padding:12px 14px;font-size:18px;color:var(--ink)}
+.choice:hover:not([disabled]){border-color:var(--maroon)}
+.choice.right{background:var(--goodbg);border-color:var(--good)}
+.choice.wrong{background:var(--badbg);border-color:var(--bad)}
+.choice[disabled]{cursor:default}
+.sched .choice{text-align:center;font-family:var(--cond);font-weight:700;font-size:22px;padding:14px 8px}
+.sched .choice small{display:block;font-family:var(--body);font-weight:400;font-size:14px;color:var(--muted)}
+.sched .choices{grid-template-columns:repeat(5,1fr)}
+
+/* Brand the Ws */
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:18px}
+.chip{background:var(--sand);border:2px solid var(--saddle);border-radius:999px;padding:8px 16px;font-size:17px;color:var(--ink)}
+.chip.sel{background:var(--maroon);color:var(--white);border-color:var(--maroon)}
+.chip.used{visibility:hidden}
+.slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.slot{min-height:110px;border:2px dashed var(--saddle);border-radius:6px;background:var(--parchment);padding:10px;text-align:left;color:var(--ink);display:flex;flex-direction:column;gap:6px}
+.slot .tag{font-family:var(--display);font-size:26px;color:var(--maroon);line-height:1}
+.slot .val{font-size:16px}
+.slot .fix{display:block;font-size:14px;color:var(--muted);margin-top:4px;font-style:italic}
+.slot.filled{border-style:solid;background:var(--white)}
+.slot.right{border-color:var(--good);background:var(--goodbg)}
+.slot.wrong{border-color:var(--bad);background:var(--badbg)}
+
+/* Corral */
+.pens{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:14px}
+.pen{min-height:96px;border:4px solid var(--saddle);border-radius:4px;background:
+  repeating-linear-gradient(0deg,transparent 0 30px,rgba(179,139,121,.25) 30px 34px),var(--parchment);
+  padding:10px;text-align:left;color:var(--ink);font-family:var(--cond);font-size:19px;font-weight:700}
+.pen span{display:block;font-family:var(--body);font-weight:400;font-size:14.5px;color:var(--muted)}
+.pen:hover:not([disabled]){border-color:var(--maroon)}
+.pen.right{border-color:var(--good);background:var(--goodbg)}
+.pen.wrong{border-color:var(--bad);background:var(--badbg)}
+.pen[disabled]{cursor:default}
+
+/* Flashcards */
+.flip{perspective:1200px;border:0;background:none;padding:0;width:100%;display:block}
+.flip .inner{position:relative;min-height:260px;transition:transform .45s;transform-style:preserve-3d}
+.flip.turned .inner{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;backface-visibility:hidden;border:3px solid var(--ink);border-radius:6px;padding:26px;display:flex;flex-direction:column;justify-content:center;text-align:left}
+.face.front{background:var(--white)}
+.face.front .term{font-family:var(--display);font-size:clamp(30px,5vw,44px);color:var(--maroon);line-height:1.05}
+.face.front .who{font-family:var(--cond);font-size:18px;color:var(--muted);margin-top:10px}
+.face.back{background:var(--oxblood);color:var(--white);transform:rotateY(180deg)}
+.face.back .def{font-size:21px;font-weight:600}
+.face.back .ex{margin-top:12px;color:var(--sand);font-size:17px}
+.hint{font-family:var(--cond);color:var(--muted);font-size:16px;margin-top:8px}
+
+/* Results */
+.result{text-align:center;padding:26px}
+.result .big{font-family:var(--display);font-size:56px;color:var(--maroon);line-height:1;margin:6px 0}
+.result .stars svg{width:44px;height:44px}
+.result p{max-width:30em;margin:12px auto}
+.result .actions{justify-content:center}
+
+/* Certificate */
+.cert{display:none;margin:0 0 30px;border:6px double var(--maroon);background:var(--white);padding:28px;text-align:center}
+.cert.show{display:block}
+.cert h2{font-family:var(--display);font-weight:400;color:var(--maroon);font-size:clamp(30px,5vw,46px);margin:6px 0}
+.cert input{font:inherit;font-size:22px;border:0;border-bottom:2px solid var(--ink);text-align:center;padding:4px;width:min(360px,90%);background:transparent}
+.cert .nm{font-family:var(--display);font-size:30px;color:var(--ink);min-height:1.2em}
+.cert .seal{font-family:var(--cond);font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-size:15px}
+.locked{color:var(--muted);font-family:var(--cond);font-size:18px}
+footer{color:var(--muted);font-size:15px;padding:0 0 30px}
+
+@media (max-width:760px){
+  .events{grid-template-columns:1fr}
+  .hero .wrap{grid-template-columns:1fr}
+  .hero .press{width:140px;justify-self:end;margin-top:-20px}
+  .slots{grid-template-columns:repeat(2,1fr)}
+  .choices{grid-template-columns:1fr}
+  .sched .choices{grid-template-columns:repeat(2,1fr)}
+  .pens{grid-template-columns:1fr}
+  .card{padding:16px}
+  .scenario{font-size:19px}
+}
+body.ingame .hero{padding-top:calc(14px + env(safe-area-inset-top,0px))}
+body.ingame .hero h1{font-size:clamp(30px,5vw,40px);margin:8px 0 14px}
+body.ingame .hero p, body.ingame .hero .press{display:none}
+@media (prefers-reduced-motion:reduce){ *{transition:none!important} }
+@media print{
+  body *{visibility:hidden}
+  .cert,.cert *{visibility:visible}
+  .cert{position:absolute;left:0;top:0;width:100%}
+  .cert .noprint{display:none}
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <div>
+      <div class="brandline">
+        <svg class="mark" viewBox="0 0 24 24" aria-hidden="true"><path fill="#edd2bb" d="M12 1.6l2.95 6.4 7 .82-5.2 4.78 1.42 6.9L12 17.2l-6.17 3.3 1.42-6.9L2.05 8.82l7-.82z"/></svg>
+        Madison County Cowboys &middot; Journalism 1
+      </div>
+      <h1>The Front Page Roundup</h1>
+      <p>Chapter 10 review. Ride all five events, earn up to three stars in each, and claim your Top Hand certificate.</p>
+    </div>
+    <svg class="press" viewBox="0 0 220 150" aria-hidden="true">
+      <g fill="none" stroke="#edd2bb" stroke-width="4" stroke-linejoin="round">
+        <rect x="18" y="26" width="150" height="104" rx="4"/>
+        <path d="M168 48h30v72a10 10 0 0 1-10 10h-20"/>
+        <rect x="34" y="42" width="60" height="34"/>
+        <path d="M106 44h46M106 56h46M106 68h46M34 92h118M34 104h118M34 116h78"/>
+      </g>
+    </svg>
+  </div>
+</header>
+<div class="rope"></div>
+
+<main class="wrap">
+
+  <!-- HUB -->
+  <section class="home" id="home">
+    <div class="board">
+      <span class="rank" id="rank">Greenhorn</span>
+      <span>Your stars: <strong id="tally">0</strong> of 12</span>
+      <button class="reset" id="reset">Start over</button>
+    </div>
+    <div class="events" id="events"></div>
+
+    <div class="cert" id="cert">
+      <div class="seal">Madison County High School</div>
+      <h2>Top Hand</h2>
+      <p style="margin:.2rem 0">This certifies that</p>
+      <div class="nm" id="certName"></div>
+      <input id="nameInput" class="noprint" placeholder="Type your name" aria-label="Your name">
+      <p style="margin:.4rem 0 0">rode every event of the Chapter 10 Front Page Roundup.</p>
+      <div class="actions noprint" style="justify-content:center">
+        <button class="btn" id="printBtn">Print certificate</button>
+      </div>
+    </div>
+    <p class="locked" id="lockMsg">Earn all 12 stars to claim your certificate.</p>
+  </section>
+
+  <!-- EVENT 1 -->
+  <section class="panel" id="ev1">
+    <div class="topbar"><button class="back" data-home>&larr; Back to events</button></div>
+    <h2>Trail Guide</h2>
+    <p class="how">Tap the card to flip it. Try to say the definition out loud before you flip. No score &mdash; warm up here first.</p>
+    <button class="flip" id="flip"><div class="inner">
+      <div class="face front"><div class="term" id="cTerm"></div><div class="who" id="cWho"></div></div>
+      <div class="face back"><div class="def" id="cDef"></div><div class="ex" id="cPg"></div></div>
+    </div></button>
+    <div class="actions">
+      <button class="btn alt" id="cPrev">Previous</button>
+      <button class="btn" id="cNext">Next card</button>
+      <span class="progress" id="cCount"></span>
+    </div>
+  </section>
+
+  <!-- EVENT 2 -->
+  <section class="panel" id="ev2">
+    <div class="topbar"><button class="back" data-home>&larr; Back to events</button><span class="progress" id="p2"></span></div>
+    <h2>Brand the Ws</h2>
+    <p class="how">Tap a phrase, then tap the box it belongs in. Fill all four, then check.</p>
+    <div id="brandBox"></div>
+  </section>
+
+  <!-- EVENT 3 -->
+  <section class="panel" id="ev3">
+    <div class="topbar"><button class="back" data-home>&larr; Back to events</button><span class="progress" id="p3"></span></div>
+    <h2>Corral It</h2>
+    <p class="how">Every sentence breaks one rule from the inverted pyramid checklist. Ask what is wrong, then tap the right pen.</p>
+    <div id="corralBox"></div>
+  </section>
+
+  <!-- EVENT 4 -->
+  <section class="panel" id="ev4">
+    <div class="topbar"><button class="back" data-home>&larr; Back to events</button><span class="progress" id="p4"></span></div>
+    <h2>Name That Lead</h2>
+    <p class="how">Straight sticks to the facts. Summary covers several at once. Direct address says <em>you</em>. A question asks. A direct quote opens in someone&rsquo;s own words. Build a streak.</p>
+    <div id="nameBox"></div>
+  </section>
+
+  <!-- EVENT 5 -->
+  <section class="panel" id="ev5">
+    <div class="topbar"><button class="back" data-home>&larr; Back to events</button><span class="progress" id="p5"></span></div>
+    <h2>Quick Draw</h2>
+    <p class="how">Ten questions straight from the chapter. Pick the best answer. You get one shot per question.</p>
+    <div id="quickBox"></div>
+  </section>
+
+  <footer>Journalism 1 &middot; Madison County High School &middot; Go Cowboys!<br>
+  Page numbers refer to Stovall, Chapter 10. Stars are saved only in this browser.</footer>
+</main>
+
+<script>
+(function(){
+  var CARDS=[["Accuracy","The main goal of journalistic writing.","Facts must be presented in a proper context, so the reader interprets them the way the reporter would.",168],["Precision","A basic means of achieving accuracy.","Using the language correctly: grammar, punctuation, spelling, and using words for precisely what they mean.",167],["Efficiency","A prized characteristic of news writing.","Getting as much information to the reader as possible in a small amount of time and space. It is about how information is presented, not how much is cut.",169],["Clarity","What keeps a reader from re-reading.","The reader understands without figuring out what the words mean. Clear writing does not have to be read a second time.",169],["Attribution","One of the most important conventions.","Giving credit to sources for their information. It builds credibility and lets the reader judge information by judging its source.",170],["Said","The verb of attribution.","The most common one, because it is neutral and unobtrusive even when repeated.",171],["Claim","A substitute to avoid.","It carries a negative or doubtful connotation, and journalists should not imply that.",171],["Inverted pyramid","The major structure of news stories.","Most important information first, then everything else in descending order of importance.",167],["Lead","The first paragraph. Say it LEED.","One sentence, about thirty words, telling the most important information in the story.",167],["Blind lead","A lead that names no one.","Used when none of the people involved are well known. Not used if someone involved is.",175],["Second paragraph","The second most important part.","Its job is to answer the questions the lead raises in the reader’s mind.",177],["Third person","The person news is written in.","The writer stays out of the story, except inside a direct quotation.",172],["Feature writing","Built around people, not events.","Centers on people and their interests. It still demands the news writer’s accuracy.",167],["Modeling","How writers learn to write.","Read good writing closely, then try to make your own writing look and read like it.",181]], BRAND=[{"lead":"The Madison County School Board voted Tuesday night to move the start of the school day at the high school.","slots":{"Who":"The Madison County School Board","What":"voted to move the start of the school day","When":"Tuesday night","Where":"at the high school"}},{"lead":"A water main broke under the bus loop at Madison County High School early Thursday, holding about 90 students on their buses.","slots":{"Who":"about 90 students","What":"a water main broke","When":"early Thursday","Where":"under the bus loop at the high school"}},{"lead":"Band director Lena Ortiz announced Friday in the auditorium that the marching band will travel to the state finals.","slots":{"Who":"Band director Lena Ortiz","What":"announced the band will travel to state finals","When":"Friday","Where":"in the auditorium"}},{"lead":"Deputies arrested two men Wednesday afternoon on Highway 53 after a traffic stop turned up stolen tools.","slots":{"Who":"two men","What":"were arrested after a traffic stop","When":"Wednesday afternoon","Where":"on Highway 53"}}], PENS=[["Too wordy","Words that earn nothing"],["Needs attribution","Who says so?"],["Name and title commas","Title before name takes none"],["Passive and vague","\"It is,\" \"there are\""]], CORRAL=[["Due to the fact that it was raining, the game was postponed.",0],["At a later date in the future, the board will vote again.",0],["The fire started in the storage closet behind the band room.",1],["Three students were treated at the scene and released.",1],["Principal, Dana Whitfield, announced the change Friday.",2],["Brad Fisher the game warden arrested the trespassers.",2],["There are three students who will represent the school.",3],["It is expected that repairs will cost about $42,000.",3]],
+      TYPES=[["Straight","Just the facts"],["Summary","Several facts at once"],["Direct address","Speaks to you"],["Question","Asks the reader"],["Direct quote","Opens in their words"]], NAMING=[["Two people were killed and four were injured Monday when a truck collided with a car on Interstate 10 near the Lee exit.",0],["A tractor-trailer carrying chemicals overturned on U.S. 90 on Thursday, killing one person, injuring four others and forcing 200 people from their homes.",1],["If you park on Gardner Street, the city is about to start charging you $25 a year.",2],["Why will the school board not say where the building money went?",3],["\"A town that reads together.\" That is what the new library director promised Monday night.",4],["The Madison County Commission voted against raising property taxes Tuesday night.",0],["A storm knocked out power to 1,400 homes, closed two schools and flooded the fairgrounds Saturday in southern Madison County.",1],["Do you know what is in the water coming out of your tap?",3],["Think your bus route is safe? The county says six of them are not.",2],["\"We ran out of room three years ago.\" Superintendent Dana Whitfield opened Monday’s budget hearing with that warning.",4]], QUICK=[{"q":"According to the chapter, all journalistic writing should share which four characteristics?","pg":167,"opts":[{"t":"Accuracy, precision, clarity, and efficiency","c":true},{"t":"Accuracy, brevity, honesty, and speed","c":false},{"t":"Clarity, creativity, fairness, and balance","c":false},{"t":"Precision, objectivity, detail, and variety","c":false}]},{"q":"The text defines precision as the ability to use the language correctly by following commonly accepted rules of —","pg":167,"opts":[{"t":"Grammar, punctuation, and spelling","c":true},{"t":"Style, tone, and voice","c":false},{"t":"Structure, length, and format","c":false},{"t":"Attribution, citation, and sourcing","c":false}]},{"q":"How is the word \"lead\" pronounced in journalism?","pg":167,"opts":[{"t":"LEED","c":true},{"t":"LED","c":false},{"t":"LAID","c":false},{"t":"LEAD, like the metal","c":false}]},{"q":"In the inverted pyramid, where is the most important information placed?","pg":167,"opts":[{"t":"At the beginning of the story","c":true},{"t":"At the end of the story","c":false},{"t":"In the middle, after background","c":false},{"t":"Wherever it fits the chronology","c":false}]},{"q":"What does attribution mean?","pg":167,"opts":[{"t":"Giving credit to sources for their information","c":true},{"t":"Checking the spelling of a name","c":false},{"t":"Summarizing a long quotation","c":false},{"t":"Placing the lead at the top of the story","c":false}]},{"q":"The text says achieving efficiency in journalistic writing does NOT mean —","pg":169,"opts":[{"t":"Reducing the amount of information in a news story","c":true},{"t":"Presenting information in an organized way","c":false},{"t":"Removing unnecessary words","c":false},{"t":"Respecting the reader’s time","c":false}]},{"q":"According to the chapter, clear writing —","pg":169,"opts":[{"t":"Does not have to be read a second time to discover its meaning","c":true},{"t":"Always uses one-syllable words","c":false},{"t":"Is always shorter than unclear writing","c":false},{"t":"Avoids all technical information","c":false}]},{"q":"The text says the first turn toward clarity is for the writer to —","pg":169,"opts":[{"t":"Put himself or herself in the place of the reader","c":true},{"t":"Shorten every sentence to ten words","c":false},{"t":"Remove all direct quotations","c":false},{"t":"Write the ending before the lead","c":false}]},{"q":"According to the chapter, long sentences in a first draft are often the result of —","pg":169,"opts":[{"t":"A lack of clarity in the thinking of the writer","c":true},{"t":"A shortage of available facts","c":false},{"t":"Pressure from an editor","c":false},{"t":"Too much time spent reporting","c":false}]},{"q":"Which piece of advice appears in the chapter’s Writing Values and Advice list?","pg":170,"opts":[{"t":"Write with verbs, not adjectives or adverbs","c":true},{"t":"Write with adjectives, not verbs","c":false},{"t":"Open every story with a question","c":false},{"t":"Use the longest accurate word available","c":false}]},{"q":"Mark Twain said the difference between the right word and the almost right word is the difference between —","pg":170,"opts":[{"t":"Lightning and the lightning bug","c":true},{"t":"Thunder and the rainstorm","c":false},{"t":"Sunlight and the candle","c":false},{"t":"The river and the raindrop","c":false}]},{"q":"The chapter gives two reasons attribution is important. One is that it establishes the news report’s credibility. The other is that it —","pg":170,"opts":[{"t":"Allows the reader to assess the information by assessing its source","c":true},{"t":"Makes the story longer and more detailed","c":false},{"t":"Protects the reporter from being sued","c":false},{"t":"Guarantees the source will talk again","c":false}]},{"q":"What is the most common verb of attribution?","pg":171,"opts":[{"t":"Said","c":true},{"t":"Claimed","c":false},{"t":"Stated","c":false},{"t":"Argued","c":false}]},{"q":"Why does the chapter recommend that verb over its substitutes?","pg":171,"opts":[{"t":"It is neutral and unobtrusive even when repeated","c":true},{"t":"It is more formal than the alternatives","c":false},{"t":"It is shorter than every other option","c":false},{"t":"It signals that the reporter agrees with the source","c":false}]},{"q":"According to the text, what does the word \"claim\" carry that \"said\" does not?","pg":171,"opts":[{"t":"A negative or doubtful connotation","c":true},{"t":"A guarantee of accuracy","c":false},{"t":"A legal protection for the publication","c":false},{"t":"A sense of formality","c":false}]},{"q":"Which kind of information usually does NOT have to be attributed?","pg":171,"opts":[{"t":"Information that is common knowledge to most readers","c":true},{"t":"Any information given during an interview","c":false},{"t":"Any information involving numbers","c":false},{"t":"Information from a government report","c":false}]},{"q":"The chapter says paragraph length in a news story usually should be kept to —","pg":172,"opts":[{"t":"Three sentences or less and fewer than 100 words","c":true},{"t":"Five sentences or less and fewer than 200 words","c":false},{"t":"One sentence only","c":false},{"t":"Whatever length the information requires","c":false}]},{"q":"News stories are usually written in which person?","pg":172,"opts":[{"t":"Third person","c":true},{"t":"First person","c":false},{"t":"Second person","c":false},{"t":"A mix of first and second person","c":false}]},{"q":"According to the chapter, a straight news lead should be —","pg":175,"opts":[{"t":"One sentence of about thirty words, with a maximum of thirty-three","c":true},{"t":"Two sentences of about fifty words","c":false},{"t":"One paragraph of three sentences","c":false},{"t":"As long as the facts require","c":false}]},{"q":"Leads on news stories generally contain at least four of the Five Ws and One H. Which four?","pg":174,"opts":[{"t":"Who, what, where, and when","c":true},{"t":"Who, what, why, and how","c":false},{"t":"What, when, why, and how","c":false},{"t":"Who, where, why, and how","c":false}]},{"q":"A lead in which the people in the story are not named is called a —","pg":175,"opts":[{"t":"Blind lead","c":true},{"t":"Summary lead","c":false},{"t":"Direct address lead","c":false},{"t":"Question lead","c":false}]},{"q":"The main characteristic of a direct address lead is —","pg":175,"opts":[{"t":"The word \"you,\" present or implied","c":true},{"t":"A direct quotation in the first sentence","c":false},{"t":"A question in the first sentence","c":false},{"t":"The absence of any names","c":false}]},{"q":"What mistake does the chapter say beginning newswriters often make with leads?","pg":174,"opts":[{"t":"Trying to put too much in the lead","c":true},{"t":"Leaving the lead too short to be useful","c":false},{"t":"Beginning the lead with a direct quotation","c":false},{"t":"Writing the lead before reporting the story","c":false}]},{"q":"According to the chapter, the chief role of the second and succeeding paragraphs is to —","pg":177,"opts":[{"t":"Answer the questions the lead raises in the reader’s mind","c":true},{"t":"Repeat the lead in different words","c":false},{"t":"Begin a chronological account of the event","c":false},{"t":"List the reporter’s sources","c":false}]},{"q":"The inverted pyramid checklist says a direct quotation should be no more than —","pg":176,"opts":[{"t":"Two sentences long","c":true},{"t":"One sentence long","c":false},{"t":"Four sentences long","c":false},{"t":"One hundred words long","c":false}]},{"q":"According to the checklist, the elements of a direct quotation should appear in which order?","pg":176,"opts":[{"t":"Direct quote, speaker, verb","c":true},{"t":"Verb, speaker, direct quote","c":false},{"t":"Speaker, verb, direct quote","c":false},{"t":"Direct quote, verb, speaker","c":false}]},{"q":"Which sentence follows the checklist’s rule for a title placed before a name?","pg":176,"opts":[{"t":"Game warden Brad Fisher arrested the trespassers.","c":true},{"t":"Game warden, Brad Fisher, arrested the trespassers.","c":false},{"t":"Game warden, Brad Fisher arrested the trespassers.","c":false},{"t":"Game warden Brad Fisher, arrested the trespassers.","c":false}]},{"q":"The checklist says to avoid \"It is . . . ,\" \"there is . . . ,\" and \"there are . . .\" because these structures are —","pg":176,"opts":[{"t":"Passive and vague","c":true},{"t":"Too informal for news writing","c":false},{"t":"Difficult to punctuate","c":false},{"t":"Usually inaccurate","c":false}]},{"q":"According to the chapter, the difference between news stories and feature stories is mainly one of —","pg":179,"opts":[{"t":"Emphasis","c":true},{"t":"Accuracy","c":false},{"t":"Truthfulness","c":false},{"t":"Length","c":false}]},{"q":"What is the main thing that sets feature stories apart from news stories?","pg":180,"opts":[{"t":"The greater amount of detail and description they contain","c":true},{"t":"The absence of any direct quotations","c":false},{"t":"The use of first-person pronouns throughout","c":false},{"t":"The lack of a central theme","c":false}]},{"q":"The chapter names three major kinds of description that should appear in a feature story. They are descriptions of —","pg":180,"opts":[{"t":"Actions, people, and places","c":true},{"t":"Sights, sounds, and smells","c":false},{"t":"Causes, effects, and outcomes","c":false},{"t":"Problems, solutions, and results","c":false}]},{"q":"Which two tips does the chapter give for writing more vivid descriptions?","pg":180,"opts":[{"t":"Rely on nouns and verbs, and remember the five senses","c":true},{"t":"Use more adjectives, and write longer sentences","c":false},{"t":"Quote more sources, and add more statistics","c":false},{"t":"Write in first person, and shorten every paragraph","c":false}]},{"q":"A feature style that begins with a story and then weaves quotations, anecdotes, and facts in and out of one another is called —","pg":179,"opts":[{"t":"An anecdotal feature","c":true},{"t":"A suspended interest feature","c":false},{"t":"A question and answer feature","c":false},{"t":"An inverted pyramid feature","c":false}]},{"q":"In a suspended interest feature, the story is —","pg":179,"opts":[{"t":"Resolved at the end in an unexpected way","c":true},{"t":"Resolved in the first paragraph","c":false},{"t":"Left unresolved on purpose","c":false},{"t":"Told strictly in chronological order","c":false}]},{"q":"The chapter says one of the most effective ways of learning to write is to read good writing and try to write like it. This technique is called —","pg":181,"opts":[{"t":"Modeling","c":true},{"t":"Drafting","c":false},{"t":"Framing","c":false},{"t":"Sourcing","c":false}]}];
+
+  var EVENTS=[
+    {id:'ev1',n:1,title:'Trail Guide: flashcards',blurb:'Flip through every key term from the chapter. Warm up here first. No score.',scored:false,wide:true},
+    {id:'ev2',n:2,title:'Brand the Ws',blurb:'Label the who, what, when, and where inside a news lead.',scored:true},
+    {id:'ev3',n:3,title:'Corral It',blurb:'Pen each sentence by the checklist rule it breaks.',scored:true},
+    {id:'ev4',n:4,title:'Name That Lead',blurb:'Straight, summary, direct address, question, or direct quote.',scored:true},
+    {id:'ev5',n:5,title:'Quick Draw',blurb:'Ten fast questions on writing, attribution, structure, and features.',scored:true}
+  ];
+  var RANKS=[[0,'Greenhorn'],[3,'Wrangler'],[6,'Bronc rider'],[9,'Trail boss'],[12,'Top hand']];
+
+  var stars={ev2:0,ev3:0,ev4:0,ev5:0};
+  try{var raw=localStorage.getItem('ch10roundup');
+    if(raw){var s=JSON.parse(raw);for(var k in stars){if(typeof s[k]==='number')stars[k]=s[k];}}}catch(e){}
+  function save(){try{localStorage.setItem('ch10roundup',JSON.stringify(stars));}catch(e){}}
+
+  var STAR='<path d="M12 1.6l2.95 6.4 7 .82-5.2 4.78 1.42 6.9L12 17.2l-6.17 3.3 1.42-6.9L2.05 8.82l7-.82z"/>';
+  function starStr(n){
+    var o='<span class="stars">';
+    for(var i=0;i<3;i++){o+='<svg viewBox="0 0 24 24" class="'+(i<n?'on':'off')+'">'+
+      '<g class="'+(i<n?'on':'off')+'">'+STAR+'</g></svg>';}
+    return o+'</span>';
+  }
+  function award(p){return p>=100?3:p>=80?2:p>=60?1:0;}
+
+  function paintHub(){
+    var total=stars.ev2+stars.ev3+stars.ev4+stars.ev5;
+    document.getElementById('tally').textContent=total;
+    var r=RANKS[0][1];
+    for(var i=0;i<RANKS.length;i++){if(total>=RANKS[i][0])r=RANKS[i][1];}
+    document.getElementById('rank').textContent=r;
+    var box=document.getElementById('events');box.innerHTML='';
+    EVENTS.forEach(function(ev){
+      var b=document.createElement('button');
+      b.className='event'+(ev.wide?' wide':'');
+      b.innerHTML='<span class="num">'+ev.n+'</span><h2>'+ev.title+'</h2><p>'+ev.blurb+'</p>'+
+        (ev.scored?starStr(stars[ev.id]):'');
+      b.addEventListener('click',function(){go(ev.id);});
+      box.appendChild(b);
+    });
+    var done=total>=12;
+    document.getElementById('cert').classList.toggle('show',done);
+    document.getElementById('lockMsg').style.display=done?'none':'block';
+    document.getElementById('lockMsg').textContent='Earn all 12 stars to claim your certificate. You have '+total+'.';
+  }
+
+  var screens=['home','ev1','ev2','ev3','ev4','ev5'];
+  function go(id){
+    document.getElementById('home').classList.toggle('hidden',id!=='home');
+    screens.slice(1).forEach(function(s){document.getElementById(s).classList.toggle('active',s===id);});
+    document.body.classList.toggle('ingame',id!=='home');
+    window.scrollTo(0,0);
+    if(id==='ev2')startBrand();
+    if(id==='ev3')startCorral();
+    if(id==='ev4')startNaming();
+    if(id==='ev5')startQuick();
+    if(id==='home')paintHub();
+  }
+  [].forEach.call(document.querySelectorAll('[data-home]'),function(b){
+    b.addEventListener('click',function(){go('home');});});
+  document.getElementById('reset').addEventListener('click',function(){
+    stars={ev2:0,ev3:0,ev4:0,ev5:0};save();paintHub();});
+  document.getElementById('printBtn').addEventListener('click',function(){window.print();});
+  var nameInput=document.getElementById('nameInput');
+  try{var nm=localStorage.getItem('ch10name');if(nm){nameInput.value=nm;
+    document.getElementById('certName').textContent=nm;}}catch(e){}
+  nameInput.addEventListener('input',function(e){
+    document.getElementById('certName').textContent=e.target.value;
+    try{localStorage.setItem('ch10name',e.target.value);}catch(err){}});
+
+  function mix(a){a=a.slice();
+    for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1));var t=a[i];a[i]=a[j];a[j]=t;}
+    return a;}
+
+  function finish(evId,right,total,box,restart,prog){
+    var pct=Math.round(right/total*100), got=award(pct);
+    if(got>stars[evId]){stars[evId]=got;save();}
+    if(prog)document.getElementById(prog).textContent='';
+    box.innerHTML='<div class="card result">'+starStr(got)+
+      '<div class="big">'+right+' / '+total+'</div>'+
+      '<p>'+pct+'% &middot; your best for this event: '+stars[evId]+' of 3 stars</p>'+
+      '<div class="actions"><button class="btn alt" data-home2>Back to events</button>'+
+      '<button class="btn" id="again">Ride again</button></div></div>';
+    document.getElementById('again').addEventListener('click',restart);
+    box.querySelector('[data-home2]').addEventListener('click',function(){go('home');});
+  }
+
+  /* EVENT 1 */
+  var ci=0,flip=document.getElementById('flip');
+  function drawCard(){var c=CARDS[ci];
+    document.getElementById('cTerm').textContent=c[0];
+    document.getElementById('cWho').textContent=c[1];
+    document.getElementById('cDef').textContent=c[2];
+    document.getElementById('cPg').textContent='page '+c[3];
+    document.getElementById('cCount').innerHTML='Card <b>'+(ci+1)+'</b> of '+CARDS.length;
+    flip.classList.remove('turned');}
+  flip.addEventListener('click',function(){flip.classList.toggle('turned');});
+  document.getElementById('cNext').addEventListener('click',function(){ci=(ci+1)%CARDS.length;drawCard();});
+  document.getElementById('cPrev').addEventListener('click',function(){ci=(ci-1+CARDS.length)%CARDS.length;drawCard();});
+  drawCard();
+
+  /* EVENT 2 */
+  var bO,bAt,bRight;
+  function startBrand(){bO=mix(BRAND.map(function(_,i){return i;}));bAt=0;bRight=0;renderBrand();}
+  function renderBrand(){
+    var box=document.getElementById('brandBox');
+    document.getElementById('p2').innerHTML='Lead <b>'+Math.min(bAt+1,BRAND.length)+'</b> of '+BRAND.length;
+    if(bAt>=bO.length)return finish('ev2',bRight,BRAND.length,box,startBrand,'p2');
+    var item=BRAND[bO[bAt]], labels=Object.keys(item.slots);
+    var phrases=mix(labels.map(function(L){return {L:L,txt:item.slots[L]};}));
+    box.innerHTML='<div class="card"><p class="scenario">'+item.lead+'</p>'+
+      '<div class="chips" id="chips"></div><div class="slots" id="slots"></div>'+
+      '<div class="feedback" id="fb2"></div>'+
+      '<div class="actions"><button class="btn" id="check2" disabled>Check</button></div></div>';
+    var sel=null,placed={},locked=false;
+    var chipWrap=document.getElementById('chips'), slotWrap=document.getElementById('slots');
+    phrases.forEach(function(p,i){
+      var c=document.createElement('button');
+      c.className='chip';c.textContent=p.txt;c.dataset.i=i;
+      c.addEventListener('click',function(){
+        if(locked)return;
+        if(sel)sel.classList.remove('sel');
+        sel=(sel===c)?null:c; if(sel)sel.classList.add('sel');});
+      chipWrap.appendChild(c);});
+    labels.forEach(function(L){
+      var d=document.createElement('button');
+      d.className='slot';d.dataset.lab=L;
+      d.innerHTML='<span class="tag">'+L+'</span><span class="val"></span>';
+      d.addEventListener('click',function(){
+        if(locked)return;
+        if(!sel){ if(placed[L]){
+            chipWrap.querySelector('[data-i="'+placed[L].i+'"]').classList.remove('used');
+            delete placed[L];d.querySelector('.val').textContent='';
+            d.classList.remove('filled');paintCheck();} return;}
+        if(placed[L])chipWrap.querySelector('[data-i="'+placed[L].i+'"]').classList.remove('used');
+        placed[L]={i:sel.dataset.i,txt:sel.textContent,src:phrases[sel.dataset.i].L};
+        d.querySelector('.val').textContent=sel.textContent;d.classList.add('filled');
+        sel.classList.add('used');sel.classList.remove('sel');sel=null;paintCheck();});
+      slotWrap.appendChild(d);});
+    function paintCheck(){document.getElementById('check2').disabled=
+      Object.keys(placed).length!==labels.length;}
+    document.getElementById('check2').addEventListener('click',function(){
+      locked=true;var good=0;
+      [].forEach.call(slotWrap.children,function(d){
+        var L=d.dataset.lab, ok=placed[L]&&placed[L].src===L;
+        d.classList.add(ok?'right':'wrong'); if(ok)good++;
+        if(!ok)d.querySelector('.val').innerHTML=(placed[L]?placed[L].txt:'')+
+          '<span class="fix">should be: '+item.slots[L]+'</span>';});
+      if(good===labels.length)bRight++;
+      var f=document.getElementById('fb2');
+      f.className='feedback show '+(good===labels.length?'ok':'no');
+      f.innerHTML='<b>'+(good===labels.length?'Branded!':'Not quite.')+'</b>'+
+        good+' of '+labels.length+' in the right box.';
+      var btn=document.getElementById('check2');
+      btn.replaceWith(btn.cloneNode(true));
+      var nb=document.getElementById('check2');
+      nb.textContent='Next lead';nb.disabled=false;
+      nb.addEventListener('click',function(){bAt++;renderBrand();});});
+  }
+
+  /* EVENT 3 */
+  var cO,cAt,cRight;
+  function startCorral(){cO=mix(CORRAL.map(function(_,i){return i;}));cAt=0;cRight=0;renderCorral();}
+  function renderCorral(){
+    var box=document.getElementById('corralBox');
+    document.getElementById('p3').innerHTML='Sentence <b>'+Math.min(cAt+1,CORRAL.length)+'</b> of '+CORRAL.length;
+    if(cAt>=cO.length)return finish('ev3',cRight,CORRAL.length,box,startCorral,'p3');
+    var it=CORRAL[cO[cAt]];
+    box.innerHTML='<div class="card"><p class="scenario">'+it[0]+'</p>'+
+      '<div class="pens" id="pens"></div><div class="feedback" id="fb3"></div>'+
+      '<div class="actions" id="row3" style="display:none">'+
+      '<button class="btn" id="next3">Next sentence</button></div></div>';
+    var wrap=document.getElementById('pens');
+    PENS.forEach(function(p,i){
+      var b=document.createElement('button');
+      b.className='pen';b.innerHTML=p[0]+'<span>'+p[1]+'</span>';
+      b.addEventListener('click',function(){
+        [].forEach.call(wrap.children,function(x,j){x.disabled=true;if(j===it[1])x.classList.add('right');});
+        var f=document.getElementById('fb3');
+        if(i===it[1]){cRight++;f.className='feedback show ok';f.innerHTML='<b>Penned right.</b>';}
+        else{b.classList.add('wrong');f.className='feedback show no';
+          f.innerHTML='<b>Not quite.</b>That one belongs in \u201c'+PENS[it[1]][0]+'.\u201d';}
+        document.getElementById('row3').style.display='flex';});
+      wrap.appendChild(b);});
+    document.getElementById('next3').addEventListener('click',function(){cAt++;renderCorral();});
+  }
+
+  /* EVENT 4 */
+  var nO,nAt,nRight,nStreak,nBest;
+  function startNaming(){nO=mix(NAMING.map(function(_,i){return i;}));nAt=0;nRight=0;nStreak=0;nBest=0;renderNaming();}
+  function renderNaming(){
+    var box=document.getElementById('nameBox');
+    document.getElementById('p4').innerHTML='Lead <b>'+Math.min(nAt+1,NAMING.length)+'</b> of '+NAMING.length+
+      ' &middot; streak <b>'+nStreak+'</b>'+(nBest?' (best '+nBest+')':'');
+    if(nAt>=nO.length)return finish('ev4',nRight,NAMING.length,box,startNaming,'p4');
+    var it=NAMING[nO[nAt]];
+    box.innerHTML='<div class="card sched"><p class="scenario">'+it[0]+'</p>'+
+      '<div class="choices" id="types"></div><div class="feedback" id="fb4"></div>'+
+      '<div class="actions" id="row4" style="display:none">'+
+      '<button class="btn" id="next4">Next lead</button></div></div>';
+    var wrap=document.getElementById('types');
+    TYPES.forEach(function(t,i){
+      var b=document.createElement('button');
+      b.className='choice';b.innerHTML=t[0]+'<small>'+t[1]+'</small>';
+      b.addEventListener('click',function(){
+        [].forEach.call(wrap.children,function(x,j){x.disabled=true;if(j===it[1])x.classList.add('right');});
+        var f=document.getElementById('fb4');
+        if(i===it[1]){nRight++;nStreak++;if(nStreak>nBest)nBest=nStreak;
+          f.className='feedback show ok';f.innerHTML='<b>Correct.</b>Streak '+nStreak+'.';}
+        else{b.classList.add('wrong');nStreak=0;f.className='feedback show no';
+          f.innerHTML='<b>Not quite.</b>That is a '+TYPES[it[1]][0].toLowerCase()+' lead. Streak back to zero.';}
+        document.getElementById('row4').style.display='flex';});
+      wrap.appendChild(b);});
+    document.getElementById('next4').addEventListener('click',function(){nAt++;renderNaming();});
+  }
+
+  /* EVENT 5 */
+  var qO,qAt,qRight,QN=10;
+  function startQuick(){qO=mix(QUICK.map(function(_,i){return i;})).slice(0,QN);qAt=0;qRight=0;renderQuick();}
+  function renderQuick(){
+    var box=document.getElementById('quickBox');
+    document.getElementById('p5').innerHTML='Question <b>'+Math.min(qAt+1,QN)+'</b> of '+QN;
+    if(qAt>=qO.length)return finish('ev5',qRight,QN,box,startQuick,'p5');
+    var it=QUICK[qO[qAt]], opts=mix(it.opts);
+    box.innerHTML='<div class="card"><p class="scenario">'+it.q+'</p>'+
+      '<div class="choices" id="qopts"></div><div class="feedback" id="fb5"></div>'+
+      '<div class="actions" id="row5" style="display:none">'+
+      '<button class="btn" id="next5">Next question</button></div></div>';
+    var wrap=document.getElementById('qopts');
+    opts.forEach(function(o){
+      var b=document.createElement('button');
+      b.className='choice';b.textContent=o.t;
+      b.addEventListener('click',function(){
+        [].forEach.call(wrap.children,function(x,j){x.disabled=true;if(opts[j].c)x.classList.add('right');});
+        var f=document.getElementById('fb5');
+        if(o.c){qRight++;f.className='feedback show ok';f.innerHTML='<b>Correct.</b>Page '+it.pg+'.';}
+        else{b.classList.add('wrong');f.className='feedback show no';
+          f.innerHTML='<b>Not quite.</b>The correct answer is marked. See page '+it.pg+'.';}
+        document.getElementById('row5').style.display='flex';});
+      wrap.appendChild(b);});
+    document.getElementById('next5').addEventListener('click',function(){qAt++;renderQuick();});
+  }
+
+  paintHub();
+  go('home');
+})();
+</script>
+</body>
+</html>
