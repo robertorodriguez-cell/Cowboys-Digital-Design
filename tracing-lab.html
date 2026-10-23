@@ -1,0 +1,759 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tracing Lab — Week 12 | Digital Design 1</title>
+<style>
+:root{
+  --maroon:#8A0635; --maroon-dk:#5C0423; --ink:#0A0A0A; --silver:#9E9FA3;
+  --paper:#FFFFFF; --wash:#F4F1F2; --line:#D9D6D8;
+  --ok:#2E7D32; --ok-bg:#E8F3E9; --bad:#B3261E; --bad-bg:#FBE9E7;
+  --blue:#1F7AE0; --cyan:#00A0DC; --yellow:#FFE500;
+  --serif:Cambria, Caladea, Georgia, serif;
+  --sans:Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+  --mono:"Courier New", Courier, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--wash);font-size:17px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.sheet-head{background:var(--maroon);color:#fff;padding:22px 24px 0}
+.head-inner{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-end;justify-content:space-between}
+.head-inner h1{font-family:var(--serif);font-size:2.6rem;line-height:1;margin:0 0 6px}
+.head-inner p{margin:0 0 4px;color:#F1D3DD;max-width:54ch}
+.who{display:flex;gap:12px;flex-wrap:wrap}
+.who label{display:flex;flex-direction:column;font-size:.85rem;color:#F1D3DD}
+.who input{margin-top:3px;padding:7px 10px;border:2px solid transparent;border-radius:6px;width:210px;background:#fff;color:var(--ink)}
+.who input.short{width:110px}
+.who input.need{border-color:var(--yellow)}
+.days{max-width:1240px;margin:16px auto 0;display:flex;gap:6px;flex-wrap:wrap}
+.days button{border:0;border-radius:8px 8px 0 0;padding:9px 16px;background:var(--maroon-dk);color:#F1D3DD;font-weight:700}
+.days button small{display:block;font-weight:400;font-size:.78rem}
+.days button[aria-pressed="true"]{background:var(--wash);color:var(--maroon)}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 24px 60px;display:grid;grid-template-columns:220px 1fr;gap:26px}
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;position:sticky;top:12px}
+nav button{width:100%;text-align:left;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:center}
+nav button .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--wash);font-weight:700;color:var(--maroon)}
+nav button .t{flex:1;line-height:1.2}
+nav button .t small{display:block;color:#666;font-size:.8rem}
+nav button[aria-current="step"]{border-color:var(--maroon);box-shadow:inset 0 0 0 1px var(--maroon)}
+nav button.done .n{background:var(--ok);color:#fff}
+.timer{margin-top:10px;padding:6px 12px;font-size:.9rem;color:#555}
+.station{position:relative;background:var(--paper);padding:26px 28px 30px;border-radius:2px;min-width:0}
+.station::before,.station::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.station::before{top:-10px;left:-10px;border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
+.station::after{bottom:-10px;right:-10px;border-bottom:1.5px solid var(--ink);border-right:1.5px solid var(--ink)}
+.station h2{font-family:var(--serif);color:var(--maroon);font-size:1.85rem;margin:0 0 4px;line-height:1.15}
+.station h3{font-family:var(--serif);font-size:1.2rem;margin:22px 0 8px}
+.time{color:#666;font-size:.9rem;margin:0 0 10px}
+.lede{margin:0 0 12px;max-width:80ch}
+kbd{font-family:var(--mono);background:var(--wash);border:1px solid #ccc;border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:.88em}
+.btn{padding:9px 16px;border-radius:8px;border:2px solid var(--maroon);background:var(--maroon);color:#fff;font-weight:700}
+.btn.ghost{background:transparent;color:var(--maroon)}
+.btn.sm{padding:5px 10px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.fb{margin-top:10px;padding:10px 14px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-bg);color:#1B5E20}
+.fb.bad{background:var(--bad-bg);color:#8C1D18}
+.fb.info{background:var(--wash);color:#333}
+.checklist{list-style:none;padding:0;margin:8px 0 0}
+.checklist li{padding:3px 0}
+.checklist li::before{content:"\25CB  ";color:#999}
+.checklist li.ok::before{content:"\2713  ";color:var(--ok);font-weight:700}
+.checklist li.ok{color:#1B5E20}
+
+/* Editor */
+.editor{display:grid;grid-template-columns:56px minmax(0,1fr) 220px;gap:10px;align-items:start}
+.editor.noside{grid-template-columns:56px minmax(0,1fr)}
+.tools{display:flex;flex-direction:column;gap:6px;background:#2b2b2b;padding:6px;border-radius:6px}
+.tools button{width:44px;height:44px;border-radius:6px;border:0;background:#3c3c3c;color:#eee;display:grid;place-items:center}
+.tools button svg{width:24px;height:24px}
+.tools button[aria-pressed="true"]{background:var(--blue);color:#fff}
+.tools button[hidden]{display:none}
+.board{background:#E6E6E6;border-radius:6px;padding:10px;min-width:0}
+.board svg{display:block;width:100%;height:auto;background:#fff;touch-action:none;user-select:none;-webkit-user-select:none}
+.statusbar{display:flex;gap:16px;flex-wrap:wrap;font-size:.88rem;color:#444;padding:6px 2px 0}
+.statusbar b{color:var(--ink)}
+.side{display:flex;flex-direction:column;gap:10px}
+.pnl{background:#ECECEC;border:1px solid #c9c9c9;border-radius:4px;font-size:.9rem}
+.pnl h4{margin:0;padding:6px 10px;background:#D6D6D6;font-size:.82rem;font-family:var(--sans);text-transform:uppercase;letter-spacing:.04em}
+.pnl .bd{padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+.lyr{display:flex;align-items:center;gap:6px;padding:5px 6px;border-radius:4px;background:#fff;border:1px solid #ddd;cursor:pointer}
+.lyr.active{border-color:var(--blue);box-shadow:inset 3px 0 0 var(--blue)}
+.lyr .nm{flex:1}
+.lyr .ic{width:28px;height:26px;border:1px solid #ccc;background:#f7f7f7;border-radius:4px;display:grid;place-items:center;font-size:.9rem;padding:0}
+.lyr .ic[aria-pressed="false"]{opacity:.35}
+.pnl label{display:flex;flex-direction:column;gap:2px}
+.pnl input[type=range]{width:100%}
+.swrow{display:flex;align-items:center;gap:6px}
+.swrow input[type=color]{width:38px;height:28px;padding:0;border:1px solid #aaa;background:#fff}
+.swrow .lbl{width:48px}
+.result{display:flex;gap:14px;align-items:center}
+.meter{font-family:var(--serif);font-size:1.6rem;color:var(--maroon);font-weight:700}
+.race{border-collapse:collapse;margin-top:10px}
+.race th,.race td{padding:6px 12px;border-bottom:1px solid var(--line);text-align:left}
+/* Image Trace */
+.it{display:grid;grid-template-columns:minmax(0,1fr) 250px;gap:12px;align-items:start}
+.it .board svg{cursor:default}
+.stats{display:grid;grid-template-columns:1fr auto;gap:2px 10px;font-size:.92rem}
+.stats b{text-align:right;font-variant-numeric:tabular-nums}
+/* quiz/report */
+.mc label{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}
+.mc label:hover{background:var(--wash)}
+.mc label.ok{border-color:var(--ok);background:var(--ok-bg)}
+.mc label.bad{border-color:var(--bad);background:var(--bad-bg)}
+.q{border-top:1px solid var(--line);padding:14px 0}
+.q p{margin:0 0 8px;font-weight:700}
+.report table{border-collapse:collapse;width:100%;margin:10px 0 18px}
+.report th,.report td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+.report td.num{text-align:right}
+.report tfoot td{font-weight:700;border-top:2px solid var(--ink)}
+.report textarea{width:100%;min-height:100px;padding:10px;border:1px solid #bbb;border-radius:8px}
+.stamp{display:inline-block;border:3px solid var(--maroon);color:var(--maroon);font-family:var(--serif);font-weight:700;padding:6px 14px;transform:rotate(-3deg);font-size:1.2rem}
+.note{color:#555;font-size:.92rem}
+.choices{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
+.choices button{border:1px solid #bbb;background:#fff;border-radius:8px;padding:6px 12px}
+.choices button[aria-pressed="true"]{border-color:var(--maroon);background:var(--maroon);color:#fff}
+.fname{font-family:var(--mono);padding:8px 10px;border:1px solid #bbb;border-radius:6px;min-width:320px}
+@media (max-width:1060px){ .editor{grid-template-columns:56px minmax(0,1fr)} .editor .side{grid-column:1/-1;flex-direction:row;flex-wrap:wrap} .editor .side .pnl{flex:1;min-width:200px} .it{grid-template-columns:1fr} }
+@media (max-width:860px){ .wrap{grid-template-columns:1fr} nav ol{position:static;flex-direction:row;overflow-x:auto} nav button{min-width:160px} .station{padding:20px 14px} .editor{grid-template-columns:1fr} .tools{flex-direction:row;flex-wrap:wrap} }
+@media print{ nav,.row-actions,.no-print,.days{display:none!important} .wrap{display:block} body{background:#fff} }
+</style>
+</head>
+<body>
+<header class="sheet-head">
+  <div class="head-inner">
+    <div>
+      <h1>Tracing Lab</h1>
+      <p>Week 12: trace photos with the Pen tool, the Curvature tool, and Image Trace, then build your Vector Trace project.</p>
+    </div>
+    <div class="who">
+      <label>Your name<input id="sname" autocomplete="name" placeholder="First and last name"></label>
+      <label>Class period<input id="speriod" class="short" placeholder="e.g. 3"></label>
+    </div>
+  </div>
+  <div class="days" id="days" role="group" aria-label="Choose the day"></div>
+</header>
+<div class="wrap">
+  <nav aria-label="Stations"><ol id="nav"></ol><div class="timer" id="timer"></div></nav>
+  <main id="stage" class="station" tabindex="-1"></main>
+</div>
+
+<script>
+(function(){
+"use strict";
+/* ===== TEACHER SETUP: same web app URL as the other labs ===== */
+var RESULTS_URL="https://script.google.com/macros/s/AKfycbwYTkQW5toOW2JMFNbcd6PK9_RF6B60FeaHafwCDVS78go92jg_DyBQzb4aK9QTZOVj/exec";
+/* ============================================================== */
+var HAS_URL=/^https:\/\/script\.google\.com\//.test(RESULTS_URL);
+var KEY="dd1-tracing-lab-w12";
+var W=600,H=400;
+
+/* ================= geometry ================= */
+function P(x,y){return {x:x,y:y};}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+function bez(p0,p1,p2,p3,t){var u=1-t;return P(u*u*u*p0.x+3*u*u*t*p1.x+3*u*t*t*p2.x+t*t*t*p3.x,u*u*u*p0.y+3*u*u*t*p1.y+3*u*t*t*p2.y+t*t*t*p3.y);}
+function ctrl(a,b){return [P(a.x,a.y),P(a.x+(a.ho?a.ho.x:0),a.y+(a.ho?a.ho.y:0)),P(b.x+(b.hi?b.hi.x:0),b.y+(b.hi?b.hi.y:0)),P(b.x,b.y)];}
+function segs(path){var s=[],a=path.anchors;for(var i=0;i<a.length-1;i++)s.push(ctrl(a[i],a[i+1]));if(path.closed&&a.length>1)s.push(ctrl(a[a.length-1],a[0]));return s;}
+function pathD(path){var a=path.anchors;if(!a.length)return "";var d="M"+a[0].x.toFixed(1)+" "+a[0].y.toFixed(1);segs(path).forEach(function(c){d+=" C"+[c[1],c[2],c[3]].map(function(p){return p.x.toFixed(1)+" "+p.y.toFixed(1);}).join(" ");});if(path.closed)d+=" Z";return d;}
+function sample(path,n){var out=[];segs(path).forEach(function(c,i){for(var k=(i?1:0);k<=n;k++)out.push(bez(c[0],c[1],c[2],c[3],k/n));});if(!out.length&&path.anchors.length)out.push(P(path.anchors[0].x,path.anchors[0].y));return out;}
+function pseg(p,a,b){var dx=b.x-a.x,dy=b.y-a.y,l=dx*dx+dy*dy;if(!l)return dist(p,a);var t=Math.max(0,Math.min(1,((p.x-a.x)*dx+(p.y-a.y)*dy)/l));return Math.hypot(p.x-a.x-t*dx,p.y-a.y-t*dy);}
+function directed(A_,B_){var sum=0,mx=0;A_.forEach(function(p){var m=Infinity;for(var i=0;i<B_.length-1;i++){var d=pseg(p,B_[i],B_[i+1]);if(d<m)m=d;}if(B_.length===1)m=dist(p,B_[0]);sum+=m;if(m>mx)mx=m;});return {mean:sum/A_.length,max:mx};}
+function compare(student,target){
+  if(!student||student.anchors.length<2)return {acc:0};
+  var sT=sample(target,40),sS=sample(student,40),a=directed(sT,sS),b=directed(sS,sT);
+  var mean=(a.mean+b.mean)/2,mx=Math.max(a.max,b.max);
+  var acc=Math.round(Math.max(0,Math.min(100,100-Math.max(0,mean-1.5)*7)));if(mx>30)acc=Math.min(acc,69);
+  return {acc:acc};
+}
+function splitAt(a,b,t){var c=ctrl(a,b);function L(p,q){return P(p.x+(q.x-p.x)*t,p.y+(q.y-p.y)*t);}
+  var p01=L(c[0],c[1]),p12=L(c[1],c[2]),p23=L(c[2],c[3]),p012=L(p01,p12),p123=L(p12,p23),m=L(p012,p123);
+  return {m:m,aho:P(p01.x-a.x,p01.y-a.y),mhi:P(p012.x-m.x,p012.y-m.y),mho:P(p123.x-m.x,p123.y-m.y),bhi:P(p23.x-b.x,p23.y-b.y)};}
+function snap45(o,p){var dx=p.x-o.x,dy=p.y-o.y,r=Math.hypot(dx,dy),ang=Math.round(Math.atan2(dy,dx)/(Math.PI/4))*(Math.PI/4);return P(o.x+r*Math.cos(ang),o.y+r*Math.sin(ang));}
+/* Curvature tool: smooth handles computed from neighbors, like Illustrator's rubber-band curves */
+function autoHandles(path){var a=path.anchors,n=a.length;for(var i=0;i<n;i++){var c=a[i];if(!c.auto)continue;if(c.corner){c.hi=null;c.ho=null;continue;}
+  var pr=i>0?a[i-1]:(path.closed&&n>2?a[n-1]:null),nx=i<n-1?a[i+1]:(path.closed&&n>2?a[0]:null);
+  if(!pr&&!nx){c.hi=c.ho=null;continue;}
+  var tx,ty;if(pr&&nx){tx=nx.x-pr.x;ty=nx.y-pr.y;}else if(nx){tx=nx.x-c.x;ty=nx.y-c.y;}else{tx=c.x-pr.x;ty=c.y-pr.y;}
+  var L=Math.hypot(tx,ty)||1;tx/=L;ty/=L;
+  c.hi=pr?P(-tx*dist(pr,c)/3,-ty*dist(pr,c)/3):null;c.ho=nx?P(tx*dist(nx,c)/3,ty*dist(nx,c)/3):null;}}
+function curvShape(pts,closed){var p={anchors:pts.map(function(q){return {x:q[0],y:q[1],auto:true,corner:!!q[2],hi:null,ho:null};}),closed:!!closed};autoHandles(p);return p;}
+function A(x,y,hi,ho){return {x:x,y:y,hi:hi?P(hi[0],hi[1]):null,ho:ho?P(ho[0],ho[1]):null};}
+
+/* ================= practice "photos" (drawn in code so the outline is known) ================= */
+var SHAPES={
+  boot:{label:"Cowboy boot",path:{anchors:[A(240,60),A(340,60),A(345,220,null,[60,10]),A(505,305,[-50,-55],[5,30]),A(470,340,[30,0],null),A(230,340),A(230,300)],closed:true}},
+  shield:{label:"Shield",path:curvShape([[190,90,1],[410,90,1],[405,230],[300,350,1],[195,230]],true)},
+  pebble:{label:"Pebble",path:curvShape([[160,230],[230,125],[370,105],[455,190],[420,300],[270,320]],true)},
+  apple:{label:"Apple",path:curvShape([[300,118,1],[375,88],[448,160],[428,282],[352,340],[300,326,1],[248,340],[172,282],[152,160],[225,88]],true)},
+  pear:{label:"Pear",path:curvShape([[300,72],[343,118],[352,190],[420,268],[382,346],[218,346],[180,268],[248,190],[257,118]],true)}
+};
+function rng(seed){return function(){seed=(seed*1664525+1013904223)>>>0;return seed/4294967296;};}
+function noise(ctx,amt,seed){var r=rng(seed),im=ctx.getImageData(0,0,W,H),d=im.data;for(var i=0;i<d.length;i+=4){var n=(r()-.5)*2*amt;d[i]+=n;d[i+1]+=n;d[i+2]+=n;}ctx.putImageData(im,0,0);}
+function bg(ctx,inner,outer){var g=ctx.createRadialGradient(300,200,20,300,200,420);g.addColorStop(0,inner);g.addColorStop(1,outer);ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+function shadow(ctx,p2){ctx.save();ctx.translate(9,12);ctx.filter="blur(9px)";ctx.fillStyle="rgba(0,0,0,.18)";ctx.fill(p2);ctx.restore();}
+var PHOTO_CACHE={};
+function photoCanvas(kind){
+  if(PHOTO_CACHE[kind])return PHOTO_CACHE[kind];
+  var c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d",{willReadFrequently:true}),sh=SHAPES[kind],p2=new Path2D(pathD(sh.path));
+  if(kind==="boot"){bg(x,"#F3EEE7","#BDB4A8");shadow(x,p2);x.fillStyle="#4A2E1F";x.fill(p2);x.save();x.clip(p2);
+    x.fillStyle="#A8876A";x.beginPath();x.ellipse(292,160,20,95,0,0,7);x.fill();x.beginPath();x.ellipse(440,296,46,13,.35,0,7);x.fill();
+    x.fillStyle="#2A190F";x.fillRect(228,318,80,30);x.strokeStyle="#2A190F";x.lineWidth=2;x.setLineDash([6,5]);x.beginPath();x.moveTo(250,90);x.lineTo(330,90);x.moveTo(330,230);x.quadraticCurveTo(420,240,480,300);x.stroke();x.restore();}
+  else if(kind==="apple"){bg(x,"#F6F0E2","#D8CDB6");shadow(x,p2);var g=x.createRadialGradient(255,170,10,300,220,190);g.addColorStop(0,"#E8364B");g.addColorStop(1,"#8E0B20");x.fillStyle=g;x.fill(p2);
+    x.save();x.clip(p2);x.fillStyle="rgba(255,255,255,.4)";x.beginPath();x.ellipse(240,172,22,40,-.4,0,7);x.fill();x.restore();
+    x.strokeStyle="#5B3A1E";x.lineWidth=10;x.lineCap="round";x.beginPath();x.moveTo(300,120);x.quadraticCurveTo(298,85,314,58);x.stroke();
+    x.fillStyle="#3C8D2F";x.save();x.translate(350,74);x.rotate(-.45);x.beginPath();x.ellipse(0,0,40,15,0,0,7);x.fill();x.restore();}
+  else if(kind==="shield"){bg(x,"#F1F1F2","#C9CACD");shadow(x,p2);x.fillStyle="#8A0635";x.fill(p2);x.save();x.clip(p2);x.strokeStyle="#9E9FA3";x.lineWidth=18;x.stroke(p2);
+    x.fillStyle="#D9D9DC";x.font="bold 120px Georgia, serif";x.textAlign="center";x.fillText("M",300,265);x.restore();}
+  else if(kind==="pebble"){bg(x,"#EEF1EC","#C3C8BF");shadow(x,p2);var g2=x.createLinearGradient(160,110,450,320);g2.addColorStop(0,"#9A9DA1");g2.addColorStop(1,"#55585D");x.fillStyle=g2;x.fill(p2);
+    x.save();x.clip(p2);var r=rng(7);x.fillStyle="rgba(255,255,255,.25)";for(var i=0;i<60;i++){x.beginPath();x.arc(160+r()*300,110+r()*210,1+r()*3,0,7);x.fill();}x.restore();}
+  else if(kind==="pear"){bg(x,"#F3F1E6","#CFCBB5");shadow(x,p2);var g3=x.createLinearGradient(220,80,380,340);g3.addColorStop(0,"#D6DC6A");g3.addColorStop(1,"#7FA33A");x.fillStyle=g3;x.fill(p2);
+    x.strokeStyle="#5B3A1E";x.lineWidth=8;x.lineCap="round";x.beginPath();x.moveTo(300,76);x.quadraticCurveTo(296,50,310,34);x.stroke();}
+  noise(x,9,kind.length*31+5);
+  var out={canvas:c,ctx:x,src:c.toDataURL("image/jpeg",.88)};PHOTO_CACHE[kind]=out;return out;
+}
+/* uploaded photo for the project */
+var UPLOAD={canvas:null,ctx:null,src:null};
+function loadUpload(src,cb){var im=new Image();im.onload=function(){var c=document.createElement("canvas");c.width=W;c.height=H;var x=c.getContext("2d",{willReadFrequently:true});x.fillStyle="#fff";x.fillRect(0,0,W,H);
+  var s=Math.min(W/im.width,H/im.height),w=im.width*s,h=im.height*s;x.drawImage(im,(W-w)/2,(H-h)/2,w,h);UPLOAD={canvas:c,ctx:x,src:src};cb&&cb(true);};im.onerror=function(){cb&&cb(false);};im.src=src;}
+function photoFor(doc){if(!doc.photo||!doc.photo.kind)return null;if(doc.photo.kind==="upload")return UPLOAD.src?UPLOAD:null;return photoCanvas(doc.photo.kind);}
+
+/* ================= Image Trace engine ================= */
+var DSW=200,DSH=133;
+function downsample(canvas){var c=document.createElement("canvas");c.width=DSW;c.height=DSH;var x=c.getContext("2d",{willReadFrequently:true});x.drawImage(canvas,0,0,DSW,DSH);return x.getImageData(0,0,DSW,DSH).data;}
+function lum(d,i){return .299*d[i]+.587*d[i+1]+.114*d[i+2];}
+function traceMask(m,w,h){ /* boundary edges of pixel regions -> closed loops of grid points */
+  var out={},key=function(x,y){return x+","+y;},edges=[];
+  function inside(x,y){return x>=0&&y>=0&&x<w&&y<h&&m[y*w+x];}
+  function add(x1,y1,x2,y2){var k=key(x1,y1);(out[k]=out[k]||[]).push(edges.length);edges.push([x1,y1,x2,y2,0]);}
+  for(var y=0;y<h;y++)for(var x=0;x<w;x++){if(!m[y*w+x])continue;
+    if(!inside(x,y-1))add(x,y,x+1,y);if(!inside(x+1,y))add(x+1,y,x+1,y+1);if(!inside(x,y+1))add(x+1,y+1,x,y+1);if(!inside(x-1,y))add(x,y+1,x,y);}
+  var loops=[];
+  for(var e=0;e<edges.length;e++){if(edges[e][4])continue;var loop=[],cur=e,guard=0;
+    while(cur!=null&&!edges[cur][4]&&guard++<200000){var E=edges[cur];E[4]=1;loop.push([E[0],E[1]]);var nx=out[key(E[2],E[3])],next=null;
+      if(nx){for(var j=0;j<nx.length;j++){if(!edges[nx[j]][4]){next=nx[j];break;}}}cur=next;}
+    if(loop.length>2)loops.push(loop);}
+  return loops;
+}
+function area(pts){var s=0;for(var i=0;i<pts.length;i++){var a=pts[i],b=pts[(i+1)%pts.length];s+=a[0]*b[1]-b[0]*a[1];}return s/2;}
+function rdp(pts,eps){if(pts.length<3)return pts;var a=pts[0],b=pts[pts.length-1],mx=0,idx=0;
+  for(var i=1;i<pts.length-1;i++){var d=pseg(P(pts[i][0],pts[i][1]),P(a[0],a[1]),P(b[0],b[1]));if(d>mx){mx=d;idx=i;}}
+  if(mx>eps){var l=rdp(pts.slice(0,idx+1),eps),r=rdp(pts.slice(idx),eps);return l.slice(0,-1).concat(r);}return [a,b];}
+function rdpClosed(pts,eps){if(pts.length<4)return pts;var far=0,fi=0;for(var i=1;i<pts.length;i++){var d=Math.hypot(pts[i][0]-pts[0][0],pts[i][1]-pts[0][1]);if(d>far){far=d;fi=i;}}
+  var a=rdp(pts.slice(0,fi+1),eps),b=rdp(pts.slice(fi).concat([pts[0]]),eps);return a.slice(0,-1).concat(b.slice(0,-1));}
+function loopsToPaths(loops,eps,minArea,sx,sy){var res=[],anchors=0;
+  loops.forEach(function(l){if(Math.abs(area(l))<minArea)return;var s=rdpClosed(l,eps);if(s.length<3)return;
+    var p={anchors:s.map(function(q){return {x:q[0]*sx,y:q[1]*sy,auto:true,corner:false,hi:null,ho:null};}),closed:true};
+    var n=p.anchors.length;p.anchors.forEach(function(c,i){var a=p.anchors[(i-1+n)%n],b=p.anchors[(i+1)%n],v1=P(a.x-c.x,a.y-c.y),v2=P(b.x-c.x,b.y-c.y);
+      var ang=Math.acos(Math.max(-1,Math.min(1,(v1.x*v2.x+v1.y*v2.y)/((Math.hypot(v1.x,v1.y)*Math.hypot(v2.x,v2.y))||1))));if(ang<1.9)c.corner=true;});
+    autoHandles(p);anchors+=n;res.push(p);});
+  return {paths:res,anchors:anchors};}
+function kmeans(d,n,k){var px=[];for(var i=0;i<n;i++)px.push([d[i*4],d[i*4+1],d[i*4+2]]);
+  var sorted=px.map(function(p,i){return [.299*p[0]+.587*p[1]+.114*p[2],i];}).sort(function(a,b){return a[0]-b[0];});
+  var c=[];for(var j=0;j<k;j++)c.push(px[sorted[Math.floor((j+.5)/k*n)][1]].slice());var as=new Uint8Array(n);
+  for(var it=0;it<9;it++){var sum=c.map(function(){return [0,0,0,0];});
+    for(var i2=0;i2<n;i2++){var p=px[i2],best=0,bd=1e9;for(var j2=0;j2<k;j2++){var dd=(p[0]-c[j2][0])*(p[0]-c[j2][0])+(p[1]-c[j2][1])*(p[1]-c[j2][1])+(p[2]-c[j2][2])*(p[2]-c[j2][2]);if(dd<bd){bd=dd;best=j2;}}as[i2]=best;var s=sum[best];s[0]+=p[0];s[1]+=p[1];s[2]+=p[2];s[3]++;}
+    sum.forEach(function(s,j3){if(s[3])c[j3]=[s[0]/s[3],s[1]/s[3],s[2]/s[3]];});}
+  return {centers:c,assign:as};}
+function hex(c){return "#"+c.map(function(v){return ("0"+Math.round(Math.max(0,Math.min(255,v))).toString(16)).slice(-2);}).join("");}
+function imageTrace(canvas,set){
+  var d=downsample(canvas),n=DSW*DSH,sx=W/DSW,sy=H/DSH,eps=[2.2,1.5,1.0,.6][set.paths]||1,minA=set.noise;
+  if(set.preset==="bw"){var m=new Uint8Array(n);for(var i=0;i<n;i++)m[i]=lum(d,i*4)<set.threshold?1:0;
+    var r=loopsToPaths(traceMask(m,DSW,DSH),eps,minA,sx,sy);return {layers:[{fill:"#0A0A0A",paths:r.paths}],bg:"#FFFFFF",anchors:r.anchors,count:r.paths.length,mask:m};}
+  var k=set.preset==="c3"?3:6,km=kmeans(d,n,k),cnt=new Array(k).fill(0),edge=new Array(k).fill(0);
+  for(var i2=0;i2<n;i2++){cnt[km.assign[i2]]++;var x=i2%DSW,y=(i2/DSW)|0;if(x===0||y===0||x===DSW-1||y===DSH-1)edge[km.assign[i2]]++;}
+  var bgi=edge.indexOf(Math.max.apply(null,edge)),layers=[],anchors=0,count=0;
+  var order=cnt.map(function(c,i){return i;}).filter(function(i){return i!==bgi;}).sort(function(a,b){return cnt[b]-cnt[a];});
+  order.forEach(function(ci){var m2=new Uint8Array(n);for(var i3=0;i3<n;i3++)m2[i3]=km.assign[i3]===ci?1:0;var r2=loopsToPaths(traceMask(m2,DSW,DSH),eps,minA,sx,sy);anchors+=r2.anchors;count+=r2.paths.length;layers.push({fill:hex(km.centers[ci]),paths:r2.paths});});
+  return {layers:layers,bg:hex(km.centers[bgi]),anchors:anchors,count:count};
+}
+function trueMask(kind){var c=document.createElement("canvas");c.width=DSW;c.height=DSH;var x=c.getContext("2d");x.scale(DSW/W,DSH/H);x.fill(new Path2D(pathD(SHAPES[kind].path)));
+  var d=x.getImageData(0,0,DSW,DSH).data,m=new Uint8Array(DSW*DSH);for(var i=0;i<m.length;i++)m[i]=d[i*4+3]>127?1:0;return m;}
+function iou(a,b){var I=0,U=0;for(var i=0;i<a.length;i++){if(a[i]||b[i])U++;if(a[i]&&b[i])I++;}return U?I/U:0;}
+
+/* ================= days & stations ================= */
+var DAYS={
+ mon:{open:"2026-10-26",label:"Mon",date:"Oct 26",title:"Template layers",exit:"Why do designers lock the photo layer before tracing?",
+  stations:[
+   {kind:"setup",title:"Set up a template",mins:6,photo:"boot",
+    text:"Before tracing, designers set the photo up as a <b>template layer</b>. Use the <b>Layers</b> panel on the right to complete every step on the checklist. Try this too: before you lock it, use the <b>Selection tool</b> <kbd>V</kbd> to drag the photo and see how easily it moves by accident."},
+   {kind:"trace",title:"Trace the boot",mins:12,photo:"boot",tools:["pen","direct","convert"],hints:{dots:1},
+    text:"Trace the boot&rsquo;s outline with the <b>Pen tool</b> <kbd>P</kbd>. The dots show where a pro would put anchor points. Click for corners, click-drag for the curved toe, and close the path on your first point. Hide the Photo layer (eye icon) to check your line."},
+   {kind:"trace",title:"Trace the shield",mins:12,photo:"shield",tools:["pen","direct","convert","add","delete"],hints:{},
+    text:"No dots this time. Plan your points first: three sharp corners and two curved sides. Trace the outer edge of the shield as one closed path."}
+  ],
+  quiz:[
+   {q:"What does File > Place do?",o:["Saves your file","Brings an image into your Illustrator document","Prints the artboard","Deletes a layer"],a:1},
+   {q:"Why lower the photo\u2019s opacity before tracing?",o:["So your paths stand out on top of a faded photo","To make the file smaller","So the photo prints lighter","It changes the photo to CMYK"],a:0},
+   {q:"Why lock the photo layer?",o:["So it exports faster","So you can\u2019t move or select it by accident while tracing","So it turns into a vector","So other people can\u2019t open it"],a:1},
+   {q:"Where should your tracing paths go?",o:["On the same layer as the photo","On their own new layer above the photo","On a separate artboard","Inside the photo"],a:1}
+  ]},
+ tue:{open:"2026-10-27",label:"Tue",date:"Oct 27",title:"Curvature tool",exit:"How do you make a corner point with the Curvature tool?",
+  stations:[
+   {kind:"trace",title:"Meet the Curvature tool",mins:7,photo:"pebble",tools:["curv","direct"],hints:{dots:1},
+    text:"The <b>Curvature tool</b> <kbd>Shift</kbd>+<kbd>~</kbd> makes smooth curves for you. Just <b>click</b> each dot (no dragging), then click the first dot to close. Drag any point afterward to adjust it."},
+   {kind:"trace",title:"Corners with Curvature",mins:9,photo:"apple",tools:["curv","direct"],hints:{dots:1},
+    text:"Trace the apple. Points are smooth by default. To make the sharp dip at the top and the dimple at the bottom, <b>double-click</b> those points (or hold <kbd>Alt</kbd> as you click them) to turn them into corners."},
+   {kind:"race",title:"Pen vs. Curvature",mins:12,photo:"pear",
+    text:"Trace the same pear twice: once with the <b>Pen tool</b>, once with the <b>Curvature tool</b>. The timer starts on your first click. Which tool is faster? Which uses fewer anchor points?"}
+  ],
+  quiz:[
+   {q:"What is the keyboard shortcut for the Curvature tool?",o:["Shift + ~","Shift + C","P","Ctrl + K"],a:0},
+   {q:"How do you make a corner point with the Curvature tool?",o:["Click-drag the point","Double-click the point (or Alt-click while placing it)","Press Delete","Hold Shift"],a:1},
+   {q:"The Curvature tool\u2026",o:["only draws straight lines","automatically makes smooth curves through the points you click","fills shapes with color","traces photos automatically"],a:1},
+   {q:"For smooth, rounded shapes, which tool usually needs fewer clicks?",o:["The Curvature tool","The Rectangle tool","The Eyedropper","The Type tool"],a:0}
+  ]},
+ wed:{open:"2026-10-28",label:"Wed",date:"Oct 28",title:"Image Trace",exit:"Name one advantage and one disadvantage of Image Trace compared to tracing by hand.",
+  stations:[
+   {kind:"itbw",title:"Black and White Logo",mins:10,photo:"boot",
+    text:"<b>Image Trace</b> turns pixels into vector paths automatically. Choose the <b>Black and White Logo</b> preset, then drag <b>Threshold</b> until the whole boot is solid black, including the light patches, without the background turning black. Then click <b>Expand</b>."},
+   {kind:"itcolor",title:"Color presets",mins:10,photo:"apple",
+    text:"Try the <b>3 Colors</b> preset, then <b>6 Colors</b>. Watch the anchor point count. Click <b>Expand</b> on the one you like best."}
+  ],
+  quiz:[
+   {q:"Image Trace turns\u2026",o:["vector paths into pixels","a raster image (pixels) into vector paths","black into white","text into outlines"],a:1},
+   {q:"In Black and White mode, the Threshold slider controls\u2026",o:["the file size","which pixels become black and which become white","the stroke weight","the number of artboards"],a:1},
+   {q:"After tracing, what must you click to get editable anchor points?",o:["Expand","Embed","Export","Undo"],a:0},
+   {q:"Compared with a clean hand trace, an automatic Image Trace usually has\u2026",o:["fewer anchor points","many more anchor points","no anchor points","exactly the same points"],a:1},
+   {q:"When is Image Trace a good choice?",o:["When a client needs a logo with clean, minimal paths","To quickly turn a scanned sketch or simple image into vector art you can refine","To change the document to CMYK","To fix spelling"],a:1}
+  ]},
+ thu:{open:"2026-10-29",label:"Thu",date:"Oct 29",title:"Project work day",exit:"What is one detail you still need to add to finish your trace?",
+  stations:[
+   {kind:"psetup",title:"Start your project",mins:6,
+    text:"Choose the photo for your <b>Vector Trace</b> project: one of ours, or <b>upload</b> the photo your teacher gave you. Then set it up as a template layer like Monday."},
+   {kind:"project",title:"Trace your photo",mins:35,
+    text:"Trace your photo as separate shapes: the main outline first, then inner details. Fill shapes with colors sampled by the <b>Eyedropper</b> <kbd>I</kbd>: select a shape with the Selection tool <kbd>V</kbd>, then click the photo with the Eyedropper. Your work saves automatically and carries over to Friday.",
+    req:"work"}
+  ],
+  quiz:[]},
+ fri:{open:"2026-10-30",label:"Fri",date:"Oct 30",title:"Finish & export",exit:"Design rationale: in 3\u20134 sentences, explain why you chose your object and how you traced it.",
+  stations:[
+   {kind:"project",title:"Finish the details",mins:15,req:"final",
+    text:"Finish your trace. When you&rsquo;re done, <b>hide the Photo layer</b> (eye icon) so only your vector art shows, just like you would before exporting in Illustrator."},
+   {kind:"export",title:"Name & export",mins:5,
+    text:"Name your file with the class formula, export a PNG, and attach it to the assignment in Google Classroom."}
+  ],
+  quiz:[
+   {q:"A client sends a low-resolution JPEG of their logo and wants a clean vector version. What\u2019s the best approach?",o:["Run Image Trace and send it without changes","Place the JPEG, lock it as a template layer, and trace it by hand with the Pen or Curvature tool","Enlarge the JPEG to 300 ppi","Save the JPEG as a PDF"],a:1},
+   {q:"Which panel do you use to lock a layer or change its visibility?",o:["Swatches","Layers","Character","Appearance"],a:1},
+   {q:"Which tool samples a color from a photo and applies it to the selected shape?",o:["Eyedropper (I)","Direct Selection (A)","Curvature (Shift + ~)","Hand (H)"],a:0},
+   {q:"After Image Trace, what must you do before you can edit individual anchor points?",o:["Rasterize","Expand","Embed","Group"],a:1},
+   {q:"Before exporting your final traced artwork, what should you do with the photo layer?",o:["Make it 100% opacity","Hide or delete it so it doesn\u2019t appear in the export","Move it to the top","Lock it and leave it visible"],a:1}
+  ]}
+};
+var DAY_ORDER=["mon","tue","wed","thu","fri"];
+
+/* ================= state ================= */
+var S={sid:"",name:"",period:"",day:"",days:{},project:null};
+try{var sv=JSON.parse(localStorage.getItem(KEY)||"null");if(sv)S=Object.assign(S,sv);}catch(e){}
+if(!S.sid)S.sid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+var now=new Date(),iso=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+var PREVIEW=/[?&]preview=cowboys\b/i.test(location.search);
+function isOpen(k){return PREVIEW||iso>=DAYS[k].open;}
+var todayKey=DAY_ORDER.filter(function(k){return DAYS[k].open===iso;})[0];
+if(todayKey)S.day=todayKey;else if(!DAYS[S.day]||!isOpen(S.day)){var od=DAY_ORDER.filter(isOpen);S.day=od.length?od[od.length-1]:"mon";}
+function D(){var k=S.day;if(!S.days[k])S.days[k]={cur:0,start:Date.now(),st:{},quiz:{},exit:""};return S.days[k];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){try{var c=clone(S);if(c.project&&c.project.photo)c.project.photo.src=null;localStorage.setItem(KEY,JSON.stringify(c));}catch(e2){}}}
+if(S.project&&S.project.photo&&S.project.photo.kind==="upload"&&S.project.photo.src)loadUpload(S.project.photo.src,function(){render();});
+function project(){if(!S.project)S.project={paths:[],photo:{kind:null,placed:false,opacity:100,locked:false,visible:true,x:0,y:0,src:null},layer:"photo"};return S.project;}
+
+var $=function(s,r){return (r||document).querySelector(s);},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function fb(el,cls,html){el.className="fb show "+cls;el.innerHTML=html;}
+function pages(){var d=DAYS[S.day],p=d.stations.map(function(s,i){return {kind:"st",i:i,title:s.title,mins:s.mins};});if(d.quiz.length)p.push({kind:"quiz",title:"Quick check",mins:5});p.push({kind:"report",title:"Lab report"});return p;}
+function stState(i){var d=D();if(!d.st[i])d.st[i]={best:0,passed:false,checks:0,anchors:0};return d.st[i];}
+function quizScore(){var d=D(),q=DAYS[S.day].quiz,g=0,done=0;q.forEach(function(x,i){var r=d.quiz[i];if(r&&r.ok){done++;if(r.tries===1)g++;}});return {got:g,of:q.length,done:done===q.length};}
+
+/* ================= sending ================= */
+function payload(status){
+  var day=DAYS[S.day],d=D(),acc=[],passed=0,details=[];
+  day.stations.forEach(function(s,i){var r=d.st[i];var v="";if(r&&(r.checks||r.passed)){v=s.kind==="trace"||s.kind==="race"?r.best:(r.passed?100:"");}acc.push(v);if(r&&r.passed)passed++;
+    details.push(s.title+": "+(r&&(r.checks||r.passed)?((s.kind==="trace"||s.kind==="race")?r.best+"%, "+r.anchors+" pts":(r.passed?"done":"in progress"))+(r.note?" ("+r.note+")":"")+(r.passed?" \u2713":""):"not tried"));});
+  var tried=acc.filter(function(v){return v!=="";}),q=quizScore();
+  return {lab:"pen",sid:S.sid,day:"Tracing Lab \u00b7 "+day.label+" "+day.date+" \u2013 "+day.title,name:S.name,period:S.period,status:status,
+    minutes:Math.floor((Date.now()-d.start)/60000),passed:passed,stations:day.stations.length,
+    avgAcc:tried.length?Math.round(tried.reduce(function(a,b){return a+b;},0)/tried.length):"",quiz:q.of?q.got:"",quizOf:q.of||"",acc:acc,details:details.join("; "),exit:d.exit||""};
+}
+function send(status,cb){if(!HAS_URL||!S.name){cb&&cb(false);return;}
+  try{fetch(RESULTS_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload(status))}).then(function(){cb&&cb(true);}).catch(function(){cb&&cb(false);});}catch(e){cb&&cb(false);}}
+var syncT=null;function autoSync(){if(!HAS_URL)return;clearTimeout(syncT);syncT=setTimeout(function(){send(D().submittedAt?"Submitted (updated)":"In progress");},4000);}
+
+/* ================= chrome ================= */
+function renderDays(){var box=$("#days");box.innerHTML="";DAY_ORDER.forEach(function(k){var d=DAYS[k],b=document.createElement("button");b.setAttribute("aria-pressed",k===S.day);
+  b.innerHTML=(isOpen(k)?"":"\uD83D\uDD12 ")+d.label+" "+d.date+"<small>"+(isOpen(k)?d.title:"Opens "+d.label+" "+d.date)+"</small>";b.onclick=function(){S.day=k;save();render();};box.appendChild(b);});}
+function isDone(p){if(p.kind==="st")return stState(p.i).passed;if(p.kind==="quiz")return quizScore().done;return false;}
+function renderNav(){autoSync();var nav=$("#nav");nav.innerHTML="";var d=D();
+  pages().forEach(function(p,i){var li=document.createElement("li"),b=document.createElement("button");if(isDone(p))b.className="done";if(i===d.cur)b.setAttribute("aria-current","step");
+    b.innerHTML='<span class="n">'+(p.kind==="report"?"\u2713":(i+1))+'</span><span class="t">'+esc(p.title)+'<small>'+(p.kind==="report"?"Turn in":(isDone(p)?"Complete":"About "+p.mins+" min"))+'</small></span>';
+    b.onclick=function(){go(i);};li.appendChild(b);nav.appendChild(li);});
+  $("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-d.start)/60000)+" min";}
+function go(i){D().cur=i;save();render();$("#stage").focus({preventScroll:true});window.scrollTo(0,0);}
+function lockedPage(){activeKey=null;var day=DAYS[S.day];$("#nav").innerHTML="";$("#timer").textContent="";var od=DAY_ORDER.filter(isOpen);
+  $("#stage").innerHTML='<h2>\uD83D\uDD12 '+esc(day.label+" "+day.date)+': '+esc(day.title)+'</h2><p class="lede">This day unlocks on <b>'+esc(day.label+" "+day.date)+'</b>. Come back then!</p>'+
+   (od.length?'<div class="row-actions"><button class="btn" id="gotoday">Go to '+esc(DAYS[od[od.length-1]].label)+'\u2019s stations</button></div>':'<p class="note">The Tracing Lab opens Monday, Oct 26.</p>');
+  var g=$("#gotoday");if(g)g.onclick=function(){S.day=od[od.length-1];save();render();};}
+function render(){renderDays();if(!isOpen(S.day)){lockedPage();return;}var d=D(),pg=pages();if(d.cur>=pg.length)d.cur=0;renderNav();var p=pg[d.cur],st=$("#stage");activeKey=null;
+  if(p.kind==="quiz")quizPage(st);else if(p.kind==="report")reportPage(st);else{var sd=DAYS[S.day].stations[p.i];({setup:setupStation,trace:traceStation,race:raceStation,itbw:itStation,itcolor:itStation,psetup:psetupStation,project:projectStation,export:exportStation})[sd.kind](st,p.i,sd);}}
+function nextBtn(){return D().cur<pages().length-1?'<button class="btn ghost" data-next>Next</button>':'';}
+function wireNext(st){var nb=$("[data-next]",st);if(nb)nb.onclick=function(){go(D().cur+1);};}
+function head(sd,i){return '<h2>'+esc(DAYS[S.day].label)+' station '+(i+1)+': '+esc(sd.title)+'</h2><p class="time">About '+sd.mins+' minutes</p><p class="lede">'+sd.text+'</p>';}
+
+/* ================= editor ================= */
+var ICON={
+ select:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 3l12 9-5.5 1 3 6-2.5 1.2-3-6L6 18z"/></svg>',
+ direct:'<svg viewBox="0 0 24 24" fill="#fff" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M6 3l12 9-5.5 1 3 6-2.5 1.2-3-6L6 18z"/></svg>',
+ pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3l6 9-6 9-6-9z"/><path d="M12 12v9"/><circle cx="12" cy="11" r="1.4" fill="currentColor"/></svg>',
+ curv:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M3 18C7 4 17 4 21 18"/><circle cx="3" cy="18" r="1.6" fill="currentColor"/><circle cx="12" cy="7.5" r="1.6" fill="currentColor"/><circle cx="21" cy="18" r="1.6" fill="currentColor"/></svg>',
+ convert:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M4 20L12 6l8 14"/><path d="M12 6l5-3"/><circle cx="17.5" cy="2.8" r="1.6" fill="currentColor"/></svg>',
+ add:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3l5 8-5 8-5-8z"/><path d="M18 14v7M14.5 17.5h7"/></svg>',
+ delete:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M10 3l5 8-5 8-5-8z"/><path d="M14.5 17.5h7"/></svg>',
+ eyedrop:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M14 4l6 6-2 2-6-6z"/><path d="M13 7l-8 8-1 5 5-1 8-8"/></svg>'
+};
+var TNAME={select:"Selection (V)",direct:"Direct Selection (A)",pen:"Pen tool (P)",curv:"Curvature tool (Shift+~)",convert:"Anchor Point tool (Shift+C)",add:"Add Anchor Point (+)",delete:"Delete Anchor Point (\u2013)",eyedrop:"Eyedropper (I)"};
+var ALLTOOLS=["select","direct","pen","curv","convert","add","delete","eyedrop"];
+var activeKey=null;
+document.addEventListener("keydown",function(e){if(activeKey)activeKey(e);});
+
+/* cfg: {tools, single, layers, style, hints, target, setupMode, onChange(doc), onTool} ; doc: {paths, photo, layer} */
+function Editor(host,cfg,doc){
+  var tool=cfg.tools[0],drawing=null,drag=null,hover=null,sel=null,selPath=-1,undo=[];
+  var side=cfg.layers||cfg.style;
+  host.innerHTML='<div class="editor'+(side?'':' noside')+'"><div class="tools" role="toolbar" aria-label="Tools">'+ALLTOOLS.map(function(t){return '<button data-tool="'+t+'" title="'+TNAME[t]+'" aria-label="'+TNAME[t]+'"'+(cfg.tools.indexOf(t)<0?" hidden":"")+'>'+ICON[t]+'</button>';}).join("")+'</div>'+
+    '<div class="board"><svg viewBox="0 0 600 400" role="img" aria-label="Artboard"></svg><div class="statusbar"><span>Tool: <b data-s="tool"></b></span><span>Anchor points: <b data-s="anc"></b></span>'+(cfg.single?'':'<span>Shapes: <b data-s="paths"></b></span>')+'<span data-s="extra"></span></div></div>'+
+    (side?'<div class="side">'+(cfg.layers?'<div class="pnl"><h4>Layers</h4><div class="bd" data-p="layers"></div></div>':'')+(cfg.style?'<div class="pnl"><h4>Fill &amp; stroke</h4><div class="bd" data-p="style"></div></div>':'')+'</div>':'')+'</div>'+
+    '<div class="row-actions" data-p="edbtns"><button class="btn ghost sm" data-a="end">End path</button><button class="btn ghost sm" data-a="undo">Undo</button>'+(cfg.single?'<button class="btn ghost sm" data-a="clear">Clear</button>':'<button class="btn ghost sm" data-a="delpath">Delete selected shape</button>')+'</div><div class="fb" data-p="efb"></div>';
+  var svg=$(".board svg",host),efb=$('[data-p="efb"]',host);
+  function msg(cls,h){fb(efb,cls,h);}
+  function changed(){cfg.onChange&&cfg.onChange(doc);}
+  function snapshot(){undo.push(JSON.stringify({p:doc.paths,ph:doc.photo,d:drawing}));if(undo.length>60)undo.shift();}
+  function cur(){return drawing!=null?doc.paths[drawing]:null;}
+  function setTool(t){if(cfg.tools.indexOf(t)<0)return;if(drawing!=null&&t!=="pen"&&t!=="curv")endPath();tool=t;$$(".tools button",host).forEach(function(b){b.setAttribute("aria-pressed",b.dataset.tool===t);});
+    svg.style.cursor=(t==="pen"||t==="curv")?"crosshair":(t==="eyedrop"?"copy":"default");$('[data-s="tool"]',host).textContent=TNAME[t];cfg.onTool&&cfg.onTool(t);draw();}
+  function pt(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;var m=svg.getScreenCTM();if(!m)return P(0,0);var r=p.matrixTransform(m.inverse());return P(r.x,r.y);}
+  function showsAnchors(pi){if(["direct","convert","add","delete","curv"].indexOf(tool)>-1)return true;return pi===drawing||(tool==="select"&&pi===selPath);}
+  function handlesShown(pi,i){if(tool==="direct"||tool==="convert")return true;if(tool==="pen"&&drawing===pi&&i===doc.paths[pi].anchors.length-1)return true;return sel&&sel.pi===pi&&sel.i===i&&tool!=="curv";}
+  function hitAnchor(p){for(var pi=doc.paths.length-1;pi>=0;pi--){if(!showsAnchors(pi))continue;var a=doc.paths[pi].anchors;for(var i=a.length-1;i>=0;i--)if(dist(p,a[i])<=10)return {pi:pi,i:i};}return null;}
+  function hitHandle(p){for(var pi=doc.paths.length-1;pi>=0;pi--){var a=doc.paths[pi].anchors;for(var i=a.length-1;i>=0;i--){if(!handlesShown(pi,i))continue;var c=a[i];
+    var hs=["hi","ho"];for(var k=0;k<2;k++){var h=c[hs[k]];if(h&&dist(p,P(c.x+h.x,c.y+h.y))<=9)return {pi:pi,i:i,which:hs[k]};}}}return null;}
+  function hitSeg(p,only){var best=null;doc.paths.forEach(function(path,pi){if(only!=null&&pi!==only)return;var a=path.anchors,n=path.closed?a.length:a.length-1;
+    for(var i=0;i<n;i++){var b=a[(i+1)%a.length],c=ctrl(a[i],b);for(var k=0;k<=50;k++){var q=bez(c[0],c[1],c[2],c[3],k/50),d=dist(p,q);if(d<=8&&(!best||d<best.d))best={pi:pi,i:i,t:k/50,d:d};}}});return best;}
+  function hitPathBody(e){var t=e.target&&e.target.closest?e.target.closest("[data-pi]"):null;return t?+t.getAttribute("data-pi"):-1;}
+  function snapDot(p){if(!(cfg.hints&&cfg.hints.dots&&cfg.target))return p;var best=null;cfg.target.anchors.forEach(function(a){var d=dist(p,a);if(d<=12&&(!best||d<best.d))best={a:a,d:d};});return best?P(best.a.x,best.a.y):p;}
+  function onPhotoLayer(){if(cfg.layers&&doc.layer==="photo"){msg("bad",doc.photo.locked?"The <b>Photo</b> layer is locked. Click the <b>Tracing</b> layer in the Layers panel to draw.":"You&rsquo;re on the <b>Photo</b> layer. Click the <b>Tracing</b> layer in the Layers panel before you draw.");return true;}return false;}
+  function newPath(auto){var np={anchors:[],closed:false,fill:null,stroke:"#0A0A0A",sw:2};if(cfg.single){doc.paths=[np];drawing=0;}else{doc.paths.push(np);drawing=doc.paths.length-1;}selPath=drawing;return np;}
+  function endPath(){if(drawing!=null){var c=cur();if(c&&c.anchors.length<2){doc.paths.splice(drawing,1);selPath=-1;}drawing=null;changed();draw();}}
+  function autoAll(){doc.paths.forEach(autoHandles);}
+
+  svg.addEventListener("pointerdown",function(e){
+    e.preventDefault();try{svg.setPointerCapture(e.pointerId);}catch(_){}
+    var p=pt(e),t=tool;
+    if(t==="pen"&&e.altKey){var hh=hitHandle(p);if(hh){snapshot();doc.paths[hh.pi].anchors[hh.i].auto=false;drag={type:"handle",h:hh,brk:true};return;}}
+    if(t==="pen"){
+      if(onPhotoLayer())return;var c=cur(),n=c?c.anchors.length:0;
+      if(c&&n>=2&&dist(p,c.anchors[0])<=10){snapshot();drag={type:"close"};return;}
+      if(c&&n>=1&&dist(p,c.anchors[n-1])<=10){snapshot();drag={type:"last",moved:false};return;}
+      snapshot();var q=snapDot(p);if(e.shiftKey&&c&&n)q=snap45(c.anchors[n-1],q);
+      if(!c)c=newPath();c.anchors.push({x:q.x,y:q.y,hi:null,ho:null});drag={type:"new"};draw();return;}
+    if(t==="curv"){
+      if(onPhotoLayer())return;var c2=cur();
+      if(c2&&c2.anchors.length>=2&&dist(p,c2.anchors[0])<=10){snapshot();c2.closed=true;autoHandles(c2);drawing=null;changed();draw();return;}
+      var ha=hitAnchor(p);if(ha){snapshot();sel=ha;drag={type:"move",pi:ha.pi,i:ha.i,start:p,orig:P(doc.paths[ha.pi].anchors[ha.i].x,doc.paths[ha.pi].anchors[ha.i].y)};draw();return;}
+      if(!c2){var hs=hitSeg(p);if(hs&&doc.paths[hs.pi].anchors.every(function(a){return a.auto;})){snapshot();var pa=doc.paths[hs.pi];pa.anchors.splice(hs.i+1,0,{x:p.x,y:p.y,auto:true,corner:false,hi:null,ho:null});autoHandles(pa);sel={pi:hs.pi,i:hs.i+1};drag={type:"move",pi:hs.pi,i:hs.i+1,start:p,orig:P(p.x,p.y)};draw();return;}}
+      snapshot();var q2=snapDot(p);if(!c2)c2=newPath();c2.anchors.push({x:q2.x,y:q2.y,auto:true,corner:!!e.altKey,hi:null,ho:null});autoHandles(c2);
+      sel={pi:drawing,i:c2.anchors.length-1};drag={type:"move",pi:drawing,i:c2.anchors.length-1,start:p,orig:P(q2.x,q2.y)};draw();return;}
+    if(t==="direct"){
+      var h=hitHandle(p);if(h){snapshot();doc.paths[h.pi].anchors[h.i].auto=false;drag={type:"handle",h:h,brk:false};sel={pi:h.pi,i:h.i};return;}
+      var ai=hitAnchor(p);if(ai){snapshot();sel=ai;selPath=ai.pi;drag={type:"move",pi:ai.pi,i:ai.i,start:p,orig:P(doc.paths[ai.pi].anchors[ai.i].x,doc.paths[ai.pi].anchors[ai.i].y)};draw();return;}
+      sel=null;draw();return;}
+    if(t==="convert"){
+      var h2=hitHandle(p);if(h2){snapshot();doc.paths[h2.pi].anchors[h2.i].auto=false;drag={type:"handle",h:h2,brk:true};return;}
+      var ci=hitAnchor(p);if(ci){snapshot();sel=ci;drag={type:"convert",pi:ci.pi,i:ci.i,moved:false};return;}return;}
+    if(t==="add"){var s=hitSeg(p);if(!s){msg("info","Click right on a path to add a point.");return;}snapshot();var path=doc.paths[s.pi],a=path.anchors,b=a[(s.i+1)%a.length],A0=a[s.i];
+      if(A0.auto&&b.auto){a.splice(s.i+1,0,{x:p.x,y:p.y,auto:true,corner:false,hi:null,ho:null});autoHandles(path);}
+      else if(!A0.ho&&!b.hi){var cc=ctrl(A0,b),m=bez(cc[0],cc[1],cc[2],cc[3],s.t);a.splice(s.i+1,0,{x:m.x,y:m.y,hi:null,ho:null});}
+      else{var sp=splitAt(A0,b,s.t);A0.ho=sp.aho;b.hi=sp.bhi;A0.auto=false;b.auto=false;a.splice(s.i+1,0,{x:sp.m.x,y:sp.m.y,hi:sp.mhi,ho:sp.mho});}
+      sel={pi:s.pi,i:s.i+1};changed();draw();return;}
+    if(t==="delete"){var di=hitAnchor(p);if(!di){msg("info","Click right on an anchor point to delete it.");return;}var dp=doc.paths[di.pi];
+      if(dp.anchors.length<=2){msg("info","A path needs at least 2 points.");return;}snapshot();dp.anchors.splice(di.i,1);autoHandles(dp);sel=null;changed();draw();return;}
+    if(t==="select"){var bi=hitPathBody(e);if(bi<0){var sg=hitSeg(p);if(sg)bi=sg.pi;}
+      if(bi>-1){snapshot();selPath=bi;drag={type:"pathmove",pi:bi,start:p,orig:clone(doc.paths[bi].anchors)};paintStyle();draw();return;}
+      if(doc.photo&&doc.photo.placed&&doc.photo.visible&&!doc.photo.locked){snapshot();drag={type:"photo",start:p,ox:doc.photo.x,oy:doc.photo.y};return;}
+      selPath=-1;paintStyle();draw();return;}
+    if(t==="eyedrop"){var ph=photoFor(doc);if(!ph||!doc.photo.placed){msg("info","Place a photo first.");return;}
+      if(selPath<0||!doc.paths[selPath]){msg("info","Select a shape first with the <b>Selection tool</b> <kbd>V</kbd>, then click the photo with the Eyedropper.");return;}
+      var px=Math.round(p.x-doc.photo.x),py=Math.round(p.y-doc.photo.y);if(px<0||py<0||px>=W||py>=H){msg("info","Click on the photo to sample a color.");return;}
+      var d=ph.ctx.getImageData(px,py,1,1).data;snapshot();doc.paths[selPath].fill=hex([d[0],d[1],d[2]]);paintStyle();changed();draw();msg("ok","Sampled "+doc.paths[selPath].fill+" into the fill.");return;}
+  });
+  svg.addEventListener("dblclick",function(e){if(tool!=="curv")return;var p=pt(e),ha=hitAnchor(p);if(!ha)return;var a=doc.paths[ha.pi].anchors[ha.i];a.auto=true;a.corner=!a.corner;autoHandles(doc.paths[ha.pi]);changed();draw();});
+  svg.addEventListener("pointermove",function(e){
+    var p=pt(e);hover=p;if(!drag){draw();return;}var c,a,d;
+    if(drag.type==="new"){c=cur();a=c.anchors[c.anchors.length-1];d=P(p.x-a.x,p.y-a.y);if(e.shiftKey){var q=snap45(a,p);d=P(q.x-a.x,q.y-a.y);}if(Math.hypot(d.x,d.y)>3){a.ho=d;a.hi=P(-d.x,-d.y);}else{a.ho=a.hi=null;}}
+    else if(drag.type==="close"){a=cur().anchors[0];d=P(p.x-a.x,p.y-a.y);if(Math.hypot(d.x,d.y)>3){drag.moved=true;a.ho=d;a.hi=P(-d.x,-d.y);}}
+    else if(drag.type==="last"){c=cur();a=c.anchors[c.anchors.length-1];d=P(p.x-a.x,p.y-a.y);if(Math.hypot(d.x,d.y)>3){drag.moved=true;a.ho=d;}}
+    else if(drag.type==="move"){a=doc.paths[drag.pi].anchors[drag.i];a.x=drag.orig.x+(p.x-drag.start.x);a.y=drag.orig.y+(p.y-drag.start.y);autoHandles(doc.paths[drag.pi]);}
+    else if(drag.type==="handle"){a=doc.paths[drag.h.pi].anchors[drag.h.i];d=P(p.x-a.x,p.y-a.y);a[drag.h.which]=d;var o=drag.h.which==="hi"?"ho":"hi";
+      if(drag.brk)a.broken=true;else if(!a.broken&&a[o]){var L=Math.hypot(a[o].x,a[o].y),l=Math.hypot(d.x,d.y)||1;a[o]=P(-d.x/l*L,-d.y/l*L);}}
+    else if(drag.type==="convert"){a=doc.paths[drag.pi].anchors[drag.i];d=P(p.x-a.x,p.y-a.y);if(Math.hypot(d.x,d.y)>3){drag.moved=true;a.auto=false;a.ho=d;a.hi=P(-d.x,-d.y);a.broken=false;}}
+    else if(drag.type==="pathmove"){var dx=p.x-drag.start.x,dy=p.y-drag.start.y;doc.paths[drag.pi].anchors.forEach(function(an,i){an.x=drag.orig[i].x+dx;an.y=drag.orig[i].y+dy;});}
+    else if(drag.type==="photo"){doc.photo.x=drag.ox+(p.x-drag.start.x);doc.photo.y=drag.oy+(p.y-drag.start.y);doc.photo.moved=true;}
+    draw();
+  });
+  function endDrag(){if(!drag)return;var c=cur();
+    if(drag.type==="close"){c.closed=true;drawing=null;}
+    if(drag.type==="last"&&!drag.moved){c.anchors[c.anchors.length-1].ho=null;}
+    if(drag.type==="convert"&&!drag.moved){var a=doc.paths[drag.pi].anchors[drag.i];if(a.auto){a.corner=!a.corner;autoHandles(doc.paths[drag.pi]);}else{a.hi=a.ho=null;a.broken=false;}}
+    var wasPhoto=drag.type==="photo";drag=null;changed();if(wasPhoto)paintLayers();draw();}
+  svg.addEventListener("pointerup",endDrag);svg.addEventListener("pointercancel",endDrag);
+  svg.addEventListener("pointerleave",function(){hover=null;if(!drag)draw();});
+  function doUndo(){var u=undo.pop();if(!u)return;var o=JSON.parse(u);doc.paths=o.p;doc.photo=o.ph;drawing=o.d;if(drawing!=null&&!doc.paths[drawing])drawing=null;sel=null;if(selPath>=doc.paths.length)selPath=-1;changed();paintLayers();paintStyle();draw();}
+  activeKey=function(e){
+    if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName||""))return;var k=e.key;
+    if((e.ctrlKey||e.metaKey)&&k.toLowerCase()==="z"){e.preventDefault();doUndo();return;}
+    if(k==="Enter"||k==="Escape"){endPath();return;}
+    if((k==="Delete"||k==="Backspace")&&tool==="select"&&selPath>-1&&!cfg.single){e.preventDefault();snapshot();doc.paths.splice(selPath,1);selPath=-1;changed();paintStyle();draw();return;}
+    if(e.ctrlKey||e.metaKey||e.altKey)return;
+    if(k==="~"||(k==="`"&&e.shiftKey))setTool("curv");else if(k==="C"&&e.shiftKey)setTool("convert");else if(k==="v"||k==="V")setTool("select");else if(k==="a"||k==="A")setTool("direct");
+    else if(k==="p"||k==="P")setTool("pen");else if(k==="+"||k==="=")setTool("add");else if(k==="-"||k==="_")setTool("delete");else if(k==="i"||k==="I")setTool("eyedrop");};
+  $$(".tools button",host).forEach(function(b){b.onclick=function(){setTool(b.dataset.tool);};});
+  $('[data-a="end"]',host).onclick=endPath;$('[data-a="undo"]',host).onclick=doUndo;
+  if($('[data-a="clear"]',host))$('[data-a="clear"]',host).onclick=function(){snapshot();doc.paths=[];drawing=null;sel=null;changed();draw();};
+  if($('[data-a="delpath"]',host))$('[data-a="delpath"]',host).onclick=function(){if(selPath<0){msg("info","Select a shape with the Selection tool (V) first.");return;}snapshot();doc.paths.splice(selPath,1);selPath=-1;changed();paintStyle();draw();};
+
+  function paintLayers(){var box=$('[data-p="layers"]',host);if(!box)return;var ph=doc.photo;
+    box.innerHTML='<div class="lyr'+(doc.layer==="tracing"?" active":"")+'" data-l="tracing"><button class="ic" aria-pressed="true" disabled title="Visible">\uD83D\uDC41</button><button class="ic" aria-pressed="false" disabled title="Unlocked">\uD83D\uDD13</button><span class="nm">Tracing</span></div>'+
+      (ph.placed?'<div class="lyr'+(doc.layer==="photo"?" active":"")+'" data-l="photo"><button class="ic" data-t="vis" aria-pressed="'+ph.visible+'" title="Show/hide">\uD83D\uDC41</button><button class="ic" data-t="lock" aria-pressed="'+ph.locked+'" title="Lock/unlock">'+(ph.locked?"\uD83D\uDD12":"\uD83D\uDD13")+'</button><span class="nm">Photo</span></div>'+
+        '<label><span>Photo opacity: <b>'+ph.opacity+'%</b></span><input type="range" min="10" max="100" step="5" value="'+ph.opacity+'" data-t="op"></label>':'')+
+      (cfg.placeBtn&&!ph.placed?'<button class="btn sm" data-t="place">File &gt; Place\u2026</button>':'')+
+      (ph.placed&&ph.moved?'<button class="btn ghost sm" data-t="recenter">Move photo back</button>':'');
+    $$(".lyr",box).forEach(function(r){r.onclick=function(ev){if(ev.target.closest("[data-t]"))return;doc.layer=r.dataset.l;changed();paintLayers();};});
+    var v=$('[data-t="vis"]',box);if(v)v.onclick=function(){snapshot();ph.visible=!ph.visible;changed();paintLayers();draw();};
+    var lk=$('[data-t="lock"]',box);if(lk)lk.onclick=function(){snapshot();ph.locked=!ph.locked;changed();paintLayers();draw();};
+    var op=$('[data-t="op"]',box);if(op)op.oninput=function(){ph.opacity=+op.value;op.previousElementSibling.querySelector('b').textContent=ph.opacity+"%";changed();draw();};
+    var pl=$('[data-t="place"]',box);if(pl)pl.onclick=function(){if(!photoFor(doc)){msg("info","Choose a photo first.");return;}snapshot();ph.placed=true;ph.visible=true;ph.opacity=100;ph.locked=false;doc.layer="photo";changed();paintLayers();draw();};
+    var rc=$('[data-t="recenter"]',box);if(rc)rc.onclick=function(){snapshot();ph.x=0;ph.y=0;ph.moved=false;changed();paintLayers();draw();};
+  }
+  function paintStyle(){var box=$('[data-p="style"]',host);if(!box)return;var sp=selPath>-1?doc.paths[selPath]:null;
+    if(!sp){box.innerHTML='<span class="note">Select a shape with the Selection tool <kbd>V</kbd> to change its fill and stroke.</span>';return;}
+    box.innerHTML='<span class="note">Shape '+(selPath+1)+' of '+doc.paths.length+'</span>'+
+      '<div class="swrow"><span class="lbl">Fill</span><input type="color" data-t="fill" value="'+(sp.fill||"#ffffff")+'"><button class="btn ghost sm" data-t="nofill">None</button></div>'+
+      '<div class="swrow"><span class="lbl">Stroke</span><input type="color" data-t="stroke" value="'+(sp.stroke||"#000000")+'"><button class="btn ghost sm" data-t="nostroke">None</button></div>'+
+      '<label>Stroke weight<select data-t="sw">'+[0.5,1,2,3,4,6,8].map(function(w){return '<option'+(sp.sw===w?" selected":"")+'>'+w+'</option>';}).join("")+'</select></label>'+
+      '<div class="swrow"><button class="btn ghost sm" data-t="front">Bring to front</button><button class="btn ghost sm" data-t="back">Send to back</button></div>';
+    $('[data-t="fill"]',box).oninput=function(e){sp.fill=e.target.value;changed();draw();};
+    $('[data-t="stroke"]',box).oninput=function(e){sp.stroke=e.target.value;changed();draw();};
+    $('[data-t="nofill"]',box).onclick=function(){sp.fill=null;changed();draw();};
+    $('[data-t="nostroke"]',box).onclick=function(){sp.stroke=null;changed();draw();};
+    $('[data-t="sw"]',box).onchange=function(e){sp.sw=+e.target.value;changed();draw();};
+    $('[data-t="front"]',box).onclick=function(){snapshot();doc.paths.splice(selPath,1);doc.paths.push(sp);selPath=doc.paths.length-1;changed();paintStyle();draw();};
+    $('[data-t="back"]',box).onclick=function(){snapshot();doc.paths.splice(selPath,1);doc.paths.unshift(sp);selPath=0;changed();paintStyle();draw();};
+  }
+  function draw(){
+    var h=['<defs><pattern id="gg" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#F0F0F0"/></pattern></defs><rect width="600" height="400" fill="url(#gg)"/>'];
+    var ph=photoFor(doc);if(ph&&doc.photo.placed&&doc.photo.visible)h.push('<image href="'+ph.src+'" x="'+doc.photo.x+'" y="'+doc.photo.y+'" width="600" height="400" opacity="'+(doc.photo.opacity/100)+'" style="pointer-events:none"/>');
+    if(cfg.target&&cfg.hints&&cfg.hints.dots)cfg.target.anchors.forEach(function(a){h.push('<circle cx="'+a.x+'" cy="'+a.y+'" r="6" fill="#00A0DC" opacity=".8" stroke="#fff" stroke-width="1.5"/>');});
+    doc.paths.forEach(function(path,pi){if(!path.anchors.length)return;var fill=cfg.single?"none":(path.fill||"none"),stroke=cfg.single?"#E5007E":(path.stroke||"none"),sw=cfg.single?2.4:path.sw;
+      h.push('<path data-pi="'+pi+'" d="'+pathD(path)+'" fill="'+fill+'" stroke="'+stroke+'" stroke-width="'+sw+'" stroke-linejoin="round" pointer-events="'+(tool==="select"?"visiblePainted":"none")+'"'+(fill==="none"&&tool==="select"?' style="pointer-events:stroke"':'')+'/>');});
+    if(tool==="select"&&selPath>-1&&doc.paths[selPath]&&doc.paths[selPath].anchors.length){var xs=doc.paths[selPath].anchors.map(function(a){return a.x;}),ys=doc.paths[selPath].anchors.map(function(a){return a.y;});
+      var x0=Math.min.apply(null,xs),y0=Math.min.apply(null,ys);h.push('<rect x="'+(x0-4)+'" y="'+(y0-4)+'" width="'+(Math.max.apply(null,xs)-x0+8)+'" height="'+(Math.max.apply(null,ys)-y0+8)+'" fill="none" stroke="#1F7AE0" stroke-dasharray="4 3" pointer-events="none"/>');}
+    var c=cur();if((tool==="pen")&&c&&hover&&!drag&&c.anchors.length){var last=c.anchors[c.anchors.length-1],c1=P(last.x+(last.ho?last.ho.x:0),last.y+(last.ho?last.ho.y:0));
+      h.push('<path d="M'+last.x+' '+last.y+' C'+c1.x+' '+c1.y+' '+hover.x+' '+hover.y+' '+hover.x+' '+hover.y+'" fill="none" stroke="#1F7AE0" stroke-width="1.4" stroke-dasharray="4 4" pointer-events="none"/>');}
+    if(tool==="curv"&&c&&hover&&!drag&&c.anchors.length){var tmp=clone(c);tmp.anchors.push({x:hover.x,y:hover.y,auto:true,corner:false});autoHandles(tmp);h.push('<path d="'+pathD(tmp)+'" fill="none" stroke="#1F7AE0" stroke-width="1.4" stroke-dasharray="4 4" pointer-events="none"/>');}
+    doc.paths.forEach(function(path,pi){if(!showsAnchors(pi))return;path.anchors.forEach(function(a,i){if(!handlesShown(pi,i))return;["hi","ho"].forEach(function(w){var v=a[w];if(!v)return;
+      h.push('<line x1="'+a.x+'" y1="'+a.y+'" x2="'+(a.x+v.x)+'" y2="'+(a.y+v.y)+'" stroke="#1F7AE0" stroke-width="1.2" pointer-events="none"/><circle cx="'+(a.x+v.x)+'" cy="'+(a.y+v.y)+'" r="4.5" fill="#1F7AE0" pointer-events="none"/>');});});
+      path.anchors.forEach(function(a,i){var on=sel&&sel.pi===pi&&sel.i===i;h.push(a.auto&&a.corner===false&&tool==="curv"?'<circle cx="'+a.x+'" cy="'+a.y+'" r="4.8" fill="'+(on?"#1F7AE0":"#fff")+'" stroke="#1F7AE0" stroke-width="1.6" pointer-events="none"/>':'<rect x="'+(a.x-4.5)+'" y="'+(a.y-4.5)+'" width="9" height="9" fill="'+(on?"#1F7AE0":"#fff")+'" stroke="#1F7AE0" stroke-width="1.6" pointer-events="none"/>');});});
+    if((tool==="pen"||tool==="curv")&&c&&hover&&c.anchors.length>=2&&dist(hover,c.anchors[0])<=10)h.push('<circle cx="'+(c.anchors[0].x+12)+'" cy="'+(c.anchors[0].y+12)+'" r="5" fill="none" stroke="#1F7AE0" stroke-width="1.6"/>');
+    svg.innerHTML=h.join("");
+    var total=doc.paths.reduce(function(s,p){return s+p.anchors.length;},0);$('[data-s="anc"]',host).textContent=total;var pc=$('[data-s="paths"]',host);if(pc)pc.textContent=doc.paths.length;
+    if(cfg.status)$('[data-s="extra"]',host).innerHTML=cfg.status(doc);
+  }
+  paintLayers();paintStyle();setTool(tool);
+  return {draw:draw,setTool:setTool,doc:function(){return doc;},setDoc:function(d){doc=d;drawing=null;sel=null;selPath=-1;paintLayers();paintStyle();draw();},endPath:endPath,paintLayers:paintLayers,msg:msg};
+}
+
+/* ================= station types ================= */
+function practiceDoc(st,kind,placed){if(!st.doc)st.doc={paths:[],photo:{kind:kind,placed:!!placed,opacity:placed?50:100,locked:!!placed,visible:true,x:0,y:0},layer:placed?"tracing":"photo"};return st.doc;}
+function setupStation(stage,i,sd){
+  var st=stState(i),doc=practiceDoc(st,sd.photo,false);
+  stage.innerHTML=head(sd,i)+'<div data-ed></div><h3>Checklist</h3><ul class="checklist" id="ck"></ul><div class="row-actions">'+nextBtn()+'</div>';
+  var ed=Editor($("[data-ed]",stage),{tools:["select","pen"],single:true,layers:true,placeBtn:true,onChange:function(){paint();}},doc);
+  $('[data-a="end"]',stage).style.display="none";
+  function paint(){var ph=doc.photo,items=[["Place the photo: click <b>File &gt; Place\u2026</b>",ph.placed],["Lower the photo opacity to <b>60% or less</b>",ph.placed&&ph.opacity<=60],["<b>Lock</b> the Photo layer (padlock icon)",ph.placed&&ph.locked],["Click the <b>Tracing</b> layer so new paths go there",ph.placed&&doc.layer==="tracing"],["Photo is back in place (not dragged off)",ph.placed&&(!ph.moved||(Math.abs(ph.x)<3&&Math.abs(ph.y)<3))]];
+    $("#ck",stage).innerHTML=items.map(function(it){return '<li class="'+(it[1]?"ok":"")+'">'+it[0]+'</li>';}).join("");
+    var all=items.every(function(it){return it[1];});
+    if(all&&!st.passed){st.passed=true;st.checks=1;ed.msg("ok","<b>Template ready.</b> This is how every tracing project starts.");renderNav();}
+    st.doc=doc;save();}
+  paint();wireNext(stage);
+}
+function traceStation(stage,i,sd){
+  var st=stState(i),doc=practiceDoc(st,sd.photo,true),target=SHAPES[sd.photo].path;
+  stage.innerHTML=head(sd,i)+'<div data-ed></div><div class="row-actions"><button class="btn" id="chk">Check my trace</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  var ed=Editor($("[data-ed]",stage),{tools:sd.tools,single:true,layers:true,hints:sd.hints,target:target,onChange:function(d){st.doc=d;save();}},doc);
+  if(st.passed)fb($("#sfb",stage),"ok","Passed with "+st.best+"% accuracy and "+st.anchors+" anchor points. Keep practicing if you like; your best is saved.");
+  $("#chk",stage).onclick=function(){ed.endPath();var d=ed.doc(),p=d.paths[0],box=$("#sfb",stage);
+    if(!p||p.anchors.length<2){fb(box,"info","Trace the outline first.");return;}
+    var r=compare(p,target),n=p.anchors.length;st.checks++;
+    var issue=!p.closed?"Close your path by clicking your first anchor point.":"";var pass=!issue&&r.acc>=70;
+    if(r.acc>st.best||(pass&&!st.passed)){st.best=r.acc;st.anchors=n;}if(pass)st.passed=true;save();renderNav();
+    fb(box,pass?"ok":"bad",'<div class="result"><span class="meter">'+r.acc+'%</span><span>'+(pass?"<b>Passed.</b> Your trace follows the photo. You used "+n+" anchor points (a pro would use about "+target.anchors.length+").":(issue||"Parts of your path drift off the edge of the object (70% passes). Hide the Photo layer to see where, then fix points with Direct Selection <kbd>A</kbd>."))+'</span></div>');};
+  wireNext(stage);
+}
+function raceStation(stage,i,sd){
+  var st=stState(i);st.rounds=st.rounds||{};var target=SHAPES[sd.photo].path,round=st.round||"pen",t0=null;
+  stage.innerHTML=head(sd,i)+'<div class="choices" id="rounds"></div><div data-ed></div><div class="row-actions"><button class="btn" id="chk">Check this round</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div><table class="race" id="rt"></table>';
+  var ed;
+  function table(){var r=st.rounds;$("#rt",stage).innerHTML='<tr><th>Round</th><th>Accuracy</th><th>Anchor points</th><th>Time</th></tr>'+["pen","curv"].map(function(k){var x=r[k];return '<tr><td>'+(k==="pen"?"Pen tool":"Curvature tool")+'</td><td>'+(x?x.acc+"%":"\u2014")+'</td><td>'+(x?x.n:"\u2014")+'</td><td>'+(x?x.sec+" sec":"\u2014")+'</td></tr>';}).join("");}
+  function start(k){round=k;st.round=k;save();t0=null;
+    $("#rounds",stage).innerHTML=["pen","curv"].map(function(x){return '<button data-r="'+x+'" aria-pressed="'+(x===k)+'">Round '+(x==="pen"?"1: Pen tool":"2: Curvature tool")+(st.rounds[x]&&st.rounds[x].acc>=70?" \u2713":"")+'</button>';}).join("");
+    $$("#rounds button",stage).forEach(function(b){b.onclick=function(){start(b.dataset.r);};});
+    var doc={paths:[],photo:{kind:sd.photo,placed:true,opacity:50,locked:true,visible:true,x:0,y:0},layer:"tracing"};
+    ed=Editor($("[data-ed]",stage),{tools:k==="pen"?["pen","direct","convert"]:["curv","direct"],single:true,layers:true,target:target,hints:{},onChange:function(){}},doc);
+    $(".board svg",$("[data-ed]",stage)).addEventListener("pointerdown",function(){if(!t0)t0=Date.now();},true);}
+  start(round);table();
+  $("#chk",stage).onclick=function(){ed.endPath();var p=ed.doc().paths[0],box=$("#sfb",stage);if(!p||p.anchors.length<2){fb(box,"info","Trace the pear first.");return;}
+    if(!p.closed){fb(box,"bad","Close your path on the first point.");return;}
+    var r=compare(p,target),sec=t0?Math.round((Date.now()-t0)/1000):0,prev=st.rounds[round];st.checks++;
+    if(!prev||r.acc>prev.acc)st.rounds[round]={acc:r.acc,n:p.anchors.length,sec:sec};
+    var a=st.rounds.pen,b=st.rounds.curv;st.best=Math.round(((a?a.acc:0)+(b?b.acc:0))/((a?1:0)+(b?1:0)));st.anchors=(a?a.n:0)+"/"+(b?b.n:0);
+    if(a&&b&&a.acc>=70&&b.acc>=70){st.passed=true;st.note="Pen "+a.n+" pts/"+a.sec+"s vs Curv "+b.n+" pts/"+b.sec+"s";}
+    save();renderNav();table();start(round);
+    fb(box,r.acc>=70?"ok":"bad",'<div class="result"><span class="meter">'+r.acc+'%</span><span>'+(r.acc>=70?"Round passed in "+sec+" seconds with "+p.anchors.length+" points."+(st.passed?" <b>Both rounds done.</b> Compare them in the table below.":" Now do the other round."):"Not quite on the edge yet (70% passes). Adjust your points and check again.")+'</span></div>');};
+  wireNext(stage);
+}
+function itStation(stage,i,sd){
+  var st=stState(i),color=sd.kind==="itcolor";st.set=st.set||{preset:color?"c3":"none",threshold:128,paths:1,noise:6};st.tried=st.tried||{};
+  stage.innerHTML=head(sd,i)+'<div class="it"><div class="board"><svg viewBox="0 0 600 400" id="itv"></svg><div class="statusbar"><span>View: <select id="view"><option value="result">Tracing result</option><option value="outline">Outlines (show anchor points)</option><option value="source">Source image</option></select></span></div></div>'+
+   '<div class="pnl"><h4>Image Trace</h4><div class="bd"><label>Preset<select id="preset">'+(color?'':'<option value="none">(choose a preset)</option><option value="bw">Black and White Logo</option>')+'<option value="c3">3 Colors</option><option value="c6">6 Colors</option>'+(color?'<option value="bw">Black and White Logo</option>':'')+'</select></label>'+
+   '<label id="thl"><span>Threshold: <b id="thv"></b></span><input type="range" id="th" min="0" max="255" value="128"></label>'+
+   '<label><span>Paths: <b id="pv"></b></span><input type="range" id="pa" min="0" max="3" step="1" value="1"></label>'+
+   '<label><span>Noise: <b id="nv"></b> px</span><input type="range" id="no" min="1" max="40" value="6"></label>'+
+   '<div class="stats"><span>Paths</span><b id="sp">\u2014</b><span>Anchor points</span><b id="sa">\u2014</b><span>Colors</span><b id="sc">\u2014</b></div>'+
+   '<button class="btn" id="exp">Expand</button></div></div></div>'+
+   '<div class="fb" id="sfb"></div><div class="row-actions">'+nextBtn()+'</div>';
+  var ph=photoCanvas(sd.photo),tm=color?null:trueMask(sd.photo),res=null,timer=null,view="result",expanded=!!st.expanded;
+  var set=st.set;$("#preset",stage).value=set.preset;$("#th",stage).value=set.threshold;$("#pa",stage).value=set.paths;$("#no",stage).value=set.noise;
+  function labels(){$("#thv",stage).textContent=set.threshold;$("#pv",stage).textContent=["Low","Medium","High","Very high"][set.paths];$("#nv",stage).textContent=set.noise;$("#thl",stage).style.display=set.preset==="bw"?"":"none";}
+  function run(){labels();if(set.preset==="none"){res=null;paint();return;}res=imageTrace(ph.canvas,set);
+    if(!color&&set.preset==="bw"){st.iou=Math.round(iou(res.mask,tm)*100);}
+    if(color&&set.preset!=="bw"){st.tried[set.preset]=res.anchors;}
+    paint();check(false);}
+  function paint(){var h=[],sv=$("#itv",stage);
+    if(view==="source"||!res){h.push('<image href="'+ph.src+'" width="600" height="400"/>');}
+    else{h.push('<rect width="600" height="400" fill="'+(view==="outline"?"#fff":res.bg)+'"/>');res.layers.forEach(function(L){var d=L.paths.map(pathD).join(" ");
+      if(view==="outline")h.push('<path d="'+d+'" fill="none" stroke="#0A0A0A" stroke-width="1" fill-rule="evenodd"/>');else h.push('<path d="'+d+'" fill="'+L.fill+'" stroke="'+L.fill+'" stroke-width="0.8" fill-rule="evenodd"/>');});
+      if(view==="outline"&&res.anchors<6000)res.layers.forEach(function(L){L.paths.forEach(function(p){p.anchors.forEach(function(a){h.push('<rect x="'+(a.x-2)+'" y="'+(a.y-2)+'" width="4" height="4" fill="#1F7AE0"/>');});});});}
+    sv.innerHTML=h.join("");
+    $("#sp",stage).textContent=res?res.count:"\u2014";$("#sa",stage).textContent=res?res.anchors:"\u2014";$("#sc",stage).textContent=res?(set.preset==="bw"?2:(set.preset==="c3"?3:6)):"\u2014";
+    $("#exp",stage).textContent=expanded?"Expanded \u2713":"Expand";}
+  function queue(){expanded=false;st.expanded=false;clearTimeout(timer);timer=setTimeout(run,120);save();}
+  $("#preset",stage).onchange=function(e){set.preset=e.target.value;queue();};
+  $("#th",stage).oninput=function(e){set.threshold=+e.target.value;$("#thv",stage).textContent=set.threshold;queue();};
+  $("#pa",stage).oninput=function(e){set.paths=+e.target.value;queue();};
+  $("#no",stage).oninput=function(e){set.noise=+e.target.value;queue();};
+  $("#view",stage).onchange=function(e){view=e.target.value;paint();};
+  $("#exp",stage).onclick=function(){if(!res){fb($("#sfb",stage),"info","Choose a preset first.");return;}expanded=true;st.expanded=true;st.anchors=res.anchors;view="outline";$("#view",stage).value="outline";paint();check(true);};
+  function check(fromExpand){var box=$("#sfb",stage);
+    if(!color){if(set.preset!=="bw"){if(fromExpand)fb(box,"info","Use the <b>Black and White Logo</b> preset for this station.");return;}
+      var good=st.iou>=97;
+      if(expanded&&good){st.passed=true;st.best=100;st.checks++;st.note="threshold "+set.threshold+", "+res.anchors+" pts";fb(box,"ok","<b>Expanded.</b> Clean trace at threshold "+set.threshold+": <b>"+res.anchors+"</b> anchor points (a careful hand trace uses about 7). Now drag <b>Paths</b> to Very high and watch the count jump. On real photos, Image Trace usually makes far more points than a hand trace, and every extra point is one more to clean up.");}
+      else if(expanded)fb(box,"bad","Expanded, but the trace doesn&rsquo;t match the boot well yet ("+st.iou+"% match, 97% needed). "+(set.threshold<150?"The light patches on the boot are missing. Raise the Threshold.":"Parts of the background turned black. Lower the Threshold."));
+      else fb(box,"info","Shape match: <b>"+st.iou+"%</b>. "+(st.iou>=97?"Looks clean. Click <b>Expand</b> to turn it into editable paths.":(set.threshold<150?"Light patches on the boot are still white. Try raising the Threshold.":"The background is turning black. Try lowering the Threshold.")));}
+    else{var t3=st.tried.c3,t6=st.tried.c6;
+      if(expanded&&t3!=null&&t6!=null){st.passed=true;st.best=100;st.checks++;st.note="3 colors "+t3+" pts, 6 colors "+t6+" pts";fb(box,"ok","<b>Expanded.</b> 3 Colors made <b>"+t3+"</b> anchor points; 6 Colors made <b>"+t6+"</b>. More colors = more detail, but many more points to manage.");}
+      else fb(box,"info",(t3!=null?"3 Colors: "+t3+" points. ":"Try <b>3 Colors</b>. ")+(t6!=null?"6 Colors: "+t6+" points. ":"Try <b>6 Colors</b>. ")+(t3!=null&&t6!=null?"Now click <b>Expand</b>.":""));}
+    save();renderNav();}
+  run();wireNext(stage);
+}
+function projectChecklist(doc,mode){var ph=doc.photo,paths=doc.paths,closed=paths.filter(function(p){return p.closed;}).length,filled=paths.filter(function(p){return p.fill;}).length;
+  var items=[["Photo placed and set up as a template (opacity 60% or less, locked)",ph.placed&&ph.opacity<=60&&ph.locked],["Main outline traced as a closed shape",closed>=1],["At least 3 shapes (outline + details)",paths.length>=3],["At least 2 shapes filled with color",filled>=2]];
+  if(mode==="final")items.push(["At least 5 shapes for a detailed trace",paths.length>=5],["Photo layer hidden so only your vector art shows",ph.placed&&!ph.visible]);
+  return items;}
+var PROJECT_KINDS=["boot","apple","pear","shield","pebble"];
+function psetupStation(stage,i,sd){
+  var st=stState(i),doc=project();
+  stage.innerHTML=head(sd,i)+'<div class="choices" id="pick"></div><p class="note no-print">Upload: use the photo from Google Classroom. JPG or PNG; it stays on this Chromebook.</p><input type="file" id="up" accept="image/*" hidden>'+
+   '<div data-ed></div><h3>Checklist</h3><ul class="checklist" id="ck"></ul><div class="row-actions">'+nextBtn()+'</div>';
+  var ed;
+  function pick(){$("#pick",stage).innerHTML=PROJECT_KINDS.map(function(k){return '<button data-k="'+k+'" aria-pressed="'+(doc.photo.kind===k)+'">'+SHAPES[k].label+'</button>';}).join("")+'<button data-k="upload" aria-pressed="'+(doc.photo.kind==="upload")+'">\u2B06 Upload my photo</button>';
+    $$("#pick button",stage).forEach(function(b){b.onclick=function(){var k=b.dataset.k;
+      if(doc.paths.length&&!confirm("Changing the photo keeps your shapes but swaps the photo. Continue?"))return;
+      if(k==="upload"){$("#up",stage).click();return;}doc.photo.kind=k;doc.photo.src=null;doc.photo.placed=false;S.project=doc;save();pick();ed.paintLayers();ed.draw();paint();};});}
+  $("#up",stage).onchange=function(e){var f=e.target.files[0];if(!f)return;var rd=new FileReader();rd.onload=function(){var im=new Image();im.onload=function(){
+      var c=document.createElement("canvas"),s=Math.min(1,900/Math.max(im.width,im.height));c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext("2d").drawImage(im,0,0,c.width,c.height);
+      var src=c.toDataURL("image/jpeg",.82);loadUpload(src,function(ok){if(!ok)return;doc.photo.kind="upload";doc.photo.src=src;doc.photo.placed=false;S.project=doc;save();pick();ed.paintLayers();ed.draw();paint();});};im.src=rd.result;};rd.readAsDataURL(f);};
+  ed=Editor($("[data-ed]",stage),{tools:["select","pen","curv"],single:false,layers:true,placeBtn:true,onChange:function(){S.project=doc;save();paint();}},doc);
+  function paint(){var ph=doc.photo,items=[["Choose a photo",!!ph.kind],["Place it: <b>File &gt; Place\u2026</b>",ph.placed],["Opacity 60% or less",ph.placed&&ph.opacity<=60],["Lock the Photo layer",ph.placed&&ph.locked],["Select the Tracing layer",ph.placed&&doc.layer==="tracing"]];
+    $("#ck",stage).innerHTML=items.map(function(it){return '<li class="'+(it[1]?"ok":"")+'">'+it[0]+'</li>';}).join("");
+    if(items.every(function(it){return it[1];})&&!st.passed){st.passed=true;st.checks=1;save();renderNav();ed.msg("ok","<b>Project set up.</b> Go to the next station to start tracing.");}}
+  pick();paint();wireNext(stage);
+}
+function projectStation(stage,i,sd){
+  var st=stState(i),doc=project();
+  if(!doc.photo.kind){stage.innerHTML=head(sd,i)+'<div class="fb show info">Set up your project first (Thursday, station 1).</div>';return;}
+  if(doc.photo.kind==="upload"&&!UPLOAD.src){stage.innerHTML=head(sd,i)+'<div class="fb show info">Loading your photo\u2026 If this doesn&rsquo;t go away, re-upload it on Thursday station 1.</div>';return;}
+  stage.innerHTML=head(sd,i)+'<div data-ed></div><h3>Checklist</h3><ul class="checklist" id="ck"></ul><div class="row-actions">'+nextBtn()+'</div>';
+  var ed=Editor($("[data-ed]",stage),{tools:["select","direct","pen","curv","convert","add","delete","eyedrop"],single:false,layers:true,style:true,onChange:function(){S.project=doc;save();paint();}},doc);
+  function paint(){var items=projectChecklist(doc,sd.req);$("#ck",stage).innerHTML=items.map(function(it){return '<li class="'+(it[1]?"ok":"")+'">'+it[0]+'</li>';}).join("");
+    var all=items.every(function(it){return it[1];});st.checks=1;st.note=doc.paths.length+" shapes";if(all&&!st.passed){st.passed=true;ed.msg("ok","<b>Checklist complete.</b> Keep adding detail if you have time.");}save();renderNav();}
+  paint();wireNext(stage);
+}
+function lastFirst(){var parts=(S.name||"").trim().split(/\s+/);if(parts.length<2)return null;var last=parts[parts.length-1].replace(/[^A-Za-z\-]/g,""),first=parts[0].replace(/[^A-Za-z]/g,"");if(!last||!first)return null;
+  return {last:last.charAt(0).toUpperCase()+last.slice(1),fi:first.charAt(0).toUpperCase()};}
+function exportStation(stage,i,sd){
+  var st=stState(i),doc=project(),lf=lastFirst();
+  stage.innerHTML=head(sd,i)+'<p>Class formula: <b>LastName_FirstInitial_ProjectCode_v#.ext</b>. This project&rsquo;s code is <b>VectorTrace</b>.</p>'+
+   '<div class="row-actions" style="margin-top:4px"><input class="fname" id="fn" spellcheck="false" autocomplete="off" placeholder="e.g. Garcia_M_VectorTrace_v1.png" value="'+esc(st.fname||"")+'"><button class="btn" id="ex">Export PNG</button></div><div class="fb" id="sfb"></div>'+
+   '<h3>Preview</h3><div class="board" style="max-width:620px"><svg viewBox="0 0 600 400" id="pv"></svg></div><div class="row-actions">'+nextBtn()+'</div>';
+  function art(withBg){return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" width="1200" height="800">'+(withBg?'<rect width="600" height="400" fill="#ffffff"/>':'')+doc.paths.map(function(p){return '<path d="'+pathD(p)+'" fill="'+(p.fill||"none")+'" stroke="'+(p.stroke||"none")+'" stroke-width="'+p.sw+'" stroke-linejoin="round"/>';}).join("")+'</svg>';}
+  $("#pv",stage).innerHTML=doc.paths.map(function(p){return '<path d="'+pathD(p)+'" fill="'+(p.fill||"none")+'" stroke="'+(p.stroke||"none")+'" stroke-width="'+p.sw+'"/>';}).join("")||'<text x="300" y="200" text-anchor="middle" fill="#999" font-family="Calibri,Carlito,Arial">Your traced shapes will appear here.</text>';
+  function validate(v){if(!lf)return "Type your first and last name at the top of the page first.";if(/\s/.test(v))return "No spaces. Use underscores.";
+    var exp=lf.last+"_"+lf.fi+"_VectorTrace_v";if(v.indexOf(exp)!==0)return "Start with "+lf.last+"_"+lf.fi+"_VectorTrace_v (your last name, first initial, project code, version).";
+    if(!/^.+_v\d+\.png$/.test(v))return "End with a version number and the extension, like _v1.png";return null;}
+  $("#ex",stage).onclick=function(){var v=$("#fn",stage).value.trim(),box=$("#sfb",stage),err=validate(v);st.fname=v;save();
+    if(!doc.paths.length){fb(box,"info","Trace something first.");return;}if(err){fb(box,"bad",err);return;}
+    var img=new Image(),blob=new Blob([art(true)],{type:"image/svg+xml"}),url=URL.createObjectURL(blob);
+    img.onload=function(){var c=document.createElement("canvas");c.width=1200;c.height=800;c.getContext("2d").drawImage(img,0,0);URL.revokeObjectURL(url);
+      c.toBlob(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=v;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+        st.passed=true;st.checks=1;st.note=v;save();renderNav();fb(box,"ok","<b>Exported "+esc(v)+".</b> Find it in your Downloads folder and attach it to the assignment in Google Classroom.");},"image/png");};
+    img.onerror=function(){fb(box,"bad","Export failed. Try again.");};img.src=url;};
+  wireNext(stage);
+}
+
+/* ================= quiz & report ================= */
+function quizPage(stage){var day=DAYS[S.day],d=D();
+  stage.innerHTML='<h2>Quick check</h2><p class="time">About 5 minutes</p><p class="lede">A correct first answer earns the point; if you miss, try again to see the right one.</p>'+
+   day.quiz.map(function(q,i){return '<div class="q" data-i="'+i+'"><p>'+(i+1)+'. '+esc(q.q)+'</p><div class="mc">'+q.o.map(function(o,j){return '<label><input type="radio" name="q'+i+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join("")+'</div><button class="btn">Check</button><div class="fb"></div></div>';}).join("")+'<div class="row-actions">'+nextBtn()+'</div>';
+  $$(".q",stage).forEach(function(el){var i=+el.dataset.i,q=day.quiz[i],r=d.quiz[i]||{tries:0,ok:false},btn=$(".btn",el),box=$(".fb",el);
+    function lock(){btn.disabled=true;$$("input",el).forEach(function(x){x.disabled=true;if(+x.value===q.a){x.checked=true;x.closest("label").classList.add("ok");}});fb(box,"ok",r.tries===1?"Correct on the first try.":"Correct.");}
+    if(r.ok)lock();btn.onclick=function(){var c=$("input:checked",el);if(!c){fb(box,"info","Choose an answer first.");return;}r.tries++;
+      if(+c.value===q.a){r.ok=true;lock();}else{c.closest("label").classList.add("bad");c.checked=false;fb(box,"bad","Not quite. Try another answer.");}d.quiz[i]=r;save();renderNav();};});
+  wireNext(stage);}
+function reportPage(stage){var day=DAYS[S.day],d=D(),q=quizScore(),pl=payload("");
+  var rows=day.stations.map(function(s,i){var r=d.st[i],acc=(s.kind==="trace"||s.kind==="race")&&r&&r.checks?r.best+"%":"\u2014";return '<tr><td>'+esc(s.title)+(r&&r.note?'<br><span class="note">'+esc(r.note)+'</span>':'')+'</td><td>'+(r&&r.passed?"\u2713 Done":(r&&r.checks?"Not yet":"Not tried"))+'</td><td class="num">'+acc+'</td></tr>';}).join("");
+  var all=pl.passed===day.stations.length&&(!q.of||q.done);
+  stage.innerHTML='<h2>Lab report: '+esc(day.label+" "+day.date)+'</h2><p class="lede">'+esc(day.title)+'.</p><p><b>Name:</b> '+(S.name?esc(S.name):'<span style="color:var(--bad)">Type your name at the top of the page</span>')+' &nbsp; <b>Period:</b> '+esc(S.period||"\u2014")+'</p>'+
+   '<div class="report"><table><thead><tr><th>Station</th><th>Status</th><th class="num">Accuracy</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td>Stations done: '+pl.passed+' / '+day.stations.length+'</td><td>'+(q.of?"Quick check: "+q.got+" / "+q.of:"")+'</td><td></td></tr></tfoot></table>'+
+   '<h3>'+(S.day==="fri"?"Design rationale":"Exit ticket")+'</h3><p>'+esc(day.exit)+'</p><textarea id="ex">'+esc(d.exit||"")+'</textarea>'+(all&&S.name?'<p><span class="stamp">Traced &amp; ready</span></p>':'')+'</div>'+
+   '<p class="no-print">'+(HAS_URL?'Click <b>Submit to teacher</b> when you finish.':'Screenshot this report (<b>Ctrl + Show windows</b>) and attach it in Google Classroom.')+'</p>'+
+   '<div class="row-actions">'+(HAS_URL?'<button class="btn" id="sub">Submit to teacher</button>':'')+'<button class="btn ghost" id="pdf">Save as PDF</button></div><div class="fb" id="subfb"></div>';
+  $("#ex",stage).addEventListener("input",function(e){d.exit=e.target.value;save();});$("#pdf",stage).onclick=function(){window.print();};
+  if(HAS_URL){var sb=$("#sub",stage),sf=$("#subfb",stage);if(d.submittedAt)fb(sf,"ok","Submitted at "+d.submittedAt+". You can submit again if you keep working.");
+    sb.onclick=function(){if(!S.name){fb(sf,"bad","Type your name at the top of the page, then submit.");$("#sname").focus();return;}if(!(d.exit||"").trim()){fb(sf,"bad","Answer the question above before you submit.");$("#ex",stage).focus();return;}
+      sb.disabled=true;fb(sf,"info","Sending\u2026");send("Submitted",function(ok){sb.disabled=false;if(ok){d.submittedAt=new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});save();fb(sf,"ok","Submitted at "+d.submittedAt+". Your teacher can see your results.");}else fb(sf,"bad","Couldn\u2019t reach the results sheet. Try again, or turn in a screenshot instead.");});};}
+}
+
+var nm=$("#sname"),pd=$("#speriod");nm.value=S.name;pd.value=S.period;
+function needName(){nm.classList.toggle("need",!nm.value.trim());}
+nm.addEventListener("input",function(){S.name=nm.value.trim();save();needName();});pd.addEventListener("input",function(){S.period=pd.value.trim();save();});needName();
+setInterval(function(){if(isOpen(S.day))$("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-D().start)/60000)+" min";},30000);
+window.__traceLab={SHAPES:SHAPES,compare:compare,imageTrace:imageTrace,photoCanvas:photoCanvas,trueMask:trueMask,iou:iou};
+render();
+})();
+</script>
+</body>
+</html>
