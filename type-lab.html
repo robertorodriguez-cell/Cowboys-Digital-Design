@@ -1,0 +1,717 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Type Lab — Week 13 | Digital Design 1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&family=Pacifico&family=Rye&family=Courier+Prime:wght@400;700&family=Roboto+Slab:wght@400;700&family=Lora:wght@400;700&family=Raleway:wght@400;700&family=Lobster&family=Dancing+Script:wght@700&family=Bungee&family=Space+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --maroon:#8A0635; --maroon-dk:#5C0423; --ink:#0A0A0A; --silver:#9E9FA3;
+  --paper:#FFFFFF; --wash:#F4F1F2; --line:#D9D6D8;
+  --ok:#2E7D32; --ok-bg:#E8F3E9; --bad:#B3261E; --bad-bg:#FBE9E7;
+  --blue:#1F7AE0; --cyan:#00A0DC; --yellow:#FFE500;
+  --serif:Cambria, Caladea, Georgia, serif;
+  --sans:Calibri, Carlito, "Segoe UI", Arial, sans-serif;
+  --mono:"Courier New", Courier, monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:var(--sans);color:var(--ink);background:var(--wash);font-size:17px;line-height:1.45}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--cyan);outline-offset:2px}
+.sheet-head{background:var(--maroon);color:#fff;padding:22px 24px 0}
+.head-inner{max-width:1240px;margin:0 auto;display:flex;flex-wrap:wrap;gap:18px 40px;align-items:flex-end;justify-content:space-between}
+.head-inner h1{font-family:var(--serif);font-size:2.6rem;line-height:1;margin:0 0 6px}
+.head-inner p{margin:0 0 4px;color:#F1D3DD;max-width:54ch}
+.who{display:flex;gap:12px;flex-wrap:wrap}
+.who label{display:flex;flex-direction:column;font-size:.85rem;color:#F1D3DD}
+.who input{margin-top:3px;padding:7px 10px;border:2px solid transparent;border-radius:6px;width:210px;background:#fff;color:var(--ink)}
+.who input.short{width:110px}
+.who input.need{border-color:var(--yellow)}
+.days{max-width:1240px;margin:16px auto 0;display:flex;gap:6px;flex-wrap:wrap}
+.days button{border:0;border-radius:8px 8px 0 0;padding:9px 16px;background:var(--maroon-dk);color:#F1D3DD;font-weight:700}
+.days button small{display:block;font-weight:400;font-size:.78rem}
+.days button[aria-pressed="true"]{background:var(--wash);color:var(--maroon)}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 24px 60px;display:grid;grid-template-columns:220px 1fr;gap:26px}
+nav ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px;position:sticky;top:12px}
+nav button{width:100%;text-align:left;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);display:flex;gap:10px;align-items:center}
+nav button .n{flex:none;width:28px;height:28px;border-radius:50%;display:grid;place-items:center;background:var(--wash);font-weight:700;color:var(--maroon)}
+nav button .t{flex:1;line-height:1.2}
+nav button .t small{display:block;color:#666;font-size:.8rem}
+nav button[aria-current="step"]{border-color:var(--maroon);box-shadow:inset 0 0 0 1px var(--maroon)}
+nav button.done .n{background:var(--ok);color:#fff}
+.timer{margin-top:10px;padding:6px 12px;font-size:.9rem;color:#555}
+.station{position:relative;background:var(--paper);padding:26px 28px 30px;border-radius:2px;min-width:0}
+.station::before,.station::after{content:"";position:absolute;width:22px;height:22px;pointer-events:none}
+.station::before{top:-10px;left:-10px;border-top:1.5px solid var(--ink);border-left:1.5px solid var(--ink)}
+.station::after{bottom:-10px;right:-10px;border-bottom:1.5px solid var(--ink);border-right:1.5px solid var(--ink)}
+.station h2{font-family:var(--serif);color:var(--maroon);font-size:1.85rem;margin:0 0 4px;line-height:1.15}
+.station h3{font-family:var(--serif);font-size:1.2rem;margin:22px 0 8px}
+.time{color:#666;font-size:.9rem;margin:0 0 10px}
+.lede{margin:0 0 12px;max-width:80ch}
+kbd{font-family:var(--mono);background:var(--wash);border:1px solid #ccc;border-bottom-width:2px;border-radius:4px;padding:0 5px;font-size:.88em}
+.btn{padding:9px 16px;border-radius:8px;border:2px solid var(--maroon);background:var(--maroon);color:#fff;font-weight:700}
+.btn.ghost{background:transparent;color:var(--maroon)}
+.btn.sm{padding:5px 10px;font-size:.9rem}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.fb{margin-top:10px;padding:10px 14px;border-radius:8px;display:none}
+.fb.show{display:block}
+.fb.ok{background:var(--ok-bg);color:#1B5E20}
+.fb.bad{background:var(--bad-bg);color:#8C1D18}
+.fb.info{background:var(--wash);color:#333}
+.board{background:#E6E6E6;border-radius:6px;padding:10px;min-width:0}
+.board svg{display:block;width:100%;height:auto;background:#fff;user-select:none;-webkit-user-select:none}
+.grid2{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:18px;align-items:start}
+.field{display:flex;flex-direction:column;margin-bottom:10px}
+.field span{font-weight:700;margin-bottom:3px}
+.field select{padding:7px 9px;border:1px solid #bbb;border-radius:6px;max-width:280px}
+.field.ok select{border-color:var(--ok);background:var(--ok-bg)}
+.field.bad select{border-color:var(--bad);background:var(--bad-bg)}
+.samples{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.sample{border:1px solid var(--line);border-radius:8px;padding:12px}
+.sample .spec{font-size:2rem;line-height:1.2;margin-bottom:8px;min-height:2.6rem}
+.sample.ok{border-color:var(--ok);background:var(--ok-bg)}
+.sample.bad{border-color:var(--bad);background:var(--bad-bg)}
+.ctrl{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:8px 0}
+.ctrl input[type=range]{width:260px}
+.ctrl b{min-width:70px;font-variant-numeric:tabular-nums}
+.pnl{background:#ECECEC;border:1px solid #c9c9c9;border-radius:4px;font-size:.92rem}
+.pnl h4{margin:0;padding:6px 10px;background:#D6D6D6;font-size:.82rem;text-transform:uppercase;letter-spacing:.04em}
+.pnl .bd{padding:8px 10px;display:flex;flex-direction:column;gap:8px}
+.pnl label{display:flex;flex-direction:column;gap:2px}
+.pnl select,.pnl input[type=number]{padding:5px 7px;border:1px solid #aaa;border-radius:4px}
+.swatches{display:flex;gap:6px;flex-wrap:wrap}
+.swatches button{width:28px;height:28px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #999}
+.swatches button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--blue)}
+.seg{display:flex;border:1px solid #aaa;border-radius:6px;overflow:hidden;width:max-content}
+.seg button{border:0;background:#fff;padding:5px 10px;border-right:1px solid #ddd}
+.seg button:last-child{border-right:0}
+.seg button[aria-pressed="true"]{background:var(--maroon);color:#fff}
+.checklist{list-style:none;padding:0;margin:8px 0 0}
+.checklist li{padding:3px 0}
+.checklist li::before{content:"\25CB  ";color:#999}
+.checklist li.ok::before{content:"\2713  ";color:var(--ok);font-weight:700}
+.checklist li.ok{color:#1B5E20}
+.mc label{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:8px;cursor:pointer}
+.mc label:hover{background:var(--wash)}
+.mc label.ok{border-color:var(--ok);background:var(--ok-bg)}
+.mc label.bad{border-color:var(--bad);background:var(--bad-bg)}
+.q{border-top:1px solid var(--line);padding:14px 0}
+.q > p{margin:0 0 8px;font-weight:700}
+.mini{width:240px;height:320px;border:1px solid #bbb;position:relative;overflow:hidden;margin-bottom:10px;flex:none}
+.spotrow{display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.demo{position:relative;height:300px;border:1px dashed #bbb;background:#fff;margin-bottom:8px;overflow:hidden}
+.tbox{position:absolute;outline:1px solid var(--blue)}
+.tbox .h{position:absolute;width:12px;height:12px;background:#fff;border:2px solid var(--blue);right:-7px;bottom:-7px;cursor:nwse-resize;touch-action:none}
+.tbox .over{position:absolute;right:-7px;bottom:-26px;width:14px;height:14px;border:1.5px solid var(--bad);color:var(--bad);font-size:12px;line-height:11px;text-align:center;background:#fff;display:none}
+.report table{border-collapse:collapse;width:100%;margin:10px 0 18px}
+.report th,.report td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--line)}
+.report td.num{text-align:right}
+.report tfoot td{font-weight:700;border-top:2px solid var(--ink)}
+.report textarea{width:100%;min-height:100px;padding:10px;border:1px solid #bbb;border-radius:8px}
+.stamp{display:inline-block;border:3px solid var(--maroon);color:var(--maroon);font-family:var(--serif);font-weight:700;padding:6px 14px;transform:rotate(-3deg);font-size:1.2rem}
+.note{color:#555;font-size:.92rem}
+.fname{font-family:var(--mono);padding:8px 10px;border:1px solid #bbb;border-radius:6px;min-width:320px}
+.poster{display:grid;grid-template-columns:minmax(0,420px) 260px;gap:14px;align-items:start}
+@media (max-width:980px){ .grid2,.poster{grid-template-columns:1fr} }
+@media (max-width:860px){ .wrap{grid-template-columns:1fr} nav ol{position:static;flex-direction:row;overflow-x:auto} nav button{min-width:160px} .station{padding:20px 14px} }
+@media print{ nav,.row-actions,.no-print,.days{display:none!important} .wrap{display:block} body{background:#fff} }
+</style>
+</head>
+<body>
+<header class="sheet-head">
+  <div class="head-inner">
+    <div>
+      <h1>Type Lab</h1>
+      <p>Week 13: type anatomy, spacing, point and area type, type on a path, and building hierarchy.</p>
+    </div>
+    <div class="who">
+      <label>Your name<input id="sname" autocomplete="name" placeholder="First and last name"></label>
+      <label>Class period<input id="speriod" class="short" placeholder="e.g. 4"></label>
+    </div>
+  </div>
+  <div class="days" id="days" role="group" aria-label="Choose the day"></div>
+</header>
+<div class="wrap">
+  <nav aria-label="Stations"><ol id="nav"></ol><div class="timer" id="timer"></div></nav>
+  <main id="stage" class="station" tabindex="-1"></main>
+</div>
+<script>
+(function(){
+"use strict";
+/* ===== TEACHER SETUP: same results link as the other labs ===== */
+var RESULTS_URL="https://script.google.com/macros/s/AKfycbzMG12sqfDj-7BREB8yngh7Lvc_S7kxCyMMPWEmJcf-9atS2lFbRAPCds_YCIRoW1xDNQ/exec";
+/* =============================================================== */
+var HAS_URL=/^https:\/\/script\.google\.com\//.test(RESULTS_URL);
+var KEY="dd1-type-lab-w13";
+var F={serif:"'Playfair Display', Caladea, Georgia, serif",sans:"Montserrat, Carlito, Arial, sans-serif",cond:"Oswald, 'Arial Narrow', Arial, sans-serif",
+  script:"Pacifico, 'Brush Script MT', cursive",display:"Rye, Impact, fantasy",mono:"'Courier Prime', 'Courier New', monospace",
+  slab:"'Roboto Slab', Rockwell, Georgia, serif",lora:"Lora, Georgia, serif",raleway:"Raleway, Arial, sans-serif",lobster:"Lobster, cursive",dancing:"'Dancing Script', cursive",bungee:"Bungee, Impact, fantasy",spacemono:"'Space Mono', 'Courier New', monospace"};
+var FONT_NAMES={serif:"Playfair Display (serif)",sans:"Montserrat (sans serif)",cond:"Oswald (condensed sans)",script:"Pacifico (script)",display:"Rye (western display)",mono:"Courier Prime (monospace)"};
+var $=function(s,r){return (r||document).querySelector(s);},$$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s));};
+function esc(t){return String(t).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+function fb(el,cls,html){el.className="fb show "+cls;el.innerHTML=html;}
+function clone(o){return JSON.parse(JSON.stringify(o));}
+var MC=document.createElement("canvas").getContext("2d");
+function measure(font,txt){MC.font=font;try{MC.fontKerning="normal";}catch(e){}return MC.measureText(txt);}
+
+/* ================= days ================= */
+var DAYS={
+ mon:{open:"2026-11-02",label:"Mon",date:"Nov 2",title:"Type anatomy",exit:"What is the difference between x-height and cap height?",
+  stations:[
+   {kind:"anatomy",title:"Label the letterforms",mins:8,text:"Every letter sits on invisible guidelines. Choose the correct name for each numbered part, then check."},
+   {kind:"classify",title:"Name that category",mins:12,text:"Typefaces are grouped into categories. Decide which category each sample belongs to."},
+   {kind:"match",title:"Type terms",mins:9,text:"Match each typography term to what it means. You&rsquo;ll use all of these terms this week.",
+    items:[["Leading","The space between lines of text"],["Kerning","The space between two specific letters"],["Tracking","The spacing across a whole word or line"],["Point size","How big the type is (72 points is about 1 inch)"],["Serif","Small strokes at the ends of letters"],["Typeface","The overall design of a set of letters, like Helvetica or Garamond"],
+     ["Font family","All the weights and styles of one typeface, like Regular, Bold, and Italic"],["Weight","How thick the strokes of the letters are, like light or bold"],["Italic","A slanted version of a typeface"],
+     ["Glyph","Any single character in a font, including letters, numbers, and symbols"],["Ligature","Two letters joined into one character, like fi"],["Alignment","How the lines of text line up: left, center, right, or justified"]]},
+   {kind:"read",title:"Read: Where type came from",mins:14,text:"Read the article, then answer the questions. You can scroll back up to the reading any time.",
+    passage:["For most of history, every book was copied by hand. That changed in Europe around 1450, when Johannes Gutenberg of Mainz, Germany, built a printing press that used <b>movable metal type</b>. Each letter was cast as its own small metal block, so a printer could arrange letters into words, print hundreds of pages, then take the letters apart and reuse them. (Printers in China and Korea had used movable type centuries earlier, but Gutenberg&rsquo;s system spread quickly across Europe.)",
+     "Gutenberg&rsquo;s letters looked like the heavy, pointed handwriting of the time, called <b>blackletter</b>. A few years later, printers in Italy designed lighter, rounder letters based on carved Roman inscriptions. A printer named Nicolas Jenson, working in Venice around 1470, cut one of the most admired of these <b>Roman</b> typefaces. The little strokes at the ends of those letters are <b>serifs</b>, and typefaces like Garamond and Times New Roman still follow that tradition.",
+     "Many words designers use today come straight from the print shop. Metal letters were stored in wooden trays called cases. Capital letters sat in the <b>upper case</b> and small letters in the <b>lower case</b>, which is where &ldquo;uppercase&rdquo; and &ldquo;lowercase&rdquo; come from. To add space between lines, printers slid thin strips of lead metal between them. That space is still called <b>leading</b> (it rhymes with &ldquo;bedding&rdquo;).",
+     "In the metal-type days, a <b>font</b> meant one complete set of letters in a single size and style, like 12-point bold. The <b>typeface</b> was the design itself. Today people often use the two words to mean the same thing, but designers still find the difference useful.",
+     "<b>Sans serif</b> type (&ldquo;sans&rdquo; is French for &ldquo;without&rdquo;) appeared in the early 1800s. In 1957, two Swiss designers, Max Miedinger and Eduard Hoffmann, created a clean sans serif that was renamed <b>Helvetica</b> a few years later. It became one of the most used typefaces in the world, from subway signs to company logos.",
+     "When the Apple Macintosh arrived in 1984, regular people could choose fonts on a computer for the first time. Today you can pick from thousands of digital typefaces in seconds, but every one of them still sits on a baseline and has an x-height, just like Gutenberg&rsquo;s metal letters."],
+    qs:[{q:"What did Gutenberg’s press use that made printing much faster?",o:["Movable metal type that could be rearranged and reused","Computer fonts","Hand-painted pages","Photographs"],a:0},
+        {q:"Where do the words “uppercase” and “lowercase” come from?",o:["The size of the paper","The wooden cases where printers stored capital and small letters","The height of the printing press","The way letters were taught in school"],a:1},
+        {q:"Leading gets its name from…",o:["the first line of a paragraph","thin strips of lead metal placed between lines of type","the leader of the print shop","the darkest ink color"],a:1},
+        {q:"In the metal-type days, what was the difference between a font and a typeface?",o:["There was no difference","A font was one set of letters in a single size and style; the typeface was the design","A typeface was smaller than a font","A font only had capital letters"],a:1},
+        {q:"Helvetica is an example of a…",o:["blackletter typeface","script typeface","sans serif typeface designed in Switzerland in 1957","Roman serif typeface from Venice"],a:2}]}
+  ],
+  quiz:[
+   {q:"The baseline is\u2026",o:["the line most letters sit on","the top of capital letters","the bottom of letters like p and y","the space between lines"],a:0},
+   {q:"x-height measures\u2026",o:["the height of capital letters","the height of lowercase letters like x, without ascenders","the width of the letter x","the space between letters"],a:1},
+   {q:"A sans serif typeface\u2026",o:["has small strokes at the ends of letters","looks like handwriting","does not have small strokes at the ends of letters","uses the same width for every letter"],a:2},
+   {q:"Script typefaces work best for\u2026",o:["long paragraphs of body copy","a few decorative words, like a name or title","tiny legal text","spreadsheets"],a:1}
+  ]},
+ tue:{open:"2026-11-03",label:"Tue",date:"Nov 3",title:"Kerning, tracking & leading",exit:"Explain the difference between kerning and tracking in your own words.",
+  stations:[
+   {kind:"kern",title:"Kern it",mins:18,text:"The spacing in these words is uneven. Click a gap marker under the word, then use the arrow buttons (or <kbd>Alt</kbd> + <kbd>&larr;</kbd>/<kbd>&rarr;</kbd>, like in Illustrator) to fix it. Make the space between every pair of letters <b>look</b> even."},
+   {kind:"tracking",title:"Tracking",mins:8,text:"Tracking changes the spacing across a whole line. Illustrator measures it in thousandths of an em. Fix all four so they&rsquo;re easy to read."},
+   {kind:"leading",title:"Leading",mins:8,text:"Leading is the space from one baseline to the next. Fix the leading for all four blocks of text."},
+   {kind:"read",title:"Read: Why spacing matters",mins:14,text:"Read the article, then answer the questions.",
+    passage:["Good spacing is almost invisible. When it&rsquo;s right, readers never notice it. When it&rsquo;s wrong, the words feel clumsy, or a sign says something it didn&rsquo;t mean to say.",
+     "Computers space letters using measurements built into each font. Those numbers work most of the time, but some letter pairs have shapes that don&rsquo;t fit together neatly. The diagonal sides of <b>A</b> and <b>V</b> leave a big wedge of empty space between them. A capital <b>T</b> next to a small <b>o</b> leaves a gap under the T&rsquo;s arm. <b>Kerning</b> fixes these pairs one at a time. Designers judge kerning <b>by eye</b>, not by measuring, because the goal is space that <i>looks</i> even, not space that measures even.",
+     "Bad kerning has its own nickname: <b>keming</b>. If the letters r and n are squeezed too close, they can look like an m, so &ldquo;kerning&rdquo; turns into &ldquo;keming.&rdquo; Real signs and logos have made this mistake, sometimes with embarrassing results.",
+     "<b>Tracking</b> changes the spacing across a whole word, line, or paragraph at once. ALL CAPS headlines often look better with a little extra tracking, because capital letters are big blocks that crowd each other. Body text usually works best with tracking close to zero. Spreading out small text breaks up the shapes of words, and readers recognize words partly by their shapes.",
+     "<b>Leading</b> is the space from one baseline to the next. Too little, and ascenders and descenders crash into each other and readers lose their place. Too much, and each line floats away from the next. Illustrator&rsquo;s Auto leading is 120% of the font size, a good place to start for body text. Large headlines can often use tighter leading, close to their font size, so the lines hold together as one unit.",
+     "One more spacing rule: <b>line length</b>. Many designers aim for about 45 to 75 characters per line of body text. Longer lines make the reader&rsquo;s eye travel too far to find the next line; very short lines make the eye jump back too often. Kerning, tracking, leading, and line length all work together to make reading feel effortless."],
+    qs:[{q:"Why do letter pairs like A and V often need kerning?",o:["They are always misspelled","Their diagonal shapes leave a big gap between them","They are different colors","They are too tall"],a:1},
+        {q:"How do designers usually judge kerning?",o:["By eye, so the space looks even","With a ruler only","By making every gap exactly the same number","By changing the font size"],a:0},
+        {q:"“Keming” is a joke about…",o:["a font that is too large","bad kerning that makes r and n look like m","a missing font","too much leading"],a:1},
+        {q:"Why is heavy tracking a problem for body text?",o:["It changes the color","It breaks up word shapes and makes reading harder","It makes the file too big","It adds leading"],a:1},
+        {q:"About how many characters per line do many designers aim for in body text?",o:["5 to 10","45 to 75","150 to 200","As many as fit"],a:1}]}
+  ],
+  quiz:[
+   {q:"Kerning adjusts\u2026",o:["the space between two specific letters","the space between lines","the size of the type","the color of the type"],a:0},
+   {q:"Tracking adjusts\u2026",o:["one pair of letters","the spacing across a whole word, line, or paragraph","the height of capital letters","the baseline"],a:1},
+   {q:"In Illustrator, Auto leading is set to what percent of the font size?",o:["100%","120%","150%","200%"],a:1},
+   {q:"In Illustrator, which shortcut adjusts kerning when your cursor is between two letters?",o:["Alt (Option) + Left/Right arrow","Ctrl + K","Shift + C","Tab"],a:0},
+   {q:"Large ALL CAPS headlines usually look better with\u2026",o:["negative tracking","a little positive tracking","no spaces between words","more leading than body text"],a:1}
+  ]},
+ wed:{open:"2026-11-04",label:"Wed",date:"Nov 4",title:"Point, area & path type",exit:"When would you use area type instead of point type?",
+  stations:[
+   {kind:"pointarea",title:"Point vs. area type",mins:10,text:"Illustrator has two main kinds of type. Drag the corner handle on <b>each</b> box below and watch what happens. Then answer the questions."},
+   {kind:"sortq",title:"Which kind of type?",mins:8,text:"Designers pick the right kind of type for each job. Choose point type, area type, or type on a path for each one.",
+    opts:["Point type","Area type","Type on a path"],
+    items:[["A one-word OPEN sign in a shop window",0],["The paragraph of rules on the back of a raffle ticket",1],["MADISON COUNTY curving around a round school seal",2],["The descriptions under each item on a restaurant menu",1],
+      ["A big HOMECOMING headline on a poster",0],["A city name next to a dot on a map",0],["A two-column newsletter article",1],["Words wrapping around the edge of a round bottle cap",2],["A river name that follows the curve of the river on a map",2],["A short logo name like Cowboy Coffee",0],
+      ["A paragraph of directions on a field trip permission slip",1],["A team name arching over a mascot on a T-shirt",2]]},
+   {kind:"textpath",title:"Type on a path badge",mins:14,text:"Build a Cowboys badge with type on a path. Drag the round curve handle to bend each path, and use <b>Position</b> to slide the text along the path, like the center bracket in Illustrator."},
+   {kind:"read",title:"Read: Type at work",mins:14,text:"Read the article, then answer the questions.",
+    passage:["Look around your school and you&rsquo;ll find all three kinds of Illustrator type doing different jobs.",
+     "<b>Point type</b> is for short text that stands on its own: a single word on a sign, a headline, a label on a map, or the name inside a logo. Because point type doesn&rsquo;t wrap, you control every line break yourself. That&rsquo;s exactly what you want for a headline like HOMECOMING, where an automatic line break in the wrong spot would look like a mistake.",
+     "<b>Area type</b> is for text that needs to flow: the description under each item on a restaurant menu, the paragraphs in a magazine article, or the rules printed on the back of a ticket. When you resize an area type box, the text re-wraps to fit. If you put more text in than the box can hold, Illustrator shows a small red plus sign. That&rsquo;s <b>overset text</b>, and it&rsquo;s easy to miss. A printed menu with half a sentence missing is a classic beginner mistake, so always check for that red plus sign before you export.",
+     "Long articles often need more than one box, like two columns on a page. In Illustrator you can link area type boxes so text flows from one into the next. This is called <b>threading</b>. Change the first box, and the rest of the text slides along into the next one automatically.",
+     "<b>Type on a path</b> shows up on badges, seals, stamps, team logos, and bottle labels. It looks great for short phrases, but it has rules. Tight curves squeeze letters together on the inside of the curve and spread them apart on the outside, so gentle curves read best. Keep the phrase short. A full sentence running around a circle is hard to read. And text along the bottom of a circle can end up upside down; designers fix this by flipping the text or putting it on a separate path that curves the other way, just like the COWBOYS path you built.",
+     "Choosing the right kind of type isn&rsquo;t just a software decision. It&rsquo;s a design decision about how people will read your work."],
+    qs:[{q:"Which job is the best fit for area type?",o:["A one-word store sign","The item descriptions on a restaurant menu","A single letter in a logo","A map label"],a:1},
+        {q:"What does the small red plus sign on an area type box warn you about?",o:["Spelling errors","Overset text: more text than fits in the box","A locked layer","Low resolution"],a:1},
+        {q:"Linking area type boxes so text flows from one to the next is called…",o:["kerning","threading","outlining","tracking"],a:1},
+        {q:"Why do gentle curves work better than tight curves for type on a path?",o:["Tight curves squeeze and spread letters, making them hard to read","Tight curves change the font","Gentle curves print faster","Tight curves delete letters"],a:0},
+        {q:"Why might a designer choose point type for a headline?",o:["It wraps automatically","They control every line break themselves","It holds more text","It is the only type that can be colored"],a:1}]}
+  ],
+  quiz:[
+   {q:"Clicking once with the Type tool (T) creates\u2026",o:["point type","area type","a type on a path","outlines"],a:0},
+   {q:"Click-dragging a box with the Type tool creates\u2026",o:["point type","area type, where text wraps inside the box","a text path","a new artboard"],a:1},
+   {q:"A small red plus sign at the corner of an area type box means\u2026",o:["the text is spelled wrong","there is more text than fits in the box (overset text)","the font is missing","the box is locked"],a:1},
+   {q:"Which tool places text along a curved line?",o:["Area Type tool","Type on a Path tool","Touch Type tool","Vertical Type tool"],a:1},
+   {q:"How do you move type on a path to the other side of the line?",o:["Delete the path","Drag the center bracket across the path, or use Flip in Type on a Path Options","Press Enter","Change the font"],a:1}
+  ]},
+ thu:{open:"2026-11-05",label:"Thu",date:"Nov 5",title:"Hierarchy",exit:"What did you change on your poster to make the most important information read first?",
+  stations:[
+   {kind:"hier",title:"Build the hierarchy",mins:12,text:"A flyer needs the most important information to read first. Use size and weight to rank the text on <b>all three flyers</b> in the order the client asked for."},
+   {kind:"spot",title:"Spot the problem",mins:12,text:"Each of the eight mini flyers has one big typography problem. Pick the main problem for each."},
+   {kind:"poster",title:"Start your type poster",mins:25,req:"start",text:"Your <b>Typographic Hierarchy</b> project: a homecoming poster made only with type. Click a line of text to select it, drag it to move it, and use the Character panel to style it. Your work saves automatically and carries over to Friday."},
+   {kind:"read",title:"Read: How readers scan a page",mins:14,text:"Read the article, then answer the questions.",
+    passage:["People don&rsquo;t read posters the way they read books. They glance. A student walking down the hallway gives a flyer about two seconds. In that time, the design has to answer one question: <i>Should I stop and look closer?</i> <b>Typographic hierarchy</b> is how designers control what the eye sees first, second, and third.",
+     "Most designers plan three levels. The <b>primary</b> level is the one thing everyone must notice, usually the event name. The <b>secondary</b> level answers the next questions readers have: when and where. The <b>tertiary</b> level holds details for people who are already interested, like prices, rules, or contact information.",
+     "Designers create those levels with a small set of tools: <b>size</b>, <b>weight</b> (bold vs. regular), <b>color</b>, <b>position</b>, and <b>space</b>. The trick is contrast. If the title is only a little bigger than everything else, nothing stands out. A strong title is often two, three, or even four times the size of the body text. Empty space, often called <b>white space</b>, is a tool too. Space around a headline makes it look important, the same way a museum leaves space around a famous painting.",
+     "On simple designs like posters and ads, readers&rsquo; eyes often move in a <b>Z-pattern</b>: across the top, diagonally down through the middle, and across the bottom. Designers put the most important information along that path.",
+     "Here&rsquo;s a quick test pros use: the <b>squint test</b>. Step back and squint at your design until the words get blurry. Whatever you can still see is what readers will notice first. If everything blurs into one gray block, your hierarchy needs more contrast.",
+     "Finally, less is more. Most good designs use just one or two typefaces. Mixing five fonts doesn&rsquo;t create hierarchy; it creates noise. Use size, weight, and space to make levels, and let your typefaces stay consistent."],
+    qs:[{q:"What is the primary level of hierarchy on an event poster usually?",o:["The price","The event name","The contact email","The fine print"],a:1},
+        {q:"What does the squint test check?",o:["Whether your spelling is correct","What stands out first when details blur","The file size","Whether the colors are CMYK"],a:1},
+        {q:"In a Z-pattern, readers’ eyes move…",o:["only down the left side","across the top, diagonally through the middle, and across the bottom","in circles","from bottom to top"],a:1},
+        {q:"Why does white space help hierarchy?",o:["It hides mistakes","Space around something makes it look important","It adds more text","It changes the font"],a:1},
+        {q:"Which of these is NOT one of the article’s hierarchy tools?",o:["Size","Weight","The file name","Space"],a:2}]}
+  ],
+  quiz:[]},
+ fri:{open:"2026-11-06",label:"Fri",date:"Nov 6",title:"Finish & export",exit:"Design rationale: in 3\u20134 sentences, explain the choices you made to create hierarchy on your poster.",
+  stations:[
+   {kind:"poster",title:"Finish your poster",mins:15,req:"final",text:"Polish your poster until every item on the checklist is complete."},
+   {kind:"export",title:"Name & export",mins:5,text:"Name your file with the class formula and export a PNG to turn in on Google Classroom."},
+   {kind:"read",title:"Read: Fonts, licenses & careers",mins:14,text:"Read the article, then answer the questions.",
+    passage:["Here&rsquo;s something many people don&rsquo;t know: a digital font is <b>software</b>. Someone designed every letter, number, and symbol, then spent months spacing and kerning them. Like other software, fonts come with a <b>license</b> that says how you&rsquo;re allowed to use them.",
+     "Some fonts are licensed for personal use only. Others can be used in work you sell or publish. Using a font in a way its license doesn&rsquo;t allow can be a legal problem, just like using a photo you don&rsquo;t have rights to. That&rsquo;s why professional designers keep track of where every font in a project came from.",
+     "Two sources make this easier. <b>Google Fonts</b>, where the fonts in this lab come from, offers typefaces under open-source licenses, so they&rsquo;re free to use in personal and professional work. <b>Adobe Fonts</b>, which used to be called Typekit, is included with a Creative Cloud subscription and lets you activate thousands of typefaces inside Illustrator and Photoshop.",
+     "Fonts also cause problems at the printer. If the print shop doesn&rsquo;t have the font you used, its computer swaps in a different one. Designers prevent that by sending a PDF, packaging the fonts with the file when the license allows it, or <b>creating outlines</b> on a copy of the file so the letters become shapes.",
+     "Typography is also a career path. <b>Graphic designers</b> choose and arrange type for posters, packaging, websites, and logos. <b>Type designers</b> create new typefaces, drawing every character and testing it at different sizes. <b>Sign painters and lettering artists</b> hand-letter storefronts, trucks, and murals. <b>UX and web designers</b> pick type that reads clearly on phones and screens. Even jobs outside design, like marketing and publishing, depend on people who understand what makes text easy to read.",
+     "Every skill you practiced this week, from kerning a word to building a poster&rsquo;s hierarchy, is a skill these professionals use every day."],
+    qs:[{q:"According to the article, a digital font is…",o:["a free picture","software that comes with a license","a type of paper","a color setting"],a:1},
+        {q:"What is true about Google Fonts?",o:["They can’t be used in school projects","They are offered under open-source licenses that allow personal and professional use","They only work in Photoshop","They cost money for each letter"],a:1},
+        {q:"Adobe Fonts used to be called…",o:["Typekit","FontBook","Helvetica","Google Fonts"],a:0},
+        {q:"Why might text print in the wrong font at a print shop?",o:["The printer’s computer doesn’t have the font, so it substitutes another","The ink is the wrong color","The paper is too thick","The file name has an underscore"],a:0},
+        {q:"Which career focuses on creating brand-new typefaces?",o:["Type designer","Photographer","Video editor","Web host"],a:0}]}
+  ],
+  quiz:[
+   {q:"A client wants the event name to be noticed first. What creates that hierarchy?",o:["Making every line the same size","Making the event name larger and bolder than everything else","Using five different typefaces","Putting the event name at the bottom in small text"],a:1},
+   {q:"Before sending a file with type to a printer, designers often\u2026",o:["Create Outlines on a copy so the printer doesn\u2019t need the fonts","Change the type to RGB","Delete the text","Rasterize the artboard"],a:0},
+   {q:"Body copy is set at 11 pt. Which leading is a sensible starting point?",o:["6 pt","13 pt","30 pt","72 pt"],a:1},
+   {q:"How many typefaces should most simple designs use?",o:["One or two","Five or six","As many as possible","Every line should be different"],a:0},
+   {q:"In Illustrator, which panel holds leading, kerning, and tracking?",o:["Swatches","Character","Layers","Pathfinder"],a:1},
+   {q:"Which kind of type should you use for a paragraph of rules on a flyer?",o:["Point type","Area type","Type on a path","Outlined type"],a:1},
+   {q:"What does the small red plus sign on a text box mean?",o:["Overset text: more text than fits","The font is bold","The text is kerned","The layer is locked"],a:0},
+   {q:"Which part of a letter drops below the baseline, like the tail of a p?",o:["Ascender","Counter","Descender","Serif"],a:2},
+   {q:"A small ALL CAPS label looks cramped. What should you adjust?",o:["Add tracking","Lower the leading","Change it to script","Make it RGB"],a:0},
+   {q:"You squint at your poster and everything blurs into one gray block. What does that tell you?",o:["The hierarchy needs more contrast","The colors are CMYK","The file is too large","The poster is finished"],a:0}
+  ]}
+};
+var DAY_ORDER=["mon","tue","wed","thu","fri"];
+
+/* ================= state ================= */
+var S={sid:"",name:"",period:"",day:"",days:{},poster:null};
+try{var sv=JSON.parse(localStorage.getItem(KEY)||"null");if(sv)S=Object.assign(S,sv);}catch(e){}
+if(!S.sid)S.sid=Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+var now=new Date(),iso=now.getFullYear()+"-"+String(now.getMonth()+1).padStart(2,"0")+"-"+String(now.getDate()).padStart(2,"0");
+var PREVIEW=/[?&]preview=cowboys\b/i.test(location.search);
+function isOpen(k){return PREVIEW||iso>=DAYS[k].open;}
+var todayKey=DAY_ORDER.filter(function(k){return DAYS[k].open===iso;})[0];
+if(todayKey)S.day=todayKey;else if(!DAYS[S.day]||!isOpen(S.day)){var od=DAY_ORDER.filter(isOpen);S.day=od.length?od[od.length-1]:"mon";}
+function D(){var k=S.day;if(!S.days[k])S.days[k]={cur:0,start:Date.now(),st:{},quiz:{},exit:""};return S.days[k];}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+function pages(){var d=DAYS[S.day],p=d.stations.map(function(s,i){return {kind:"st",i:i,title:s.title,mins:s.mins};});if(d.quiz.length)p.push({kind:"quiz",title:"Quick check",mins:5});p.push({kind:"report",title:"Lab report"});return p;}
+function stState(i){var d=D();if(!d.st[i])d.st[i]={best:"",passed:false,checks:0};return d.st[i];}
+function firstScore(st,pct){if(st.best===""||st.best==null)st.best=pct;}
+function quizScore(){var d=D(),q=DAYS[S.day].quiz,g=0,done=0;q.forEach(function(x,i){var r=d.quiz[i];if(r&&r.ok){done++;if(r.tries===1)g++;}});return {got:g,of:q.length,done:done===q.length};}
+
+/* ================= sending ================= */
+function payload(status){
+  var day=DAYS[S.day],d=D(),acc=[],passed=0,details=[];
+  day.stations.forEach(function(s,i){var r=d.st[i];var v=(r&&r.best!==""&&r.best!=null)?r.best:"";acc.push(v);if(r&&r.passed)passed++;
+    details.push(s.title+": "+(r&&(r.checks||r.passed)?(v!==""?v+"% first try":"")+(r.note?" ("+r.note+")":"")+(r.passed?" \u2713":""):"not tried"));});
+  var tried=acc.filter(function(v){return v!=="";}),q=quizScore();
+  return {lab:"pen",sid:S.sid,day:"Type Lab \u00b7 "+day.label+" "+day.date+" \u2013 "+day.title,name:S.name,period:S.period,status:status,
+    minutes:Math.floor((Date.now()-d.start)/60000),passed:passed,stations:day.stations.length,
+    avgAcc:tried.length?Math.round(tried.reduce(function(a,b){return a+b;},0)/tried.length):"",quiz:q.of?q.got:"",quizOf:q.of||"",acc:acc,details:details.join("; "),exit:d.exit||""};
+}
+function send(status,cb){if(!HAS_URL||!S.name){cb&&cb(false);return;}
+  try{fetch(RESULTS_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},body:JSON.stringify(payload(status))}).then(function(){cb&&cb(true);}).catch(function(){cb&&cb(false);});}catch(e){cb&&cb(false);}}
+var syncT=null;function autoSync(){if(!HAS_URL)return;clearTimeout(syncT);syncT=setTimeout(function(){send(D().submittedAt?"Submitted (updated)":"In progress");},4000);}
+
+/* ================= chrome ================= */
+var activeKey=null;document.addEventListener("keydown",function(e){if(activeKey)activeKey(e);});
+function renderDays(){var box=$("#days");box.innerHTML="";DAY_ORDER.forEach(function(k){var d=DAYS[k],b=document.createElement("button");b.setAttribute("aria-pressed",k===S.day);
+  b.innerHTML=(isOpen(k)?"":"\uD83D\uDD12 ")+d.label+" "+d.date+"<small>"+(isOpen(k)?d.title:"Opens "+d.label+" "+d.date)+"</small>";b.onclick=function(){S.day=k;save();render();};box.appendChild(b);});}
+function isDone(p){if(p.kind==="st")return stState(p.i).passed;if(p.kind==="quiz")return quizScore().done;return false;}
+function renderNav(){autoSync();var nav=$("#nav");nav.innerHTML="";var d=D();
+  pages().forEach(function(p,i){var li=document.createElement("li"),b=document.createElement("button");if(isDone(p))b.className="done";if(i===d.cur)b.setAttribute("aria-current","step");
+    b.innerHTML='<span class="n">'+(p.kind==="report"?"\u2713":(i+1))+'</span><span class="t">'+esc(p.title)+'<small>'+(p.kind==="report"?"Turn in":(isDone(p)?"Complete":"About "+p.mins+" min"))+'</small></span>';
+    b.onclick=function(){go(i);};li.appendChild(b);nav.appendChild(li);});
+  $("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-d.start)/60000)+" min";}
+function go(i){D().cur=i;save();render();$("#stage").focus({preventScroll:true});window.scrollTo(0,0);}
+function lockedPage(){activeKey=null;var day=DAYS[S.day];$("#nav").innerHTML="";$("#timer").textContent="";var od=DAY_ORDER.filter(isOpen);
+  $("#stage").innerHTML='<h2>\uD83D\uDD12 '+esc(day.label+" "+day.date)+': '+esc(day.title)+'</h2><p class="lede">This day unlocks on <b>'+esc(day.label+" "+day.date)+'</b>. Come back then!</p>'+
+   (od.length?'<div class="row-actions"><button class="btn" id="gotoday">Go to '+esc(DAYS[od[od.length-1]].label)+'\u2019s stations</button></div>':'<p class="note">The Type Lab opens Monday, Nov 2.</p>');
+  var g=$("#gotoday");if(g)g.onclick=function(){S.day=od[od.length-1];save();render();};}
+var KINDS={};
+function render(){renderDays();if(!isOpen(S.day)){lockedPage();return;}var d=D(),pg=pages();if(d.cur>=pg.length)d.cur=0;renderNav();var p=pg[d.cur],st=$("#stage");activeKey=null;
+  if(p.kind==="quiz")quizPage(st);else if(p.kind==="report")reportPage(st);else{var sd=DAYS[S.day].stations[p.i];KINDS[sd.kind](st,p.i,sd);}}
+function nextBtn(){return D().cur<pages().length-1?'<button class="btn ghost" data-next>Next</button>':'';}
+function wireNext(st){var nb=$("[data-next]",st);if(nb)nb.onclick=function(){go(D().cur+1);};}
+function head(sd,i){return '<h2>'+esc(DAYS[S.day].label)+' station '+(i+1)+': '+esc(sd.title)+'</h2><p class="time">About '+sd.mins+' minutes</p><p class="lede">'+sd.text+'</p>';}
+function whenFonts(cb){if(document.fonts&&document.fonts.ready){Promise.race([document.fonts.ready,new Promise(function(r){setTimeout(r,2500);})]).then(cb);}else cb();}
+function fontsOk(){try{return document.fonts.check("700 20px 'Playfair Display'")&&document.fonts.check("20px Rye");}catch(e){return true;}}
+function fontWarn(){return fontsOk()?'':'<div class="fb show info">Some fonts didn&rsquo;t load (your network may block Google Fonts), so the samples may look different from your classmates&rsquo;. The activity still works.</div>';}
+
+/* ================= Mon: anatomy ================= */
+KINDS.anatomy=function(stage,i,sd){
+  var st=stState(i);st.vals=st.vals||{};
+  stage.innerHTML=head(sd,i)+'<div id="an"><p class="note">Loading fonts\u2026</p></div>';
+  whenFonts(function(){
+    var font="700 120px 'Playfair Display'",word="Typography",x0=30,base=230;
+    var cap=measure(font,"T").actualBoundingBoxAscent,xh=measure(font,"x").actualBoundingBoxAscent,desc=measure(font,"p").actualBoundingBoxDescent,
+        asc=measure(font,"h").actualBoundingBoxAscent,W=measure(font,word).width;
+    var hx=x0+measure(font,"Typograp").width+measure(font,"h").width*0.25,ox=x0+measure(font,"Typ").width+measure(font,"o").width/2;
+    var vbW=Math.max(700,x0+W+150);
+    var lines=[["1",base-cap,"#C00000"],["2",base-xh,"#1F5FA8"],["3",base,"#0A0A0A"],["4",base+desc,"#2E7D32"]];
+    var svg='<svg viewBox="0 0 '+vbW+' 320" role="img" aria-label="The word Typography with numbered guidelines">';
+    lines.forEach(function(L){svg+='<line x1="10" x2="'+(x0+W+20)+'" y1="'+L[1]+'" y2="'+L[1]+'" stroke="'+L[2]+'" stroke-width="2" stroke-dasharray="7 5"/><circle cx="'+(x0+W+44)+'" cy="'+L[1]+'" r="15" fill="'+L[2]+'"/><text x="'+(x0+W+44)+'" y="'+(L[1]+6)+'" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="700" font-size="17">'+L[0]+'</text>';});
+    svg+='<text x="'+x0+'" y="'+base+'" font-family="Playfair Display" font-weight="700" font-size="120" fill="#0A0A0A">'+word+'</text>';
+    svg+='<line x1="'+hx+'" y1="'+(base-asc)+'" x2="'+(hx-40)+'" y2="'+(base-asc-50)+'" stroke="#8A0635" stroke-width="2"/><circle cx="'+(hx-40)+'" cy="'+(base-asc-62)+'" r="15" fill="#8A0635"/><text x="'+(hx-40)+'" y="'+(base-asc-56)+'" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="700" font-size="17">5</text>';
+    svg+='<line x1="'+ox+'" y1="'+(base-xh/2)+'" x2="'+(ox+10)+'" y2="'+(base+desc+40)+'" stroke="#8A0635" stroke-width="2"/><circle cx="'+ox+'" cy="'+(base-xh/2)+'" r="4" fill="#8A0635"/><circle cx="'+(ox+10)+'" cy="'+(base+desc+52)+'" r="15" fill="#8A0635"/><text x="'+(ox+10)+'" y="'+(base+desc+58)+'" text-anchor="middle" fill="#fff" font-family="Arial" font-weight="700" font-size="17">6</text></svg>';
+    var Q=[["1","Cap height"],["2","x-height"],["3","Baseline"],["4","Descender"],["5","Ascender"],["6","Counter"]],OPTS=["Ascender","Baseline","Cap height","Counter","Descender","Kerning","Serif","x-height"];
+    $("#an",stage).innerHTML=fontWarn()+'<div class="board">'+svg+'</div><div class="grid2" style="margin-top:14px"><div>'+Q.map(function(q){return '<label class="field" data-k="'+q[0]+'"><span>'+q[0]+'.</span><select><option value="">Choose\u2026</option>'+OPTS.map(function(o){return '<option'+(st.vals[q[0]]===o?" selected":"")+'>'+o+'</option>';}).join("")+'</select></label>';}).join("")+
+      '</div><div class="note"><p><b>Hints</b></p><p>Lines 1&ndash;4 run across the whole word. Number 5 points to the part of a lowercase letter that rises above the x-height. Number 6 points to the enclosed space inside a letter.</p></div></div>'+
+      '<div class="row-actions"><button class="btn" id="chk">Check answers</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+    $$(".field select",stage).forEach(function(s){s.onchange=function(){st.vals[s.closest(".field").dataset.k]=s.value;save();};});
+    $("#chk",stage).onclick=function(){if($$(".field select",stage).some(function(x){return !x.value;})){fb($("#sfb",stage),"info","Choose an answer for all 6 parts before you check.");return;}var right=0;Q.forEach(function(q){var f=$('[data-k="'+q[0]+'"]',stage),ok=$("select",f).value===q[1];f.classList.toggle("ok",ok);f.classList.toggle("bad",!ok);if(ok)right++;});
+      st.checks++;firstScore(st,Math.round(right/Q.length*100));if(right===Q.length)st.passed=true;save();renderNav();
+      fb($("#sfb",stage),right===Q.length?"ok":"bad",right===Q.length?"All 6 correct. These guidelines are why letters in a word line up so neatly.":right+" of 6 correct. Fix the red ones and check again.");};
+    wireNext(stage);});
+};
+/* ================= Mon: classify ================= */
+KINDS.classify=function(stage,i,sd){
+  var st=stState(i);st.vals=st.vals||{};
+  var S6=[["serif","Playfair Display","Serif"],["sans","Montserrat","Sans serif"],["script","Pacifico","Script"],["display","Rye","Display / decorative"],["mono","Courier Prime","Monospace"],["cond","Oswald","Sans serif"],
+    ["slab","Roboto Slab","Slab serif"],["lora","Lora","Serif"],["raleway","Raleway","Sans serif"],["lobster","Lobster","Script"],["bungee","Bungee","Display / decorative"],["spacemono","Space Mono","Monospace"]];
+  var CATS=["Serif","Slab serif","Sans serif","Script","Display / decorative","Monospace"];
+  stage.innerHTML=head(sd,i)+'<div id="cl"><p class="note">Loading fonts\u2026</p></div>';
+  whenFonts(function(){
+    $("#cl",stage).innerHTML=fontWarn()+'<div class="samples">'+S6.map(function(s,k){return '<div class="sample" data-k="'+k+'"><div class="spec" style="font-family:'+F[s[0]].replace(/"/g,"&quot;")+'">Cowboys Rodeo</div><label class="field"><span>Sample '+(k+1)+'</span><select><option value="">Choose a category\u2026</option>'+CATS.map(function(c){return '<option'+(st.vals[k]===c?" selected":"")+'>'+c+'</option>';}).join("")+'</select></label></div>';}).join("")+'</div>'+
+      '<p class="note"><b>Clues:</b> serifs are small strokes at letter ends. Slab serifs are thick and block-shaped. Script looks handwritten. Display fonts are made for big, short headlines. In monospace, every letter takes up the same width.</p>'+
+      '<div class="row-actions"><button class="btn" id="chk">Check answers</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+    $$(".sample select",stage).forEach(function(s){s.onchange=function(){st.vals[s.closest(".sample").dataset.k]=s.value;save();};});
+    $("#chk",stage).onclick=function(){if($$(".sample select",stage).some(function(x){return !x.value;})){fb($("#sfb",stage),"info","Choose a category for all "+S6.length+" samples before you check.");return;}var right=0;S6.forEach(function(s,k){var el=$('.sample[data-k="'+k+'"]',stage),ok=$("select",el).value===s[2];el.classList.toggle("ok",ok);el.classList.toggle("bad",!ok);if(ok)right++;});
+      st.checks++;firstScore(st,Math.round(right/S6.length*100));if(right===S6.length)st.passed=true;save();renderNav();
+      fb($("#sfb",stage),right===S6.length?"ok":"bad",right===S6.length?"All 12 correct. The fonts were "+S6.map(function(x){return x[1];}).join(", ")+".":right+" of 12 correct. Look closely at the ends of the letters and try again.");};
+    wireNext(stage);});
+};
+/* ================= Mon: match ================= */
+KINDS.match=function(stage,i,sd){
+  var st=stState(i);st.vals=st.vals||{};var defs=sd.items.map(function(x){return x[1];}).slice().sort();
+  stage.innerHTML=head(sd,i)+sd.items.map(function(it,k){return '<label class="field" data-k="'+k+'"><span>'+esc(it[0])+'</span><select style="max-width:560px"><option value="">Choose the meaning\u2026</option>'+defs.map(function(d){return '<option'+(st.vals[k]===d?" selected":"")+'>'+esc(d)+'</option>';}).join("")+'</select></label>';}).join("")+
+    '<div class="row-actions"><button class="btn" id="chk">Check answers</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  $$(".field select",stage).forEach(function(s){s.onchange=function(){st.vals[s.closest(".field").dataset.k]=s.value;save();};});
+  $("#chk",stage).onclick=function(){if($$(".field select",stage).some(function(x){return !x.value;})){fb($("#sfb",stage),"info","Choose a meaning for all "+sd.items.length+" terms before you check.");return;}var right=0;sd.items.forEach(function(it,k){var f=$('[data-k="'+k+'"]',stage),ok=$("select",f).value===it[1];f.classList.toggle("ok",ok);f.classList.toggle("bad",!ok);if(ok)right++;});
+    st.checks++;firstScore(st,Math.round(right/sd.items.length*100));if(right===sd.items.length)st.passed=true;save();renderNav();
+    fb($("#sfb",stage),right===sd.items.length?"ok":"bad",right===sd.items.length?"All correct. Tomorrow you&rsquo;ll adjust leading, kerning, and tracking yourself.":right+" of "+sd.items.length+" correct. Fix the red ones.");};
+  wireNext(stage);
+};
+
+/* ================= Tue: kerning ================= */
+var KWORDS=[{w:"WAVE",off:[22,-14,18]},{w:"COWBOYS",off:[0,20,0,-12,18,-8]},{w:"Typography",off:[14,0,-10,12,0,0,16,-10,0]},
+  {w:"AVATAR",off:[16,-12,14,0,-10]},{w:"Today",off:[18,-8,0,10]},{w:"RODEO",off:[0,14,-10,12]},{w:"Yellow",off:[16,0,-8,0,12]}];
+KINDS.kern=function(stage,i,sd){
+  var st=stState(i);st.words=st.words||KWORDS.map(function(k){return {off:k.off.slice(),done:false,score:null};});var wi=st.wi||0,sel=0;
+  stage.innerHTML=head(sd,i)+'<div id="kn"><p class="note">Loading fonts\u2026</p></div>';
+  whenFonts(function(){
+    $("#kn",stage).innerHTML=fontWarn()+'<div class="row-actions" style="margin-top:0" id="wtabs"></div><div class="board"><svg id="ksv" viewBox="0 0 760 220"></svg></div>'+
+      '<div class="ctrl"><span>Gap <b id="gname"></b></span><button class="btn ghost sm" id="lt" aria-label="Tighter">\u25C0 Tighter</button><button class="btn ghost sm" id="rt" aria-label="Looser">Looser \u25B6</button><span class="note">Kerning: <b id="kv"></b></span></div>'+
+      '<div class="row-actions"><button class="btn" id="chk">Check this word</button><button class="btn ghost" id="cmp">Compare with the designer\u2019s spacing</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+    var showIdeal=false;
+    function geom(){var k=KWORDS[wi],font="700 110px 'Playfair Display'",xs=[],w=measure(font,k.w).width,start=(760-w)/2;
+      for(var j=0;j<k.w.length;j++)xs.push(start+measure(font,k.w.slice(0,j)).width);return {xs:xs,font:font,chars:k.w.split("")};}
+    function tabs(){$("#wtabs",stage).innerHTML=KWORDS.map(function(k,j){var s=st.words[j];return '<button class="btn sm '+(j===wi?"":"ghost")+'" data-w="'+j+'">'+k.w+(s.done?" \u2713":"")+'</button>';}).join("");
+      $$("#wtabs button",stage).forEach(function(b){b.onclick=function(){wi=+b.dataset.w;st.wi=wi;sel=0;showIdeal=false;save();tabs();draw();};});}
+    function draw(){var g=geom(),off=st.words[wi].off,h='',cum=0,gx=[];
+      g.chars.forEach(function(c,j){if(j>0)cum+=showIdeal?0:off[j-1];h+='<text x="'+(g.xs[j]+cum)+'" y="140" font-family="Playfair Display" font-weight="700" font-size="110" fill="'+(showIdeal?"#2E7D32":"#0A0A0A")+'" style="font-kerning:none">'+esc(c)+'</text>';});
+      cum=0;for(var j=1;j<g.chars.length;j++){cum+=off[j-1];var x=g.xs[j]+cum-(showIdeal?cum:0);gx.push(x);}
+      gx.forEach(function(x,j){h+='<g data-g="'+j+'" style="cursor:pointer"><rect x="'+(x-14)+'" y="160" width="28" height="40" fill="transparent"/><path d="M'+(x-9)+' 190 L'+x+' 172 L'+(x+9)+' 190 Z" fill="'+(j===sel?"#1F7AE0":"#BBB")+'"/></g>';});
+      $("#ksv",stage).innerHTML=h;$$("#ksv [data-g]",stage).forEach(function(el){el.onclick=function(){sel=+el.dataset.g;draw();};});
+      $("#gname",stage).textContent=g.chars[sel]+g.chars[sel+1];$("#kv",stage).textContent=Math.round(off[sel]/110*1000);}
+    function nudge(d){showIdeal=false;st.words[wi].off[sel]+=d;save();draw();}
+    $("#lt",stage).onclick=function(){nudge(-2);};$("#rt",stage).onclick=function(){nudge(2);};
+    activeKey=function(e){if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName||""))return;if(e.key==="ArrowLeft"&&e.altKey){e.preventDefault();nudge(-2);}else if(e.key==="ArrowRight"&&e.altKey){e.preventDefault();nudge(2);}
+      else if(e.key==="ArrowLeft"&&!e.altKey){e.preventDefault();sel=Math.max(0,sel-1);draw();}else if(e.key==="ArrowRight"&&!e.altKey){e.preventDefault();sel=Math.min(KWORDS[wi].w.length-2,sel+1);draw();}};
+    $("#cmp",stage).onclick=function(){showIdeal=!showIdeal;draw();$("#cmp",stage).textContent=showIdeal?"Back to my spacing":"Compare with the designer\u2019s spacing";};
+    $("#chk",stage).onclick=function(){var off=st.words[wi].off,err=off.reduce(function(a,b){return a+Math.abs(b);},0)/off.length,sc=Math.round(Math.max(0,Math.min(100,100-(err-1)*5))),w=st.words[wi];
+      if(w.score==null)w.score=sc;if(sc>=85)w.done=true;st.checks++;
+      var all=st.words.every(function(x){return x.done;});if(all){st.passed=true;st.best=Math.round(st.words.reduce(function(a,b){return a+b.score;},0)/st.words.length);}
+      save();renderNav();tabs();
+      var worst=0,wv=0;off.forEach(function(v,j){if(Math.abs(v)>wv){wv=Math.abs(v);worst=j;}});
+      fb($("#sfb",stage),sc>=85?"ok":"bad",'<b>'+sc+'%</b> even spacing. '+(sc>=85?(all?"All "+KWORDS.length+" words are kerned. Nice eye!":"Move on to the next word."):"The gap "+KWORDS[wi].w[worst]+KWORDS[wi].w[worst+1]+" still looks "+(off[worst]>0?"too wide":"too tight")+". 85% passes."));};
+    tabs();draw();wireNext(stage);});
+};
+/* ================= Tue: tracking & leading (several items each) ================= */
+var TRACK=[
+ {id:"h",label:"Headline (ALL CAPS)",txt:"MADISON COUNTY COWBOYS",css:"font-family:"+F.sans+";font-weight:700;font-size:34px;color:#8A0635;white-space:nowrap",start:-40,lo:50,hi:200,
+  low:"The ALL CAPS headline is still cramped. Capitals need extra room: try about 75\u2013150.",high:"The headline is spaced so far apart the words fall apart. Try about 75\u2013150."},
+ {id:"b",label:"Paragraph (body text)",txt:"The Cowboys host the Hornets this Friday night. Gates open at 6:30, and the pep band takes the field at 7:00. Wear maroon and bring a friend.",css:"font-family:"+F.serif+";font-size:17px;line-height:1.5;max-width:560px",start:240,lo:-20,hi:30,
+  low:"The paragraph is squeezed. Body text works best near 0.",high:"The paragraph is too spread out to read comfortably. Body text works best near 0."},
+ {id:"l",label:"Small label (ALL CAPS, 12 pt)",txt:"EST. 1912 \u00b7 MADISON, FLORIDA",css:"font-family:"+F.sans+";font-weight:700;font-size:13px;color:#0A0A0A;white-space:nowrap",start:0,lo:100,hi:300,
+  low:"Tiny ALL CAPS labels need wide tracking to stay readable. Try about 150\u2013250.",high:"That label is stretched too far. Try about 150\u2013250."},
+ {id:"w",label:"Wordmark (lowercase logo)",txt:"cowboy coffee",css:"font-family:"+F.lora+";font-weight:700;font-size:44px;color:#5C0423;white-space:nowrap",start:-220,lo:-40,hi:40,
+  low:"The letters are crashing into each other. Lowercase wordmarks usually sit near 0.",high:"Lowercase letters look loose and disconnected when tracked out. Bring it back near 0."}];
+var LEAD=[
+ {id:"b",label:"Body copy: 12 pt type",txt:"Homecoming week starts Monday with spirit days, a canned food drive, and the parade on Thursday afternoon. Every club is invited to build a float and join the fun.",css:"font-family:"+F.serif+";font-size:16px;max-width:420px",pt:12,px:16,min:6,max:30,step:1,start:9,lo:14,hi:17,
+  low:"The body lines are crowding each other. Auto leading would be 14.4 pt (120% of 12).",high:"The body lines are drifting apart. Try about 120\u2013140% of 12 pt."},
+ {id:"h",label:"Headline: 48 pt type",txt:"HOMECOMING<br>WEEK",css:"font-family:"+F.cond+";font-weight:700;font-size:48px;color:#8A0635",pt:48,px:48,min:30,max:110,step:2,start:96,lo:44,hi:58,
+  low:"The headline lines are crashing into each other. Open it up a little.",high:"Big headlines look best with tighter leading, close to the type size (about 44\u201356 pt here)."},
+ {id:"c",label:"Photo caption: 9 pt type",txt:"The 2025 Cowboys marching band performs at halftime during the homecoming game against the Hornets.",css:"font-family:"+F.sans+";font-size:12px;max-width:360px;color:#444",pt:9,px:12,min:5,max:24,step:1,start:20,lo:11,hi:13,
+  low:"The caption lines touch. Try about 11\u201313 pt for 9 pt type.",high:"The caption lines are floating apart. Try about 11\u201313 pt for 9 pt type."},
+ {id:"s",label:"Subhead: 24 pt type, two lines",txt:"Pep Rally &amp; Parade<br>Thursday at 2:00 PM",css:"font-family:"+F.slab+";font-weight:700;font-size:24px",pt:24,px:24,min:14,max:60,step:1,start:16,lo:26,hi:32,
+  low:"The two lines are colliding. Try a little over the type size, about 26\u201332 pt.",high:"The two lines don\u2019t look like one subhead anymore. Try about 26\u201332 pt."}];
+function sliderStation(stage,i,sd,ITEMS,unit,apply){
+  var st=stState(i);st.v=st.v||{};ITEMS.forEach(function(it){if(st.v[it.id]==null)st.v[it.id]=it.start;});
+  stage.innerHTML=head(sd,i)+fontWarn()+ITEMS.map(function(it){return '<div class="board" style="background:#fff;padding:18px;margin-bottom:10px"><p class="note" style="margin:0 0 6px"><b>'+(ITEMS.indexOf(it)+1)+'. '+it.label+'</b></p><div data-t="'+it.id+'" style="'+it.css.replace(/"/g,"&quot;")+';overflow:hidden">'+it.txt+'</div>'+
+    '<div class="ctrl" style="margin-bottom:0"><span>'+unit.name+'</span><input type="range" data-r="'+it.id+'" min="'+(it.min!=null?it.min:-300)+'" max="'+(it.max!=null?it.max:400)+'" step="'+(it.step||10)+'"><b data-v="'+it.id+'"></b></div></div>';}).join("")+
+    '<div class="row-actions"><button class="btn" id="chk">Check all</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  function paint(){ITEMS.forEach(function(it){apply($('[data-t="'+it.id+'"]',stage),it,st.v[it.id]);$('[data-r="'+it.id+'"]',stage).value=st.v[it.id];$('[data-v="'+it.id+'"]',stage).textContent=st.v[it.id]+unit.suffix;});}
+  ITEMS.forEach(function(it){$('[data-r="'+it.id+'"]',stage).oninput=function(e){st.v[it.id]=+e.target.value;save();paint();};});
+  $("#chk",stage).onclick=function(){var m=[],good=0;ITEMS.forEach(function(it,k){var v=st.v[it.id];if(v<it.lo)m.push((k+1)+". "+it.low);else if(v>it.hi)m.push((k+1)+". "+it.high);else good++;});
+    st.checks++;firstScore(st,Math.round(good/ITEMS.length*100));if(!m.length)st.passed=true;save();renderNav();
+    fb($("#sfb",stage),m.length?"bad":"ok",m.length?good+" of "+ITEMS.length+" look right.<br>"+m.join("<br>"):unit.done);};
+  paint();wireNext(stage);
+}
+KINDS.tracking=function(stage,i,sd){sliderStation(stage,i,sd,TRACK,{name:"Tracking",suffix:"",done:"All four read well. Rule of thumb: track out ALL CAPS (especially small labels); keep body text and lowercase wordmarks near 0."},
+  function(el,it,v){el.style.letterSpacing=(v/1000)+"em";});};
+KINDS.leading=function(stage,i,sd){sliderStation(stage,i,sd,LEAD,{name:"Leading",suffix:" pt",done:"All four look right. Small text likes about 120\u2013140% leading; big headlines can go tighter."},
+  function(el,it,v){el.style.lineHeight=(v/it.pt*it.px)+"px";});};
+
+/* ================= Wed: point vs area ================= */
+KINDS.pointarea=function(stage,i,sd){
+  var st=stState(i);st.tried=st.tried||{};
+  var txt="Homecoming week starts Monday with spirit days, a canned food drive, and a parade on Thursday. Every club is invited to build a float.";
+  var QS=[{q:"When you dragged the POINT type handle, the text\u2026",o:["wrapped onto new lines","stretched and scaled, like a picture","disappeared","turned into outlines"],a:1},
+          {q:"When you dragged the AREA type handle smaller, the text\u2026",o:["stretched","stayed the same size and re-wrapped inside the box","got bigger","moved to a new artboard"],a:1},
+          {q:"Which kind of type is best for a paragraph of body copy?",o:["Point type","Area type"],a:1},
+          {q:"Which kind of type is best for a one-word headline?",o:["Point type","Area type"],a:0}];
+  stage.innerHTML=head(sd,i)+fontWarn()+'<div class="grid2"><div><h3 style="margin-top:0">Point type</h3><p class="note">Made by clicking once with the Type tool.</p><div class="demo" id="dp"><div class="tbox" id="bp" style="left:20px;top:30px;transform-origin:0 0"><div style="font-family:'+F.sans.replace(/"/g,"&quot;")+';font-weight:700;font-size:40px;white-space:nowrap;color:#8A0635;padding:2px 4px">COWBOYS</div><div class="h"></div></div></div></div>'+
+   '<div><h3 style="margin-top:0">Area type</h3><p class="note">Made by click-dragging a box with the Type tool.</p><div class="demo" id="da"><div class="tbox" id="ba" style="left:20px;top:20px;width:300px;height:170px"><div style="font-family:'+F.serif.replace(/"/g,"&quot;")+';font-size:17px;line-height:1.35;padding:4px;overflow:hidden;height:100%">'+txt+'</div><div class="h"></div><div class="over" title="Overset text">+</div></div></div></div></div>'+
+   '<div id="qs"></div><div class="row-actions"><button class="btn" id="chk">Check answers</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  function dragHandle(box,onMove){var h=$(".h",box);h.addEventListener("pointerdown",function(e){e.preventDefault();h.setPointerCapture(e.pointerId);var sx=e.clientX,sy=e.clientY,r=box.getBoundingClientRect();
+    function mv(ev){onMove(ev.clientX-sx,ev.clientY-sy,r);}function up(){h.removeEventListener("pointermove",mv);h.removeEventListener("pointerup",up);}h.addEventListener("pointermove",mv);h.addEventListener("pointerup",up);});}
+  var bp=$("#bp",stage),ba=$("#ba",stage),w0=bp.offsetWidth,h0=bp.offsetHeight;
+  dragHandle(bp,function(dx,dy){var sx=Math.max(.3,(w0+dx)/w0),sy=Math.max(.3,(h0+dy)/h0);bp.style.transform="scale("+sx.toFixed(2)+","+sy.toFixed(2)+")";st.tried.p=1;save();});
+  dragHandle(ba,function(dx,dy,r){var w=Math.max(90,r.width+dx),h=Math.max(50,r.height+dy);ba.style.width=w+"px";ba.style.height=h+"px";var inner=ba.firstElementChild;$(".over",ba).style.display=inner.scrollHeight>inner.clientHeight+2?"block":"none";st.tried.a=1;save();});
+  $("#qs",stage).innerHTML=QS.map(function(q,k){return '<div class="q" data-k="'+k+'"><p>'+(k+1)+'. '+esc(q.q)+'</p><div class="mc">'+q.o.map(function(o,j){return '<label><input type="radio" name="pa'+k+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join("")+'</div></div>';}).join("");
+  $("#chk",stage).onclick=function(){var box=$("#sfb",stage);if(!st.tried.p||!st.tried.a){fb(box,"info","Drag the corner handle on <b>both</b> boxes first, then answer.");return;}
+    var right=0,blank=0;QS.forEach(function(q,k){var el=$('.q[data-k="'+k+'"]',stage),c=$("input:checked",el);$$("label",el).forEach(function(l){l.classList.remove("ok","bad");});if(!c){blank++;return;}var ok=+c.value===q.a;c.closest("label").classList.add(ok?"ok":"bad");if(ok)right++;});
+    if(blank){fb(box,"info","Answer every question.");return;}st.checks++;firstScore(st,Math.round(right/QS.length*100));if(right===QS.length)st.passed=true;save();renderNav();
+    fb(box,right===QS.length?"ok":"bad",right===QS.length?"Exactly. Point type scales; area type re-wraps. If you shrink area type too far, the red plus sign warns you about overset text.":right+" of 4 correct. Try the handles again and fix the red answers.");};
+  wireNext(stage);
+};
+/* ================= Wed: type on a path ================= */
+KINDS.textpath=function(stage,i,sd){
+  var st=stState(i);st.v=st.v||{top:{cy:230,pos:20,flip:false},bot:{cy:250,pos:80,flip:false}};
+  var P={top:{x1:110,y1:230,x2:490,y2:230,txt:"MADISON COUNTY"},bot:{x1:150,y1:250,x2:450,y2:250,txt:"COWBOYS"}};
+  stage.innerHTML=head(sd,i)+fontWarn()+'<div class="grid2"><div class="board"><svg id="tp" viewBox="0 0 600 420" style="touch-action:none"></svg></div>'+
+   '<div>'+["top","bot"].map(function(k){return '<div class="pnl" style="margin-bottom:10px"><h4>'+(k==="top"?"Path 1: MADISON COUNTY":"Path 2: COWBOYS")+'</h4><div class="bd"><label>Position along path: <b data-pv="'+k+'"></b><input type="range" min="0" max="100" data-p="'+k+'"></label><label style="flex-direction:row;gap:8px;align-items:center"><input type="checkbox" data-f="'+k+'"> Flip to the other side of the path</label></div></div>';}).join("")+
+   '<p class="note"><b>Goal:</b> MADISON COUNTY arches <b>over</b> the star, COWBOYS curves <b>under</b> it, both centered and reading left to right.</p></div></div>'+
+   '<div class="row-actions"><button class="btn" id="chk">Check my badge</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  var svg=$("#tp",stage),drag=null;
+  function d(k,rev){var p=P[k],v=st.v[k],cx=(p.x1+p.x2)/2;return rev?"M"+p.x2+" "+p.y2+" Q"+cx+" "+v.cy+" "+p.x1+" "+p.y1:"M"+p.x1+" "+p.y1+" Q"+cx+" "+v.cy+" "+p.x2+" "+p.y2;}
+  function star(){var s="",cx=300,cy=240,R=70,r=30;for(var j=0;j<10;j++){var a=-Math.PI/2+j*Math.PI/5,rr=j%2?r:R;s+=(j?"L":"M")+(cx+rr*Math.cos(a)).toFixed(1)+" "+(cy+rr*Math.sin(a)).toFixed(1);}return s+"Z";}
+  function draw(){var h='<circle cx="300" cy="240" r="170" fill="none" stroke="#9E9FA3" stroke-width="3"/><path d="'+star()+'" fill="#8A0635"/>';
+    ["top","bot"].forEach(function(k){var v=st.v[k],p=P[k],cx=(p.x1+p.x2)/2;
+      h+='<path id="tp-'+k+'" d="'+d(k,v.flip)+'" fill="none" stroke="#1F7AE0" stroke-width="1.2" stroke-dasharray="5 4"/>';
+      h+='<text font-family="'+F.sans.replace(/"/g,"&apos;")+'" font-weight="700" font-size="'+(k==="top"?30:34)+'" fill="#0A0A0A" letter-spacing="2"><textPath href="#tp-'+k+'" startOffset="'+v.pos+'%" text-anchor="middle">'+P[k].txt+'</textPath></text>';
+      var my=(p.y1+2*v.cy+p.y2)/4;h+='<line x1="'+cx+'" y1="'+my+'" x2="'+cx+'" y2="'+v.cy+'" stroke="#1F7AE0" stroke-width="1"/><circle data-h="'+k+'" cx="'+cx+'" cy="'+v.cy+'" r="9" fill="#fff" stroke="#1F7AE0" stroke-width="2.5" style="cursor:ns-resize"/>';});
+    svg.innerHTML=h;
+    ["top","bot"].forEach(function(k){$('[data-p="'+k+'"]',stage).value=st.v[k].pos;$('[data-pv="'+k+'"]',stage).textContent=st.v[k].pos+"%";$('[data-f="'+k+'"]',stage).checked=st.v[k].flip;});}
+  function pt(e){var p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;var r=p.matrixTransform(svg.getScreenCTM().inverse());return r;}
+  svg.addEventListener("pointerdown",function(e){var t=e.target.closest&&e.target.closest("[data-h]");if(!t)return;e.preventDefault();svg.setPointerCapture(e.pointerId);drag=t.getAttribute("data-h");});
+  svg.addEventListener("pointermove",function(e){if(!drag)return;st.v[drag].cy=Math.max(-40,Math.min(470,Math.round(pt(e).y)));draw();});
+  svg.addEventListener("pointerup",function(){if(drag){drag=null;save();}});
+  ["top","bot"].forEach(function(k){$('[data-p="'+k+'"]',stage).oninput=function(e){st.v[k].pos=+e.target.value;save();draw();};$('[data-f="'+k+'"]',stage).onchange=function(e){st.v[k].flip=e.target.checked;save();draw();};});
+  $("#chk",stage).onclick=function(){var t=st.v.top,b=st.v.bot,m=[];
+    var tArch=t.cy<=130,tC=Math.abs(t.pos-50)<=4,tF=!t.flip,bArch=b.cy>=350,bC=Math.abs(b.pos-50)<=4,bF=!b.flip;
+    if(!tArch)m.push("Path 1 should arch up and over the star. Drag its handle higher.");if(!tC)m.push("Slide MADISON COUNTY to the center (about 50%).");if(!tF)m.push("MADISON COUNTY is flipped and reads upside down. Uncheck Flip.");
+    if(!bArch)m.push("Path 2 should curve down under the star, like a smile. Drag its handle lower.");if(!bC)m.push("Slide COWBOYS to the center (about 50%).");if(!bF)m.push("COWBOYS is flipped. Uncheck Flip so it reads left to right.");
+    var good=[tArch,tC,tF,bArch,bC,bF].filter(Boolean).length;st.checks++;firstScore(st,Math.round(good/6*100));if(!m.length)st.passed=true;save();renderNav();
+    fb($("#sfb",stage),m.length?"bad":"ok",m.length?m.join("<br>"):"Badge complete! In Illustrator you&rsquo;d use the Type on a Path tool, then drag the center bracket to slide or flip the text.");};
+  draw();wireNext(stage);
+};
+
+/* ================= generic: one answer per item ================= */
+KINDS.sortq=function(stage,i,sd){
+  var st=stState(i);st.v=st.v||{};
+  stage.innerHTML=head(sd,i)+sd.items.map(function(it,k){return '<div class="q" data-k="'+k+'"><p>'+(k+1)+'. '+esc(it[0])+'</p><div class="seg">'+sd.opts.map(function(o,j){return '<button data-o="'+j+'" aria-pressed="'+(st.v[k]===j)+'">'+esc(o)+'</button>';}).join("")+'</div></div>';}).join("")+
+    '<div class="row-actions"><button class="btn" id="chk">Check answers</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  $$(".q",stage).forEach(function(el){var k=+el.dataset.k;$$("button",el).forEach(function(b){b.onclick=function(){st.v[k]=+b.dataset.o;$$("button",el).forEach(function(x){x.setAttribute("aria-pressed",x===b);});el.style.background="";save();};});});
+  $("#chk",stage).onclick=function(){var right=0,blank=0;sd.items.forEach(function(it,k){var el=$('.q[data-k="'+k+'"]',stage);if(st.v[k]==null){blank++;return;}var ok=st.v[k]===it[1];el.style.background=ok?"var(--ok-bg)":"var(--bad-bg)";if(ok)right++;});
+    if(blank){fb($("#sfb",stage),"info","Answer all "+sd.items.length+" first.");return;}st.checks++;firstScore(st,Math.round(right/sd.items.length*100));if(right===sd.items.length)st.passed=true;save();renderNav();
+    fb($("#sfb",stage),right===sd.items.length?"ok":"bad",right===sd.items.length?"All "+right+" correct. Short and standalone \u2192 point type. Paragraphs \u2192 area type. Following a curve \u2192 type on a path.":right+" of "+sd.items.length+" correct. Fix the red ones.");};
+  wireNext(stage);
+};
+
+/* ================= Thu: hierarchy ================= */
+var HROUNDS=[
+ {name:"Fall Festival",items:[["title","FALL FESTIVAL"],["when","Saturday, Nov 14 \u00b7 4\u20138 PM"],["where","Madison County High School Courtyard"],["details","Food trucks, live music, and a costume contest. Free for students."]]},
+ {name:"Band Concert",items:[["title","Winter Band Concert"],["when","Tuesday, Dec 8 \u00b7 7:00 PM"],["where","MCHS Auditorium"],["details","Featuring the Cowboy Marching Band and Jazz Ensemble. Tickets $3 at the door."]]},
+ {name:"Club Fair",items:[["title","CLUB FAIR"],["when","Wednesday \u00b7 Lunch, both periods"],["where","Main Gym"],["details","Meet 20+ clubs, from robotics to FFA. Sign up and grab free snacks."]]}];
+KINDS.hier=function(stage,i,sd){
+  var st=stState(i);st.r=st.r||HROUNDS.map(function(){return {v:{title:{s:18,b:false},when:{s:18,b:false},where:{s:18,b:false},details:{s:18,b:false}},done:false,score:null};});var ri=st.ri||0;
+  var SIZES=[10,12,14,18,24,30,36,48,60,72];
+  stage.innerHTML=head(sd,i)+fontWarn()+'<p><b>Client&rsquo;s priority order for every flyer:</b> 1) event name, 2) date and time, 3) location, 4) details.</p><div class="row-actions" style="margin-top:0" id="htabs"></div><div class="grid2"><div class="board" style="background:#fff"><div id="fl" style="width:100%;min-height:420px;padding:26px;text-align:center"></div></div><div id="hc"></div></div>'+
+   '<div class="row-actions"><button class="btn" id="chk">Check this flyer</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  var FAM=[F.sans,F.serif,F.slab];
+  function tabs(){$("#htabs",stage).innerHTML=HROUNDS.map(function(h,j){return '<button class="btn sm '+(j===ri?"":"ghost")+'" data-r="'+j+'">'+h.name+(st.r[j].done?" \u2713":"")+'</button>';}).join("");
+    $$("#htabs button",stage).forEach(function(b){b.onclick=function(){ri=+b.dataset.r;st.ri=ri;save();build();};});}
+  function build(){tabs();var R=HROUNDS[ri];
+    $("#hc",stage).innerHTML=R.items.map(function(h){return '<div class="pnl" style="margin-bottom:8px"><h4>'+esc(h[1].length>24?h[1].slice(0,24)+"\u2026":h[1])+'</h4><div class="bd" style="flex-direction:row;align-items:center;gap:10px"><label style="flex-direction:row;align-items:center;gap:6px">Size <select data-s="'+h[0]+'">'+SIZES.map(function(s){return '<option>'+s+'</option>';}).join("")+'</select> pt</label><label style="flex-direction:row;align-items:center;gap:6px"><input type="checkbox" data-b="'+h[0]+'"> Bold</label></div></div>';}).join("");
+    R.items.forEach(function(h){$('[data-s="'+h[0]+'"]',stage).onchange=function(e){st.r[ri].v[h[0]].s=+e.target.value;save();paint();};$('[data-b="'+h[0]+'"]',stage).onchange=function(e){st.r[ri].v[h[0]].b=e.target.checked;save();paint();};});paint();}
+  function paint(){var R=HROUNDS[ri],v=st.r[ri].v;$("#fl",stage).style.fontFamily=FAM[ri];
+    $("#fl",stage).innerHTML=R.items.map(function(h){var x=v[h[0]];return '<div style="font-size:'+(x.s*1.15)+'px;font-weight:'+(x.b?700:400)+';color:'+(h[0]==="title"?"#8A0635":"#0A0A0A")+';margin:0 0 16px;line-height:1.15">'+esc(h[1])+'</div>';}).join("");
+    R.items.forEach(function(h){$('[data-s="'+h[0]+'"]',stage).value=v[h[0]].s;$('[data-b="'+h[0]+'"]',stage).checked=v[h[0]].b;});}
+  $("#chk",stage).onclick=function(){var v=st.r[ri].v,rules=[
+      [v.title.s>v.when.s,"The event name must be the biggest text."],[v.when.s>=v.where.s,"The date and time should be at least as big as the location."],[v.where.s>v.details.s||(v.where.s===v.details.s&&v.where.b&&!v.details.b),"The location should stand out more than the details (bigger, or bold)."],
+      [v.title.s>=2*v.details.s,"Make the contrast stronger: the event name should be at least twice the size of the details."],[v.details.s>=10&&v.details.s<=14,"Details are body text. Keep them readable at 10\u201314 pt."],
+      [new Set([v.title.s,v.when.s,v.where.s,v.details.s]).size>=3,"Use at least 3 different sizes so each level is clear."]];
+    var bad=rules.filter(function(r){return !r[0];}),sc=Math.round((rules.length-bad.length)/rules.length*100),R=st.r[ri];if(R.score==null)R.score=sc;if(!bad.length)R.done=true;st.checks++;
+    var all=st.r.every(function(x){return x.done;});if(all){st.passed=true;st.best=Math.round(st.r.reduce(function(a,b){return a+b.score;},0)/st.r.length);}save();renderNav();tabs();
+    fb($("#sfb",stage),bad.length?"bad":"ok",bad.length?bad.map(function(r){return r[1];}).join("<br>"):(all?"All three flyers have clear hierarchy!":"Clear hierarchy! Now try the next flyer."));};
+  build();wireNext(stage);
+};
+/* ================= Thu: spot the problem ================= */
+KINDS.spot=function(stage,i,sd){
+  var st=stState(i);st.v=st.v||{};
+  var P={same:"Everything is the same size, so nothing stands out",fonts:"Too many different typefaces",edge:"Text crowds the edges (no margins)",contrast:"Low contrast; the text is hard to see",
+    long:"Lines of text are too long to read comfortably",caps:"A whole paragraph is set in ALL CAPS, which is hard to read",lead:"The leading is so tight the lines collide",align:"Too many different alignments look messy"};
+  function f(k){return F[k].replace(/"/g,"&quot;");}
+  var M=[
+   {a:"same",o:["same","fonts","contrast","lead"],h:'<div style="padding:24px;font-family:'+f("sans")+';font-size:15px;line-height:1.6">BAKE SALE<br>Friday after school<br>Room 104<br>Cookies, brownies, and lemonade<br>All money goes to the art club</div>'},
+   {a:"fonts",o:["edge","fonts","caps","same"],h:'<div style="padding:22px;text-align:center"><div style="font-family:'+f("display")+';font-size:30px">BAKE SALE</div><div style="font-family:'+f("script")+';font-size:20px">Friday after school</div><div style="font-family:'+f("mono")+';font-size:15px">Room 104</div><div style="font-family:'+f("serif")+';font-style:italic;font-size:14px;margin-top:10px">Cookies, brownies, and lemonade</div><div style="font-family:'+f("cond")+';font-size:14px">All money goes to the art club</div></div>'},
+   {a:"edge",o:["contrast","align","edge","long"],h:'<div style="padding:0;font-family:'+f("sans")+';text-align:left"><div style="font-size:42px;font-weight:700;line-height:1;margin:0 -6px">BAKE SALE</div><div style="font-size:18px;font-weight:700">Friday after school</div><div style="font-size:15px">Room 104</div><div style="font-size:12px;margin-top:150px">Cookies, brownies, and lemonade. All money goes to the art club.</div></div>'},
+   {a:"contrast",o:["same","contrast","fonts","caps"],h:'<div style="padding:24px;background:#9E9FA3;height:100%;font-family:'+f("sans")+';text-align:center;color:#B5B6BA"><div style="font-size:36px;font-weight:700">BAKE SALE</div><div style="font-size:18px;font-weight:700;margin-top:8px">Friday after school</div><div style="font-size:15px">Room 104</div><div style="font-size:12px;margin-top:40px">Cookies, brownies, and lemonade. All money goes to the art club.</div></div>'},
+   {a:"caps",o:["caps","edge","lead","fonts"],h:'<div style="padding:22px;font-family:'+f("sans")+';text-align:center"><div style="font-size:34px;font-weight:700;color:#8A0635">CAR WASH</div><div style="font-size:16px;font-weight:700;margin:6px 0 18px">Saturday \u00b7 9 AM\u20131 PM</div><div style="font-size:11px;line-height:1.5;text-align:left">ALL PROCEEDS SUPPORT THE SENIOR CLASS TRIP. BRING YOUR CAR, TRUCK, OR TRACTOR TO THE FRONT PARKING LOT. TIPS ARE WELCOME AND EVERY CAR GETS A FREE AIR FRESHENER.</div></div>'},
+   {a:"lead",o:["same","long","lead","align"],h:'<div style="padding:22px;font-family:'+f("serif")+';text-align:center"><div style="font-size:30px;font-weight:700;line-height:.62;color:#8A0635">SPRING<br>MUSICAL<br>TRYOUTS</div><div style="font-size:15px;font-weight:700;margin:34px 0 8px">Monday \u00b7 3:30 PM \u00b7 Auditorium</div><div style="font-size:12px;line-height:.85;text-align:left">Prepare 16 bars of any song. Bring water and wear comfortable shoes. Everyone is welcome to try out.</div></div>'},
+   {a:"long",o:["long","contrast","fonts","edge"],h:'<div style="padding:16px;font-family:'+f("sans")+'"><div style="font-size:26px;font-weight:700;color:#8A0635">Book Swap</div><div style="font-size:13px;font-weight:700;margin-bottom:10px">Library \u00b7 All week</div><div style="font-size:7.5px;line-height:1.45">Bring a book you&rsquo;ve finished and trade it for a new one. Every grade, every genre, from graphic novels to mysteries to cookbooks to sports biographies, and the library staff will be there all week to help match you with something you&rsquo;ll actually want to read. Bring a friend, bring two books, and leave with something great.</div></div>'},
+   {a:"align",o:["align","same","caps","contrast"],h:'<div style="padding:22px;font-family:'+f("sans")+'"><div style="font-size:30px;font-weight:700;text-align:right;color:#8A0635">TALENT SHOW</div><div style="font-size:16px;font-weight:700;text-align:center;margin:8px 0">Friday \u00b7 6 PM</div><div style="font-size:14px;text-align:left">Auditorium</div><div style="font-size:12px;text-align:right;margin-top:30px">Sign up in the front office by Wednesday.</div><div style="font-size:12px;text-align:center;margin-top:8px">Free admission</div></div>'}];
+  stage.innerHTML=head(sd,i)+fontWarn()+M.map(function(m,k){return '<div class="q" data-k="'+k+'"><p>Flyer '+(k+1)+'</p><div class="spotrow"><div class="mini">'+m.h+'</div><div class="mc" style="flex:1;min-width:260px">'+m.o.map(function(o){return '<label><input type="radio" name="sp'+k+'" value="'+o+'"'+(st.v[k]===o?" checked":"")+'><span>'+esc(P[o])+'</span></label>';}).join("")+'</div></div></div>';}).join("")+
+   '<div class="row-actions"><button class="btn" id="chk">Check answers</button>'+nextBtn()+'</div><div class="fb" id="sfb"></div>';
+  $$(".q input",stage).forEach(function(r){r.onchange=function(){st.v[r.closest(".q").dataset.k]=r.value;save();};});
+  $("#chk",stage).onclick=function(){var right=0,blank=0;M.forEach(function(m,k){var el=$('.q[data-k="'+k+'"]',stage),c=$("input:checked",el);$$("label",el).forEach(function(l){l.classList.remove("ok","bad");});if(!c){blank++;return;}var ok=c.value===m.a;c.closest("label").classList.add(ok?"ok":"bad");if(ok)right++;});
+    if(blank){fb($("#sfb",stage),"info","Pick an answer for every flyer.");return;}st.checks++;firstScore(st,Math.round(right/M.length*100));if(right===M.length)st.passed=true;save();renderNav();
+    fb($("#sfb",stage),right===M.length?"ok":"bad",right===M.length?"All eight spotted. Avoid these on your own poster!":right+" of "+M.length+" correct. Look again at the red ones.");};
+  wireNext(stage);
+};
+/* ================= Thu/Fri: poster ================= */
+var PW=400,PH=560,MARGIN=24;
+var PCOLORS=[["#0A0A0A","Black"],["#8A0635","Maroon"],["#9E9FA3","Silver"],["#FFFFFF","White"]];
+var PBGS=[["#FFFFFF","White"],["#0A0A0A","Black"],["#8A0635","Maroon"],["#F2EDE6","Cream"]];
+function poster(){if(!S.poster){var txt=["HOMECOMING","Cowboys vs. Hornets","Friday \u00b7 7:30 PM","Cowboy Stadium","Students $5 \u00b7 Adults $8","Wear maroon! Pep rally at 2:00 PM in the gym."];
+  S.poster={bg:"#FFFFFF",blocks:txt.map(function(t,k){return {text:t,font:"sans",size:18,bold:false,track:0,caps:false,color:"#0A0A0A",align:"left",x:40,y:80+k*60};})};}return S.poster;}
+function blockFont(b){return (b.bold?"700 ":"400 ")+b.size+"px "+F[b.font];}
+function posterChecks(p,bbs,mode){var bl=p.blocks,sizes=bl.map(function(b){return b.size;}),fonts=new Set(bl.map(function(b){return b.font;}));
+  var inside=bbs.every(function(r){return r.x>=MARGIN-1&&r.y>=MARGIN-1&&r.x+r.width<=PW-MARGIN+1&&r.y+r.height<=PH-MARGIN+1;});
+  var overlap=false;for(var a=0;a<bbs.length;a++)for(var b=a+1;b<bbs.length;b++){var A=bbs[a],B=bbs[b];if(A.x<B.x+B.width-2&&B.x<A.x+A.width-2&&A.y<B.y+B.height-2&&B.y<A.y+A.height-2)overlap=true;}
+  var items=[["The title (HOMECOMING) is the largest text",sizes[0]>Math.max.apply(null,sizes.slice(1))],["At least 3 different type sizes",new Set(sizes).size>=3],["No more than 2 typefaces",fonts.size<=2],
+    ["All text inside the dashed safe margin",inside],["No lines overlap",!overlap],["Every line contrasts with the background",bl.every(function(b){return b.color.toLowerCase()!==p.bg.toLowerCase();})],["Smallest text is still readable (11 pt or more)",Math.min.apply(null,sizes)>=11]];
+  if(mode==="final")items.push(["An accent color is used (maroon or silver) on at least one line or the background",bl.some(function(b){return b.color==="#8A0635"||b.color==="#9E9FA3";})||p.bg==="#8A0635"],
+    ["Any ALL CAPS line has tracking of at least 50",bl.every(function(b){return !(b.caps||b.text===b.text.toUpperCase()&&/[A-Z]{3}/.test(b.text))||b.track>=50;})]);
+  return items;}
+KINDS.poster=function(stage,i,sd){
+  var st=stState(i),p=poster(),sel=0,drag=null;
+  stage.innerHTML=head(sd,i)+'<div id="pp"><p class="note">Loading fonts\u2026</p></div>';
+  whenFonts(function(){
+    $("#pp",stage).innerHTML=fontWarn()+'<div class="poster"><div class="board"><svg id="ps" viewBox="0 0 '+PW+' '+PH+'" style="touch-action:none"></svg></div>'+
+     '<div><div class="pnl"><h4>Character</h4><div class="bd" id="cp"></div></div><div class="pnl" style="margin-top:10px"><h4>Poster background</h4><div class="bd"><div class="swatches" id="bgs"></div></div></div></div></div>'+
+     '<h3>Checklist</h3><ul class="checklist" id="ck"></ul><div class="row-actions">'+nextBtn()+'</div>';
+    var svg=$("#ps",stage);
+    function txt(b){return b.caps?b.text.toUpperCase():b.text;}
+    function anchor(b){return b.align==="center"?"middle":(b.align==="right"?"end":"start");}
+    function draw(){var h='<rect width="'+PW+'" height="'+PH+'" fill="'+p.bg+'"/><rect x="'+MARGIN+'" y="'+MARGIN+'" width="'+(PW-2*MARGIN)+'" height="'+(PH-2*MARGIN)+'" fill="none" stroke="#1F7AE0" stroke-dasharray="5 4" opacity=".6" pointer-events="none"/>';
+      p.blocks.forEach(function(b,k){h+='<text data-b="'+k+'" x="'+b.x+'" y="'+b.y+'" text-anchor="'+anchor(b)+'" font-family="'+F[b.font].replace(/"/g,"&apos;")+'" font-weight="'+(b.bold?700:400)+'" font-size="'+b.size+'" letter-spacing="'+(b.track/1000*b.size).toFixed(2)+'" fill="'+b.color+'" style="cursor:move">'+esc(txt(b))+'</text>';});
+      svg.innerHTML=h;var bbs=$$("text[data-b]",svg).map(function(t){return t.getBBox();});
+      if(bbs[sel]){var r=bbs[sel];svg.insertAdjacentHTML("beforeend",'<rect x="'+(r.x-3)+'" y="'+(r.y-3)+'" width="'+(r.width+6)+'" height="'+(r.height+6)+'" fill="none" stroke="#1F7AE0" stroke-width="1.5" pointer-events="none"/>');}
+      var items=posterChecks(p,bbs,sd.req);$("#ck",stage).innerHTML=items.map(function(it){return '<li class="'+(it[1]?"ok":"")+'">'+it[0]+'</li>';}).join("");
+      var ok=items.filter(function(it){return it[1];}).length;st.checks=1;st.note=ok+"/"+items.length+" checklist";
+      if(ok===items.length&&!st.passed){st.passed=true;st.best=100;}save();renderNav();}
+    function panel(){var b=p.blocks[sel];
+      $("#cp",stage).innerHTML='<span class="note">Line '+(sel+1)+' of '+p.blocks.length+': <b>'+esc(b.text.length>24?b.text.slice(0,24)+"\u2026":b.text)+'</b></span>'+
+        '<label>Typeface<select id="cf">'+Object.keys(FONT_NAMES).map(function(k){return '<option value="'+k+'"'+(b.font===k?" selected":"")+'>'+FONT_NAMES[k]+'</option>';}).join("")+'</select></label>'+
+        '<label>Size (pt)<input type="number" id="cs" min="8" max="120" value="'+b.size+'"></label>'+
+        '<label>Tracking<input type="number" id="ct" min="-100" max="500" step="10" value="'+b.track+'"></label>'+
+        '<div style="display:flex;gap:12px;flex-wrap:wrap"><label style="flex-direction:row;gap:6px;align-items:center"><input type="checkbox" id="cb"'+(b.bold?" checked":"")+'> Bold</label><label style="flex-direction:row;gap:6px;align-items:center"><input type="checkbox" id="cc"'+(b.caps?" checked":"")+'> ALL CAPS</label></div>'+
+        '<div>Align<div class="seg" id="ca">'+["left","center","right"].map(function(a){return '<button data-a="'+a+'" aria-pressed="'+(b.align===a)+'">'+a.charAt(0).toUpperCase()+a.slice(1)+'</button>';}).join("")+'</div></div>'+
+        '<div>Color<div class="swatches" id="cco">'+PCOLORS.map(function(c){return '<button data-c="'+c[0]+'" title="'+c[1]+'" aria-label="'+c[1]+'" aria-pressed="'+(b.color===c[0])+'" style="background:'+c[0]+'"></button>';}).join("")+'</div></div>'+
+        '<button class="btn ghost sm" id="cen">Center on poster</button>';
+      $("#cf",stage).onchange=function(e){b.font=e.target.value;draw();};$("#cs",stage).oninput=function(e){var v=+e.target.value;if(v>=8&&v<=120){b.size=v;draw();}};
+      $("#ct",stage).oninput=function(e){b.track=+e.target.value||0;draw();};$("#cb",stage).onchange=function(e){b.bold=e.target.checked;draw();};$("#cc",stage).onchange=function(e){b.caps=e.target.checked;draw();};
+      $$("#ca button",stage).forEach(function(x){x.onclick=function(){var t=$('text[data-b="'+sel+'"]',svg).getBBox();b.align=x.dataset.a;b.x=b.align==="left"?t.x:(b.align==="center"?t.x+t.width/2:t.x+t.width);panel();draw();};});
+      $$("#cco button",stage).forEach(function(x){x.onclick=function(){b.color=x.dataset.c;panel();draw();};});
+      $("#cen",stage).onclick=function(){b.align="center";b.x=PW/2;panel();draw();};}
+    $("#bgs",stage).innerHTML=PBGS.map(function(c){return '<button data-bg="'+c[0]+'" title="'+c[1]+'" aria-label="'+c[1]+'" aria-pressed="'+(p.bg===c[0])+'" style="background:'+c[0]+'"></button>';}).join("");
+    $$("#bgs button",stage).forEach(function(x){x.onclick=function(){p.bg=x.dataset.bg;$$("#bgs button",stage).forEach(function(y){y.setAttribute("aria-pressed",y===x);});draw();};});
+    function pt(e){var q=svg.createSVGPoint();q.x=e.clientX;q.y=e.clientY;return q.matrixTransform(svg.getScreenCTM().inverse());}
+    svg.addEventListener("pointerdown",function(e){var t=e.target.closest&&e.target.closest("text[data-b]");if(!t)return;e.preventDefault();svg.setPointerCapture(e.pointerId);sel=+t.getAttribute("data-b");var q=pt(e),b=p.blocks[sel];drag={sx:q.x,sy:q.y,ox:b.x,oy:b.y};panel();draw();});
+    svg.addEventListener("pointermove",function(e){if(!drag)return;var q=pt(e),b=p.blocks[sel];b.x=Math.round(drag.ox+q.x-drag.sx);b.y=Math.round(drag.oy+q.y-drag.sy);draw();});
+    svg.addEventListener("pointerup",function(){drag=null;});
+    activeKey=function(e){if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName||""))return;var b=p.blocks[sel],s=e.shiftKey?10:1;
+      if(e.key==="ArrowLeft"){b.x-=s;}else if(e.key==="ArrowRight"){b.x+=s;}else if(e.key==="ArrowUp"){b.y-=s;}else if(e.key==="ArrowDown"){b.y+=s;}else return;e.preventDefault();draw();};
+    panel();draw();wireNext(stage);});
+};
+function lastFirst(){var parts=(S.name||"").trim().split(/\s+/);if(parts.length<2)return null;var last=parts[parts.length-1].replace(/[^A-Za-z\-]/g,""),first=parts[0].replace(/[^A-Za-z]/g,"");if(!last||!first)return null;return {last:last.charAt(0).toUpperCase()+last.slice(1),fi:first.charAt(0).toUpperCase()};}
+KINDS.export=function(stage,i,sd){
+  var st=stState(i),p=poster(),lf=lastFirst();
+  stage.innerHTML=head(sd,i)+'<p>Class formula: <b>LastName_FirstInitial_ProjectCode_v#.ext</b>. This project&rsquo;s code is <b>TypeHierarchy</b>.</p>'+
+   '<div class="row-actions" style="margin-top:4px"><input class="fname" id="fn" spellcheck="false" autocomplete="off" placeholder="e.g. Garcia_M_TypeHierarchy_v1.png" value="'+esc(st.fname||"")+'"><button class="btn" id="ex">Export PNG</button></div><div class="fb" id="sfb"></div>'+
+   '<h3>Preview</h3><canvas id="cv" width="'+PW*2+'" height="'+PH*2+'" style="width:300px;border:1px solid #ccc;background:#fff"></canvas><div class="row-actions">'+nextBtn()+'</div>';
+  var cv=$("#cv",stage),ctx=cv.getContext("2d");
+  function paint(){ctx.setTransform(2,0,0,2,0,0);ctx.fillStyle=p.bg;ctx.fillRect(0,0,PW,PH);
+    p.blocks.forEach(function(b){ctx.font=blockFont(b);ctx.fillStyle=b.color;ctx.textAlign=b.align;ctx.textBaseline="alphabetic";try{ctx.letterSpacing=(b.track/1000*b.size)+"px";}catch(e){}ctx.fillText(b.caps?b.text.toUpperCase():b.text,b.x,b.y);});try{ctx.letterSpacing="0px";}catch(e){}}
+  whenFonts(paint);
+  function validate(v){if(!lf)return "Type your first and last name at the top of the page first.";if(/\s/.test(v))return "No spaces. Use underscores.";
+    var exp=lf.last+"_"+lf.fi+"_TypeHierarchy_v";if(v.indexOf(exp)!==0)return "Start with "+exp+" (your last name, first initial, project code, version).";if(!/^.+_v\d+\.png$/.test(v))return "End with a version number and the extension, like _v1.png";return null;}
+  $("#ex",stage).onclick=function(){var v=$("#fn",stage).value.trim(),box=$("#sfb",stage),err=validate(v);st.fname=v;save();if(err){fb(box,"bad",err);return;}
+    paint();cv.toBlob(function(b){var a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=v;document.body.appendChild(a);a.click();setTimeout(function(){URL.revokeObjectURL(a.href);a.remove();},1500);
+      st.passed=true;st.checks=1;st.best=100;st.note=v;save();renderNav();fb(box,"ok","<b>Exported "+esc(v)+".</b> Find it in Downloads and attach it to the assignment in Google Classroom.");},"image/png");};
+  wireNext(stage);
+};
+
+/* ================= reading ================= */
+KINDS.read=function(stage,i,sd){
+  var st=stState(i);st.qs=st.qs||{};
+  stage.innerHTML=head(sd,i)+'<article style="max-width:72ch;font-family:var(--serif);font-size:1.08rem;line-height:1.65;background:#FBFAF9;border-left:4px solid var(--maroon);padding:14px 22px;margin:0 0 18px">'+sd.passage.map(function(p){return '<p>'+p+'</p>';}).join("")+'</article>'+
+   '<h3>Questions</h3>'+sd.qs.map(function(q,k){return '<div class="q" data-k="'+k+'"><p>'+(k+1)+'. '+esc(q.q)+'</p><div class="mc">'+q.o.map(function(o,j){return '<label><input type="radio" name="rd'+k+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join("")+'</div><button class="btn sm">Check</button><div class="fb"></div></div>';}).join("")+
+   '<div class="row-actions">'+nextBtn()+'</div>';
+  function tally(){var done=0,first=0;sd.qs.forEach(function(q,k){var r=st.qs[k];if(r&&r.ok){done++;if(r.tries===1)first++;}});
+    if(done===sd.qs.length){st.passed=true;st.best=Math.round(first/sd.qs.length*100);}st.checks=Object.keys(st.qs).length;save();renderNav();}
+  $$(".q",stage).forEach(function(el){var k=+el.dataset.k,q=sd.qs[k],r=st.qs[k]||{tries:0,ok:false},btn=$(".btn",el),box=$(".fb",el);
+    function lock(){btn.disabled=true;$$("input",el).forEach(function(x){x.disabled=true;if(+x.value===q.a){x.checked=true;x.closest("label").classList.add("ok");}});fb(box,"ok",r.tries===1?"Correct on the first try.":"Correct.");}
+    if(r.ok)lock();
+    btn.onclick=function(){var c=$("input:checked",el);if(!c){fb(box,"info","Choose an answer first.");return;}r.tries++;
+      if(+c.value===q.a){r.ok=true;lock();}else{c.closest("label").classList.add("bad");c.checked=false;fb(box,"bad","Not quite. Look back at the reading and try again.");}
+      st.qs[k]=r;tally();};});
+  wireNext(stage);
+};
+
+/* ================= quiz & report ================= */
+function quizPage(stage){var day=DAYS[S.day],d=D();
+  stage.innerHTML='<h2>Quick check</h2><p class="time">About 5 minutes</p><p class="lede">A correct first answer earns the point; if you miss, try again to see the right one.</p>'+
+   day.quiz.map(function(q,i){return '<div class="q" data-i="'+i+'"><p>'+(i+1)+'. '+esc(q.q)+'</p><div class="mc">'+q.o.map(function(o,j){return '<label><input type="radio" name="q'+i+'" value="'+j+'"><span>'+esc(o)+'</span></label>';}).join("")+'</div><button class="btn">Check</button><div class="fb"></div></div>';}).join("")+'<div class="row-actions">'+nextBtn()+'</div>';
+  $$(".q",stage).forEach(function(el){var i=+el.dataset.i,q=day.quiz[i],r=d.quiz[i]||{tries:0,ok:false},btn=$(".btn",el),box=$(".fb",el);
+    function lock(){btn.disabled=true;$$("input",el).forEach(function(x){x.disabled=true;if(+x.value===q.a){x.checked=true;x.closest("label").classList.add("ok");}});fb(box,"ok",r.tries===1?"Correct on the first try.":"Correct.");}
+    if(r.ok)lock();btn.onclick=function(){var c=$("input:checked",el);if(!c){fb(box,"info","Choose an answer first.");return;}r.tries++;
+      if(+c.value===q.a){r.ok=true;lock();}else{c.closest("label").classList.add("bad");c.checked=false;fb(box,"bad","Not quite. Try another answer.");}d.quiz[i]=r;save();renderNav();};});
+  wireNext(stage);}
+function reportPage(stage){var day=DAYS[S.day],d=D(),q=quizScore(),pl=payload("");
+  var rows=day.stations.map(function(s,i){var r=d.st[i];return '<tr><td>'+esc(s.title)+(r&&r.note?'<br><span class="note">'+esc(r.note)+'</span>':'')+'</td><td>'+(r&&r.passed?"\u2713 Done":(r&&r.checks?"Not yet":"Not tried"))+'</td><td class="num">'+(r&&r.best!==""&&r.best!=null?r.best+"%":"\u2014")+'</td></tr>';}).join("");
+  var all=pl.passed===day.stations.length&&(!q.of||q.done);
+  stage.innerHTML='<h2>Lab report: '+esc(day.label+" "+day.date)+'</h2><p class="lede">'+esc(day.title)+'. Scores show your first try on each station.</p><p><b>Name:</b> '+(S.name?esc(S.name):'<span style="color:var(--bad)">Type your name at the top of the page</span>')+' &nbsp; <b>Period:</b> '+esc(S.period||"\u2014")+'</p>'+
+   '<div class="report"><table><thead><tr><th>Station</th><th>Status</th><th class="num">First try</th></tr></thead><tbody>'+rows+'</tbody><tfoot><tr><td>Stations done: '+pl.passed+' / '+day.stations.length+'</td><td>'+(q.of?"Quick check: "+q.got+" / "+q.of:"")+'</td><td></td></tr></tfoot></table>'+
+   '<h3>'+(S.day==="fri"?"Design rationale":"Exit ticket")+'</h3><p>'+esc(day.exit)+'</p><textarea id="ex">'+esc(d.exit||"")+'</textarea>'+(all&&S.name?'<p><span class="stamp">Set in type</span></p>':'')+'</div>'+
+   '<p class="no-print">'+(HAS_URL?'Click <b>Submit to teacher</b> when you finish.':'Screenshot this report (<b>Ctrl + Show windows</b>) and attach it in Google Classroom.')+'</p>'+
+   '<div class="row-actions">'+(HAS_URL?'<button class="btn" id="sub">Submit to teacher</button>':'')+'<button class="btn ghost" id="pdf">Save as PDF</button></div><div class="fb" id="subfb"></div>';
+  $("#ex",stage).addEventListener("input",function(e){d.exit=e.target.value;save();});$("#pdf",stage).onclick=function(){window.print();};
+  if(HAS_URL){var sb=$("#sub",stage),sf=$("#subfb",stage);if(d.submittedAt)fb(sf,"ok","Submitted at "+d.submittedAt+". You can submit again if you keep working.");
+    sb.onclick=function(){if(!S.name){fb(sf,"bad","Type your name at the top of the page, then submit.");$("#sname").focus();return;}if(!(d.exit||"").trim()){fb(sf,"bad","Answer the question above before you submit.");$("#ex",stage).focus();return;}
+      sb.disabled=true;fb(sf,"info","Sending\u2026");send("Submitted",function(ok){sb.disabled=false;if(ok){d.submittedAt=new Date().toLocaleTimeString([], {hour:"numeric",minute:"2-digit"});save();fb(sf,"ok","Submitted at "+d.submittedAt+". Your teacher can see your results.");}else fb(sf,"bad","Couldn\u2019t reach the results sheet. Try again, or turn in a screenshot instead.");});};}
+}
+
+var nm=$("#sname"),pd=$("#speriod");nm.value=S.name;pd.value=S.period;
+function needName(){nm.classList.toggle("need",!nm.value.trim());}
+nm.addEventListener("input",function(){S.name=nm.value.trim();save();needName();});pd.addEventListener("input",function(){S.period=pd.value.trim();save();});needName();
+setInterval(function(){if(isOpen(S.day))$("#timer").textContent="Time in lab today: "+Math.floor((Date.now()-D().start)/60000)+" min";},30000);
+render();
+})();
+</script>
+</body>
+</html>
